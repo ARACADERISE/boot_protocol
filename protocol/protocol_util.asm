@@ -123,5 +123,5 @@ init_bootloader:
 
     cli
     hlt
-
+    
 %include "protocol/gdt/gdt_ideals.asm"

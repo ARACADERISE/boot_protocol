@@ -8,6 +8,8 @@
 //**********************************
 // *      Common Functionality     *
 // *********************************
+#define halt            __asm__("cli;hlt");
+
 uint8 grab_byte_s(uint16 bytes, uint8 pos)
 {
     /* Be safe. */
@@ -28,9 +30,10 @@ uint8 grab_byte_i(uint32 bytes, uint8 pos)
     
     return (bytes >> (8 * (pos - 1)) & 0xFF);
 }
-void memsetw(uint16 *array, uint16 value)
+void memsetw(uint16 *array, uint16 value, size count)
 {
-    for(size i = 0; i < sizeof(array)/sizeof(array[0]); i++)
+    size i = 0;
+    while(count > 0)
         array[i] = value;
 }
 void memsetd(uint32 *array, uint32 value)

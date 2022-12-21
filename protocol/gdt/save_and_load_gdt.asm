@@ -44,32 +44,6 @@ save_gdt_and_load:
 
     jmp .hl
 .do_it:
-    ;push ebp
-    ;mov ebp, esp
-
-    ;mov ax, [ebp + 16]
-
-    ;pop ebp
-
-    ; Kernel cannot be loaded into memory at 0x0, 0x7C00 or 0x7E00
-    ;cmp ax, 0x0
-    ;je .failed
-    ;cmp ax, 0x07C0
-    ;je .failed
-    ;cmp ax, 0x07E0
-    ;je .failed
-
-    ;mov es, ax
-    ;xor bx, bx
-
-    ;mov ah, 0x02
-    ;mov al, 0x04
-    ;mov ch, 0x00
-    ;mov cl, 0x06
-    ;mov dh, 0x00
-    ;mov dl, 0x80
-    ;int 0x13
-    ;jc .failed
 
     jmp load_gdt
 

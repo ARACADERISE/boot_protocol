@@ -87,6 +87,11 @@ if os.path.isfile('../boot.yaml'):
     kern_size = kern_size[2:]
     kern_size = f'0x0{kern_size}'
 
+    sector_for_kern = hex(0x02 + int(ss_size, base=16)-1)
+    sector_for_kern = str(sector_for_kern)
+    sector_for_kern = sector_for_kern[2:]
+    sector_for_kern = f'0x0{sector_for_kern}'
+
     # The code :D
     boot = f"""org 0x7C00
 use16
@@ -101,47 +106,72 @@ mov sp, bp
 mov ss, ax
 sti
 
-mov ax, {ss_addr}
+mov ax, [Info.second_stage_addr]
 mov es, ax
 xor bx, bx
 
 mov ah, 0x02
-mov al, {ss_size}
+mov al, [Info.second_stage_size]
 mov ch, 0x00
-mov cl, 0x02
+mov cl, [Info.sector]
 mov dh, 0x00
 mov dl, 0x80
 int 0x13
 jc failed
 
-mov ax, {kern_addr}
+mov ax, [Info.second_stage_size]
+add [Info.sector], ax
+mov [Info.sector], ax
+
+mov ax, [Info.kernel_addr]
 mov es, ax
 xor bx, bx
 
 mov ah, 0x02
-mov al, {kern_size}
+mov al, [Info.kernel_size]
 mov ch, 0x00
-mov cl, {hex(0x02 + int(ss_size, base=16))}
+mov cl, {sector_for_kern}
 mov dh, 0x00
 mov dl, 0x80
 int 0x13
 jc failed
+
+mov ax, [Info.kernel_size]
+add [Info.sector], ax
+
+mov ax, [Info.sector]
+mov [sector_addr], ax
 
 jmp word 0x0:{r_ss_addr}
 
 jmp $
 
-failed:
-	mov ah, 0x0E
-	mov al, 'E'
-	int 0x10
+sector_addr		equ 0x5000
 
-	cli
+Info:
+	; Sector information
+	.sector				db 0x02
+	; Second stage information
+	.second_stage_size	dw (second_stageE - second_stage) / 512 + 2
+	.second_stage_addr	dw 0x07E0
+	.second_stage_loc	dw 0x7E00
+	; Kernel information
+	.kernel_size		dw (kernelE - kernel) / 512 + 1
+	.kernel_addr		dw 0x0900
+	.kernel_loc			dw 0x9000
+
+failed:
 .failed_loop:
 	jmp .failed_loop
 
 times 510 - ($ - $$) db 0x0
 dw 0xAA55
+
+second_stage: incbin "{data['second_stage_binary']}"
+second_stageE:
+
+kernel: incbin "{data['kernel_binary']}"
+kernelE:
     """
 
     # Makefile :D

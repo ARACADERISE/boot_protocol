@@ -1,4 +1,4 @@
-;use16
+use16
 global enter_rmode
 
 %macro x86_EnterRealMode 0
