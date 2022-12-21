@@ -34,7 +34,10 @@ void memsetw(uint16 *array, uint16 value, size count)
 {
     size i = 0;
     while(count > 0)
+    {
         array[i] = value;
+        count--;
+    }
 }
 void memsetd(uint32 *array, uint32 value)
 {
