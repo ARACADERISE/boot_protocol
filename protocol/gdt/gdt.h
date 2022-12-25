@@ -27,14 +27,28 @@ enum VID_MODE
     VESA_VID_MODE       =   0x5,
 };
 
+/* GDT information, such as what type of GDT, whether or not the user want
+ * a default GDT etc. */
+// TODO: Do we want this?
+// Seems just doing `#define`s is a lot easier, to me anyway. I don't know
+//typedef struct gdt_info
+//{
+    /* What type of GDT? */
+//    uint8       gdt_type;
+
+    /* Does the user what a default-gdt to be filled out if there is a clean slate
+     * loaded to memory? */
+//    bool        default_gdt: 1;
+//} _gdt_info;
+
 /* Constants for above enums. */
-#define DEFAULT_ALL                 clean_gdt | B8000
-#define CLEAN_GDT_DEF_VID_MODE      clean_gdt | B8000
-#define CLEAN_GDT_VESA_VID_MODE     clean_gdt | VESA_VID_MODE
-#define BIT32_BIT16_DEF_VID_MODE    bit32_bit16_gdt | B8000
-#define BIT32_BIT16_VESA_VID_MODE   bit32_bit16_gdt | VESA_VID_MODE
-#define BIT32_ONLY_DEF_VID_MODE     bit32_only_gdt | B8000
-#define BIT32_ONLY_VESA_VID_MODE    bit32_only_gdt | VESA_VID_MODE
+#define DEFAULT_ALL                 (uint8)clean_gdt | B8000
+#define CLEAN_GDT_DEF_VID_MODE      (uint8)clean_gdt | B8000
+#define CLEAN_GDT_VESA_VID_MODE     (uint8)clean_gdt | VESA_VID_MODE
+#define BIT32_BIT16_DEF_VID_MODE    (uint8)bit32_bit16_gdt | B8000
+#define BIT32_BIT16_VESA_VID_MODE   (uint8)bit32_bit16_gdt | VESA_VID_MODE
+#define BIT32_ONLY_DEF_VID_MODE     (uint8)bit32_only_gdt | B8000
+#define BIT32_ONLY_VESA_VID_MODE    (uint8)bit32_only_gdt | VESA_VID_MODE
 
 /* Descriptiong of GDT. */
 /* This will be overwritten(by default) if you inititalize the bootloader with anything but `clean_gdt`. */
@@ -137,10 +151,11 @@ extern void save_gdt_and_load(_gdt_desc gdtDesc, _GDT gdt);
 /* Load the GDT. */
 void load_32bit()
 {
+    /* Yes, I know. This is very, very excessive checking.*/
     if(gdt == NULL || gdtDesc == NULL || (gdt == NULL && gdtDesc == NULL))
     {
-        print_str("Error from `load_32bit`:\nThe gdt or gdt description is NULL :(");
-        __asm__("cli;hlt");
+        print_str("Error from `load_32bit`:\nThe gdt or gdt description(or both) is NULL :(");
+        halt
     }
 
     save_gdt_and_load(*gdtDesc, *gdt);

@@ -9,7 +9,7 @@
 #include "gdt/gdt.h"
 #endif
 
-static inline void load_kernel(_disk_read_info *dri)
+static inline void load_kernel()
 {
     /*unsigned char *c = (unsigned char *)0x7C00;
     if(*c == 0x31)
@@ -17,7 +17,7 @@ static inline void load_kernel(_disk_read_info *dri)
     __asm__("cli;hlt");*/
 
     // Load in any needed memory
-    load_needed_memory(dri);
+    //load_needed_memory(dri);
 
     setup_gdt_and_gdt_desc();
     load_32bit();

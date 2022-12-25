@@ -24,9 +24,9 @@ extern void print_str();
 #include "util.h"
 #endif
 
-#ifndef protocol_disk
+/*#ifndef protocol_disk
 #include "disk/disk.h"
-#endif
+#endif*/
 
 #ifndef protocol_gdt_api
 #include "gdt.h"    

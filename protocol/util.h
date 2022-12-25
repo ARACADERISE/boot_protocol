@@ -43,7 +43,11 @@ void memsetw(uint16 *array, uint16 value, size count)
     if(sizeof(array)/sizeof(array[0]) < count)
         return;
     
-    for (; count != 0; count--) *dstPtr++ = val;
+    while(count > 0)
+    {
+        array[++i] = value;
+        count--; 
+    }
 }
 
 /* The variable passed to `array` has to be declared as:

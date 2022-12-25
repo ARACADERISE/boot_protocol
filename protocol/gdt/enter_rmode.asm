@@ -28,6 +28,13 @@ global enter_rmode
 
 use32
 enter_rmode:
+    ; This is not done
+    ; Add in functionality for arguments
+    ; make argument take in a integer that
+    ; deciphers which real-mode function to call.
+    ; Also add functionality for user to create there own
+    ; real-mode function that can be called via a specific
+    ; int-value.
     call x86_EnterRealMode
 
     jmp word 0x0:.test

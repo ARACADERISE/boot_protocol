@@ -45,35 +45,3 @@ mov ax, [Info.kernel_size]
 add [Info.sector], ax
 mov ax, [Info.sector]
 mov [sector_addr], ax
-
-jmp word 0x0:0x7e00
-
-jmp $
-
-sector_addr		equ 0x5000
-
-Info:
-	; Sector information
-	.sector				db 0x02
-	; Second stage information
-	.second_stage_size	dw (second_stageE - second_stage) / 512 + 2
-	.second_stage_addr	dw 0x07E0
-	.second_stage_loc	dw 0x7E00
-	; Kernel information
-	.kernel_size		dw (kernelE - kernel) / 512 + 1
-	.kernel_addr		dw 0x0900
-	.kernel_loc			dw 0x9000
-
-failed:
-.failed_loop:
-	jmp .failed_loop
-
-times 510 - ($ - $$) db 0x0
-dw 0xAA55
-
-second_stage: incbin "bin/boot.bin"
-second_stageE:
-
-kernel: incbin "bin/kernel.bin"
-kernelE:
-    
