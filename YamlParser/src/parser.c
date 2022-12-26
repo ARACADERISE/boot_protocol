@@ -1,9 +1,10 @@
 #include "parser.h"
+#include "data.h"
 
 static void parser_begin(_parser *p);
 static void parse_user_defined(_parser *p);
 
-uint8 start(const uint8 *filename)
+uint8 open_and_parse_yaml(const uint8 *filename)
 {
 	_parser *p 	= calloc(1, sizeof(*p));
 
@@ -12,6 +13,9 @@ uint8 start(const uint8 *filename)
 	
 	/* Init token reference. */
 	p->token	= init_token_reference();
+
+	/* Initialize the yaml data. */
+	init_yaml_data();
 
 	/* Lets begin. */
 	get_token(p->token, p->lex);
@@ -35,17 +39,29 @@ static void parse_user_defined(_parser *p)
 	yaml_assert(p->token->id == colon, "Expected `:` after `%s`.\n", user_def);
 	parser_advance(p);
 
-	printf("%s", p->token->token_value);
-	exit(0);
+	/* Assign new yaml data. */
+	switch(p->token->id)
+	{
+		case character: new_yaml_data(user_def, (uint16 *)p->token->token_value, Chr);break;
+		case string: new_yaml_data(user_def, (uint16 *)p->token->token_value, Str);break;
+		case number: new_yaml_data(user_def, (uint16 *)p->token->token_value, Dec);break;
+		case hex: new_yaml_data(user_def, (uint16 *)p->token->token_value, Hex);break;
+		default: yaml_error("Error on line %ld:\n\tExpected a string, decimal or hex value.\n", p->lex->line)
+	}
+
+	parser_advance(p);
 }
 
 static void parser_begin(_parser *p)
 {
+	redo:
 	switch(p->token->id)
 	{
-		case user_def: parse_user_defined(p);break;
-		default: yaml_error("Uh Oh :(")
+		case user_def: parse_user_defined(p);goto redo;break;
+		case eof: break;
+		default: yaml_error("Error on line %ld.\n", p->lex->line)
 	}
 
+	write_binary_file("test.bin");
 	exit(0);
 }

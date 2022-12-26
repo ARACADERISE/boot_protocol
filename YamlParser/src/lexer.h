@@ -31,6 +31,7 @@ enum tokens {
 	string,
 	number,
 	hex,
+	character,
 	comma,
 	eof
 };

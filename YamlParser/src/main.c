@@ -2,6 +2,6 @@
 
 int main(int args, char *argv[])
 {
-	start("yaml_tests/test1.yaml");
+	open_and_parse_yaml("yaml_tests/test1.yaml");
 	return 0;
 }

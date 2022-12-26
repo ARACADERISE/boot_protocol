@@ -22,6 +22,6 @@ typedef struct parser
 } _parser;
 
 /* Init the parser, lexer, token reference and start parsing all at once. */
-uint8 start(const uint8 *filename);
+uint8 open_and_parse_yaml(const uint8 *filename);
 
 #endif

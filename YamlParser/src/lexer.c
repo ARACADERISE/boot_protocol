@@ -26,8 +26,6 @@ uint8 *read_file(const uint8 *filename)
 	fread(data, sizeof(uint8), file_size, file);
 
 	fclose(file);
-
-	printf("%s", data);
 	
 	return data;	
 }
@@ -54,6 +52,14 @@ static uint8* get_number(_lexer *lex)
 {
 	uint8 *number = calloc(1, sizeof(*number));
 	size index = 0;
+
+	/* Store `0x`*/
+	number[index] = lex->curr_char;
+	advance_lexer(lex);
+	index++;
+	number[index] = lex->curr_char;
+	advance_lexer(lex);
+	index++;
 
 	while(is_number(lex->curr_char) || is_hex_dec(lex->curr_char))
 	{
@@ -117,7 +123,11 @@ begin:
 			goto begin;
 		}
 		case '\n': {
-			while(lex->curr_char == '\n') advance_lexer(lex);
+			while(lex->curr_char == '\n')
+			{
+				lex->line++;
+				advance_lexer(lex);
+			}
 			goto begin;
 		}
 		case '\t': {
@@ -143,6 +153,16 @@ begin:
 			advance_lexer(lex);
 			goto end;
 		}
+		case '\'': {
+			advance_lexer(lex);						// '
+			uint8 c[2] = {lex->curr_char, '\0'};	// char
+			advance_lexer(lex);						// '
+
+			init_token(input_token, character, c);
+
+			advance_lexer(lex);
+			goto end;
+		}
 		case '[': {
 			init_token(input_token, lsqrbr, "[");
 			advance_lexer(lex);
@@ -163,13 +183,16 @@ begin:
 
 	if(is_number(lex->curr_char))
 	{
-		uint8 *number = get_number(lex);
+		uint8 *numb = get_number(lex);
 		bool is_hex = false;
-		while(*number != '\0')
+		while(*numb != '\0')
 		{
-			if(*number == 'x' || *number == 'h') {is_hex=true; break;}
-			number++;
+			if(*numb == 'x' || *numb == 'h') {is_hex=true; break;}
+			numb++;
 		}
+
+		init_token(input_token, is_hex ? hex : number, numb);
+		goto end;
 	}
 
 	yaml_assert(is_ascii(lex->curr_char), "Error on line %ld:\n\tInvalid value `%c`.\n", lex->line, lex->curr_char);
