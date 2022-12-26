@@ -48,34 +48,57 @@ static void advance_lexer(_lexer *lex)
 	lex->curr_char = lex->src[lex->index];
 }
 
-static uint8* get_number(_lexer *lex)
+static bool lexer_peek(_lexer *lex, uint8 against)
 {
-	uint8 *number = calloc(1, sizeof(*number));
-	size index = 0;
+	bool is_valid = false;
+	advance_lexer(lex);
 
-	/* Store `0x`*/
-	number[index] = lex->curr_char;
-	advance_lexer(lex);
-	index++;
-	number[index] = lex->curr_char;
-	advance_lexer(lex);
-	index++;
+	if(lex->curr_char == against) is_valid = true;
+
+	lex->index--;
+	lex->curr_char = lex->src[lex->index];
+
+	return is_valid;
+}
+
+typedef struct number_info
+{
+	uint8		*number;
+	bool		is_hex;
+} _number_info;
+
+static _number_info get_number(_lexer *lex)
+{
+	size index = 0;
+	_number_info ni = {.is_hex = false, .number = calloc(1, sizeof(*ni.number))};
+
+	/* Check and see if the number is hex. If it is, skip over the `0x` */
+	if(lexer_peek(lex, 'x')) {
+		ni.is_hex = true;
+
+		/* Skip `0x`. */
+		ni.number[index] = '0';
+		index++;
+		ni.number = realloc(ni.number, (index + 1) * sizeof(*ni.number));
+		advance_lexer(lex);		// 0
+		advance_lexer(lex);		// x
+	}
 
 	while(is_number(lex->curr_char) || is_hex_dec(lex->curr_char))
 	{
-		number[index] = lex->curr_char;
+		ni.number[index] = lex->curr_char;
 
 		advance_lexer(lex);
 		
 		/* Reallocate memory for next character. */
 		index++;
-		number = realloc(number, (index + 1) * sizeof(*number));
+		ni.number = realloc(ni.number, (index + 1) * sizeof(*ni.number));
 	}
 
 	/* Something went wrong. */
-	yaml_assert(number != NULL, "Error gathering information for number.\n")
+	yaml_assert(ni.number, "Error gathering information for number.\n")
 
-	return number;
+	return ni;
 }
 
 static uint8 *get_word(_lexer *lex)
@@ -95,7 +118,7 @@ static uint8 *get_word(_lexer *lex)
 	}
 
 	/* Something went wrong. */
-	yaml_assert(word != NULL, "Error gathering information for user-defined word.\n")
+	yaml_assert(word, "Error gathering information for user-defined word.\n")
 
 	return word;
 }
@@ -113,6 +136,14 @@ begin:
 	{
 		init_token(input_token, eof, "\0");
 		return;
+	}
+
+	if(is_number(lex->curr_char))
+	{
+		_number_info ni = get_number(lex);
+
+		init_token(input_token, ni.is_hex ? hex : number, ni.number);
+		goto end;
 	}
 
 	switch(lex->curr_char)
@@ -179,20 +210,6 @@ begin:
 			goto end;
 		}
 		default: break;
-	}
-
-	if(is_number(lex->curr_char))
-	{
-		uint8 *numb = get_number(lex);
-		bool is_hex = false;
-		while(*numb != '\0')
-		{
-			if(*numb == 'x' || *numb == 'h') {is_hex=true; break;}
-			numb++;
-		}
-
-		init_token(input_token, is_hex ? hex : number, numb);
-		goto end;
 	}
 
 	yaml_assert(is_ascii(lex->curr_char), "Error on line %ld:\n\tInvalid value `%c`.\n", lex->line, lex->curr_char);

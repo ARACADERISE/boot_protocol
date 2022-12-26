@@ -1,10 +1,9 @@
 #include "parser.h"
-#include "data.h"
 
 static void parser_begin(_parser *p);
 static void parse_user_defined(_parser *p);
 
-uint8 open_and_parse_yaml(const uint8 *filename)
+_yaml_os_data open_and_parse_yaml(const uint8 *filename)
 {
 	_parser *p 	= calloc(1, sizeof(*p));
 
@@ -21,8 +20,8 @@ uint8 open_and_parse_yaml(const uint8 *filename)
 	get_token(p->token, p->lex);
 	parser_begin(p);
 
-	/* Everything was a success. */
-	return 0;
+	/* Return the os information. */
+	return get_yaml_os_info();
 }
 
 static void parser_advance(_parser *p)
@@ -61,7 +60,4 @@ static void parser_begin(_parser *p)
 		case eof: break;
 		default: yaml_error("Error on line %ld.\n", p->lex->line)
 	}
-
-	write_binary_file("test.bin");
-	exit(0);
 }

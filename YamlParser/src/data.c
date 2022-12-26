@@ -64,19 +64,39 @@ static inline size determine_size(enum data_types type)
     return sizeof(unsigned short);
 }
 
-bool write_binary_file(const uint8 *path)
+static inline lsize convert_hex_to_dec(uint8 *hex)
+{
+	lsize dec = 0;
+	lsize base = 1;
+	for(uint32 i = strlen(hex)-1; i > 0; i--)
+    {
+        if(hex[i] >= '0' && hex[i] <= '9')
+        {
+            dec += (hex[i] - 48) * base;
+            base *= 16;
+        }
+        else if(hex[i] >= 'A' && hex[i] <= 'F')
+        {
+            dec += (hex[i] - 55) * base;
+            base *= 16;
+        }
+        else if(hex[i] >= 'a' && hex[i] <= 'f')
+        {
+            dec += (hex[i] - 87) * base;
+            base *= 16;
+        }
+    }
+
+	return dec;
+}
+
+_yaml_os_data get_yaml_os_info()
 {
 	/* Init _yaml_os_data. */
-	_yaml_os_data os_data = {
-		.n_section = 'n', 
-		.pad1 = 0x0, .pad2 = 0x0, .pad3 = 0x0, .pad4 = 0x0,
-		.pad5 = 0x0, .pad6 = 0x0, .pad7 = 0x0, .pad8 = 0x0,
-		.pad9 = 0x0, .pad10 = 0x0,
-		.desc_start = 'f', .ss_tag = 's', .kern_tag = 'k'
-	};
+	_yaml_os_data os_data;
 
 	/* Make the last `next` NULL. */
-	//yaml_file_data->next = NULL;
+	yaml_file_data->next = NULL;
 
 	/* Point to the first instance of `yaml_file_data`. */
 	yaml_file_data = all_yaml_data;
@@ -95,12 +115,8 @@ bool write_binary_file(const uint8 *path)
 	for(uint32 i = 0; i < yaml_file_data_size; i++)
 		_back
 
-	FILE *file = fopen(path, "wb");
-
-	yaml_assert(file, "Error creating file.\n")
-
 	/* Current data size. */
-	size current_size = 0;
+	//size current_size = 0;
 
 	/* Check the type of OS. */
 	if(strcmp((uint8*)yaml_file_data->val_data, "32bit") == 0) os_data.type = 0x02;
@@ -109,16 +125,10 @@ bool write_binary_file(const uint8 *path)
 
 	_next
 
-	/* Setup the rest of the information. */
+	/* Second stage binary file info. */
 	os_data.ss_filename_bin_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
 	os_data.ss_filename_bin_name = (uint8 *)yaml_file_data->val_data;
-	_next
-	// TODO: Get this done
-	_next
-	os_data.ss_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
-	os_data.ss_filename = (uint8 *)yaml_file_data->val_data;
-	_next
-
+	
 	/* Read the binary file, get the size, close. */
 	FILE *ss_bin = fopen(os_data.ss_filename_bin_name, "rb");
 
@@ -130,13 +140,32 @@ bool write_binary_file(const uint8 *path)
 
 	fclose(ss_bin);
 	_next
-	printf("%ld", os_data.ss_bin_size);
+	
+	/* Second stage address info. */
+	os_data.ss_addr = convert_hex_to_dec((uint8 *)yaml_file_data->val_data);
+	_next
 
+	/* Second stage source code file info. */
+	os_data.ss_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
+	os_data.ss_filename = (uint8 *)yaml_file_data->val_data;
+	_next
 
-	// TODO: Write the struct to the file
+	/* Kernel binary file info. */
+	os_data.kern_filename_bin_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
+	os_data.kern_filename_bin_name = (uint8 *)yaml_file_data->val_data;
+	_next
 
-	fclose(file);
+	/* Kernel address info. */
+	os_data.kern_addr = convert_hex_to_dec((uint8 *)yaml_file_data->val_data);
+	_next
+
+	/* Kernel source code info. */
+	os_data.kern_filename_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
+	os_data.kern_filename = (uint8 *)yaml_file_data->val_data;
+	_next
 
 	/* Free `yaml_file_data`. We don't need it anymore. */
 	free(yaml_file_data);
+
+	return os_data;
 }

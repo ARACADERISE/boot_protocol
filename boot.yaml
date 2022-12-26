@@ -1,31 +1,12 @@
 # What type of OS is it?
-os_type: 32bit
+os_type: "bit32"
 
 # Second stage information
-second_stage_binary: "bin/boot.bin"
+second_stage_binary: "../bin/boot.bin"
 second_stage_addr: 0x7E0
 second_stage_source_code_file: "OS/main.c"
 
 # kernel information
-kernel_binary: "bin/kernel.bin"
+kernel_binary: "../bin/kernel.bin"
 kernel_addr: 0x900 # 0x0:0x0850=0x8500
 kernel_source_code_file: "OS/kernel.c"
-
-# If writing 64-bit OS
-#   pmode_stub_binary: 
-#   pmode_addr:
-#   pmode_source_code_file
-# 64-bit kernel info:
-#   bit64_kernel_binary:
-#   bit64_kernel_addr:
-#   bit64_kernel_source_code_file:
-# For strictly 32-bit, you can also do:
-#   bit32_kernel_binary:
-#   bit32_kernel_addr:
-#   bit32_kernel_source_code_file:
-
-# Extra binaries
-extras:
-  files: ["OS/something.asm"]
-  binaries: ["OS/something.bin"]
-  addresses: [0x0400]

@@ -1,5 +1,6 @@
 # What type of OS is it?
 os_type: "bit32"
+
 # Second stage information
 second_stage_binary: "../bin/boot.bin"
 second_stage_addr: 0x7E0

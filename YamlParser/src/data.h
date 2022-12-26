@@ -15,36 +15,37 @@ enum os_type
 /* Outline of what the yaml file should look like, for our use case only. */
 typedef struct yaml_os_data
 {
-	uint8			n_section;				// 'n'
+	//uint8			n_section;				// 'n'
 
 	// 'n' section
-	uint8			pad1;					// 0
+	//uint8			pad1;					// 0
 	uint8			type;					// 2 = 32bit, 3 = 64bit
-	uint8			desc_start;				// 'f'
-	uint8			pad2;					// 0
+	//uint8			desc_start;				// 'f'
+	//uint8			pad2;					// 0
 
 	// Description of second stage bootloader
-	uint8			ss_tag;					// 's'(second stage)
-	int16			ss_size;				// second stage source code file size
-	uint8			pad3;					// 0
+	//uint8			ss_tag;					// 's'(second stage)
+	size			ss_addr;
+	uint16			ss_size;				// second stage source code file size
+	//uint8			pad3;					// 0
 	uint8			*ss_filename;			// second stage source code file name
-	uint8			pad4;					// 0
+	//uint8			pad4;					// 0
 	uint16			ss_filename_bin_size;	// second stage binary file name size
-	uint8			pad5;					// 0
+	//uint8			pad5;					// 0
 	uint8			*ss_filename_bin_name;	// second stage binary file name
-	uint8			pad6;					// 0
+	//uint8			pad6;					// 0
 	size			ss_bin_size;			// size(in bytes) of binary file
-
 	// Description of kernel
-	uint8			kern_tag;				// 'k'(kernel)
+	//uint8			kern_tag;				// 'k'(kernel)
+	size			kern_addr;
 	uint16			kern_filename_size;		// kernel source code file size
-	uint8			pad7;					// 0
+	//uint8			pad7;					// 0
 	uint8			*kern_filename;			// kernel source code file name
-	uint8			pad8;					// 0
+	//uint8			pad8;					// 0
 	uint16			kern_filename_bin_size;	// kernel binary file name size
-	uint8			pad9;					// 0
+	//uint8			pad9;					// 0
 	uint8			*kern_filename_bin_name;// kernel binary file name
-	uint8			pad10;					// 0
+	//uint8			pad10;					// 0
 	size			kern_bin_size;			// size(in bytes) of binary file
 } _yaml_os_data;
 
@@ -112,6 +113,6 @@ void init_yaml_data();
 void new_yaml_data(uint8 *user_def, uint16 *data, enum data_types type);
 
 /* Write all the data as binary. */
-bool write_binary_file(const uint8 *path);
+_yaml_os_data get_yaml_os_info();
 
 #endif

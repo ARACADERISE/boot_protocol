@@ -5,6 +5,10 @@
 #include "common.h"
 #endif
 
+#ifndef yaml_data
+#include "data.h"
+#endif
+
 /* This is useless, but I get into a habit of getting into trouble with */
 /* including libraries too much. */
 #ifndef yaml_lexer
@@ -22,6 +26,6 @@ typedef struct parser
 } _parser;
 
 /* Init the parser, lexer, token reference and start parsing all at once. */
-uint8 open_and_parse_yaml(const uint8 *filename);
+_yaml_os_data open_and_parse_yaml(const uint8 *filename);
 
 #endif
