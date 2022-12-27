@@ -56,11 +56,11 @@ Info:
 	; Sector information
 	.sector				db 0x02
 	; Second stage information
-	.second_stage_size	dw (second_stageE - second_stage) / 512 + 2
-	.second_stage_addr	dw 0x07E0
-	.second_stage_loc	dw 0x7E00
+	.second_stage_size	dw ((second_stageE - second_stage) / 512) + 2
+	.second_stage_addr	dw 0x07e0
+	.second_stage_loc	dw 0x7e00
 	; Kernel information
-	.kernel_size		dw (kernelE - kernel) / 512 + 1
+	.kernel_size		dw ((kernelE - kernel) / 512) + 1
 	.kernel_addr		dw 0x0900
 	.kernel_loc			dw 0x9000
 
