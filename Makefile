@@ -1,9 +1,10 @@
 .PHONY: run
 .PHONY: clean
 .PHONY: build
+.PHONY: bootloader
 
 FLAGS = -masm=intel -O1 -Wno-error -c -nostdinc -nostdlib -fno-builtin -fno-stack-protector -ffreestanding -m32
-run: build
+run: bootloader build
 	@qemu-system-i386 -drive format=raw,file=bin/OS.image
 
 build:
@@ -17,9 +18,10 @@ build:
 	@nasm boot/boot.asm -f bin -o bin/bootloader.bin
 	@cat bin/bootloader.bin bin/boot.bin bin/kernel.bin > bin/OS.image
 
+bootloader:
+	@cd config && make build
+
 clean:
 	@rm -rf bin/*.out
 	@rm -rf bin/*.o
 	@rm -rf bin/*.bin
-
-    
