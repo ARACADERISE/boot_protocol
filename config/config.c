@@ -44,11 +44,11 @@ int32 main(int args, char *argv[])
 
 	uint8 format2[strlen(format)];
 	sprintf(format2, format, 
-		yod.ss_addr*16, 							// jmp 0x0:second_stage_addr
-		yod.ss_addr,								// .second_stage_addr dw addr 
-		yod.ss_addr*16, 							// .second_stage_loc dw addr
-		yod.kern_addr, 								// .kernel_addr dw addr
-		yod.kern_addr*16, 							// .kernel_loc dw addr
+		yod.ss_addr*16, 				// jmp 0x0:second_stage_addr
+		yod.ss_addr,					// .second_stage_addr dw addr 
+		yod.ss_addr*16, 				// .second_stage_loc dw addr
+		yod.kern_addr, 					// .kernel_addr dw addr
+		yod.kern_addr*16, 				// .kernel_loc dw addr
 		strdel(yod.ss_filename_bin_name, 0, 3), 	// second_stage: incbin second stage binary
 		strdel(yod.kern_filename_bin_name, 0, 3));	// kernel: incbin kernel binary
 	fwrite(format2, sizeof(uint8), strlen(format2), boot_file);
