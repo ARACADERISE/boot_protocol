@@ -9,6 +9,7 @@
 <p>In Linux, you will do:</p>
 ```bash
 mkdir my_os
+
 ```
 <p>Where `my_os` is whatever name you want your OS to be called.</p></br>
 <p>2. Enter the directory you created, and clone the protocols repository:</p>
