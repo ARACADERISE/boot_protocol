@@ -14,10 +14,12 @@ git clone https://github.com/ARACADERISE/boot_protocol.git
 <p>3. After you have written some code, enter the directory `boot_protocol` of which you just cloned before writing some code.</p></br>
 <p>4. Edit the `boot.yaml` file to store the according binary file you'd like to create along with your second-stage bootloader C code file and the C code kernel source code file.</p>
 <p>After this, run `make`. Then, go back to the directory where your OS code resides, create a Makefile with the following(and add whatever for your likings):</p>
+
 ```makefile
 .PHONY: run
 
 run:
   @cd boot_protocol && make run
 ```
+
 </br><p>Congrats! You now have a running OS :D</p>
