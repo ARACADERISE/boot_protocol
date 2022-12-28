@@ -5,7 +5,14 @@
 
 # Setting up
 
-<p>1. Before you clone the repo, go ahead and make a new directory where your OS code will reside.</p></br>
+<p>1. Before you clone the repo, go ahead and make a new directory where your OS code will reside.</p>
+
+```
+mkdir my_os
+```
+
+<p>Where `my_os` is whatever name you want to call your OS</p></br>
+
 <p>2. Enter the directory you created, and clone the protocols repository:</p>
 ```bash
 git clone https://github.com/ARACADERISE/boot_protocol.git
