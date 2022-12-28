@@ -14,9 +14,15 @@ mkdir my_os
 <p>Where `my_os` is whatever name you want to call your OS</p></br>
 
 <p>2. Enter the directory you created, and clone the protocols repository:</p>
-```bash
+
+```
+cd my_os
+```
+
+```
 git clone https://github.com/ARACADERISE/boot_protocol.git
 ```
+
 <p>Once this is done, go ahead and refer to the boot protocols documentation on <i>how to use it</i>, then return after you are done.</p></br>
 <p>3. After you have written some code, enter the directory `boot_protocol` of which you just cloned before writing some code.</p></br>
 <p>4. Edit the `boot.yaml` file to store the according binary file you'd like to create along with your second-stage bootloader C code file and the C code kernel source code file.</p>
