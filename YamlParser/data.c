@@ -8,7 +8,8 @@ void init_yaml_data()
     yaml_file_data->val_data    	= NULL;
     yaml_file_data->next        	= NULL;
     yaml_file_data->previous    	= NULL;	
-    all_yaml_data 					= yaml_file_data;
+
+    all_yaml_data 			= yaml_file_data;
 }
 
 void new_yaml_data(unsigned char *user_def, unsigned short *data, enum data_types type)
