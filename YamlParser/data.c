@@ -39,6 +39,9 @@ void new_yaml_data(unsigned char *user_def, unsigned short *data, enum data_type
     
     /* Assign current yaml_file_data struct to the next _data reference. */
     yaml_file_data = yaml_file_data->next;
+
+	/* Make the `next` NULL because there might not be another `next`. */
+	yaml_file_data->next = NULL;
     
     /* Allocate memory for previous _data struct and assign to `prev`. */
     yaml_file_data->previous     = calloc(1, sizeof(*yaml_file_data->previous));
@@ -94,9 +97,6 @@ _yaml_os_data get_yaml_os_info()
 {
 	/* Init _yaml_os_data. */
 	_yaml_os_data os_data;
-
-	/* Make the last `next` NULL. */
-	yaml_file_data->next = NULL;
 
 	/* Point to the first instance of `yaml_file_data`. */
 	yaml_file_data = all_yaml_data;
