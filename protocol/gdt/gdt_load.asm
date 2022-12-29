@@ -12,7 +12,7 @@ load_gdt:
 	out 0x92, al
 
 	cli
-	lgdt [g_GDT32_16_desc_addr]
+	lgdt [g_GDT_desc_addr]
 	mov eax, cr0
 	or eax, 0x01
 	mov cr0, eax

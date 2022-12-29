@@ -1,5 +1,4 @@
 global save_gdt_and_load
-addr dw 0x0
 use16
 save_gdt_and_load:
     ; Do we need to load a already-working gdt into memory?
@@ -7,8 +6,12 @@ save_gdt_and_load:
     cmp eax, 0
     je .load_new_gdt
 
-    ; Is there already a GDT in memory that the user put there?
+    ; Is there already a bit32/bit16 GDT in memory that the user put there?
     cmp eax, 1
+    je .do_it
+
+    ; Is there already a bit32 GDT in memory?
+    cmp eax, 2
     je .do_it
 
     ; If for some reason the gdt status is neither 1 or 0, error
@@ -18,14 +21,14 @@ save_gdt_and_load:
     mov ebp, esp
 
     mov eax, [ebp + 8]
-    mov [g_GDT32_16_desc_addr], eax
+    mov [g_GDT_desc_addr], eax
 
     mov eax, [ebp + 12]
-    mov [g_GDT32_16_address], eax
+    mov [g_GDT_address], eax
 
     pop ebp
 
-    mov eax, [g_GDT32_16_desc_addr]
+    mov eax, [g_GDT_desc_addr]
     mov [g_GDTDesc], eax
 
     mov ax, [g_GDTDesc.size]

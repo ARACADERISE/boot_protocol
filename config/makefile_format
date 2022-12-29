@@ -12,8 +12,8 @@ build:
 	@nasm protocol/protocol_util.asm -f elf32 -o bin/protocol_util.o
 	@gcc ${FLAGS} -o bin%s %s
 	@gcc ${FLAGS} -o bin%s %s
-	@ld -m elf_i386 -TOS/linker.ld -nostdlib --nmagic -o bin/boot.out bin%s bin/protocol_util.o
-	@ld -m elf_i386 -TOS/kernel.ld -nostdlib --nmagic -o bin/kernel.out bin%s bin/protocol_util.o
+	@ld -m elf_i386 -T../linker.ld -nostdlib --nmagic -o bin/boot.out bin%s bin/protocol_util.o
+	@ld -m elf_i386 -T../kernel.ld -nostdlib --nmagic -o bin/kernel.out bin%s bin/protocol_util.o
 	@objcopy -O binary bin/boot.out bin/boot.bin
 	@objcopy -O binary bin/kernel.out bin/kernel.bin
 	@nasm boot/boot.asm -f bin -o bin/bootloader.bin

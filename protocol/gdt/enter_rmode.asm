@@ -28,6 +28,13 @@ global enter_rmode
 
 use32
 enter_rmode:
+    mov ax, [0xC000]
+    cmp ax, 0x02
+    jne .load
+
+    ; Cannot go to realmode, 32-bit only GDT.
+    ret
+.load:
     ; This is not done
     ; Add in functionality for arguments
     ; make argument take in a integer that
@@ -40,6 +47,9 @@ enter_rmode:
     jmp word 0x0:.test
 use16
 .test:
+    mov ah, 0x0E
+    mov al, 'S'
+    int 0x10
 
     cli
     mov eax, cr0
@@ -47,7 +57,6 @@ use16
 	mov cr0, eax
 
     jmp word 0x8:.init_segments
-
 use32
 .init_segments:
     mov ax, 0x10
