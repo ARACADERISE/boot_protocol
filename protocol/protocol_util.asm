@@ -6,8 +6,9 @@ use16
 ; =======================
 ;
 
-%include "protocol/tools/print.asm"
 %include "protocol/extra/tests.asm"
+%include "protocol/mouse/mouse.asm"
+%include "protocol/tools/print.asm"
 
 ; TODO: Make these into "magic numbers"
 ; For now, this works well
@@ -27,12 +28,16 @@ use16
 
 setting         db 0x0
 
+
 global init_bootloader
 use16
 init_bootloader:
     mov ah, 0x00
     mov al, 0x03
     int 0x10
+
+    ; Init the mouse
+    call config_mouse
 
     push ebp
     mov ebp, esp

@@ -1,6 +1,8 @@
 use16
 global enter_rmode
 
+made_it_msg: db 0xA, "Made It To Real Mode :D", 0x0
+
 %macro x86_EnterRealMode 0
     [bits 32]
     jmp word 18h:.pmode16         ; 1 - jump to 16-bit protected mode segment
@@ -47,9 +49,6 @@ enter_rmode:
     jmp word 0x0:.test
 use16
 .test:
-    mov ah, 0x0E
-    mov al, 'S'
-    int 0x10
 
     cli
     mov eax, cr0

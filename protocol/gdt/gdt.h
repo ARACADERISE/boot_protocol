@@ -187,6 +187,8 @@ static inline void setup_gdt_and_gdt_desc()
         gdt->data32_gran        = 0b11001111;
         gdt->data32_base_high   = 0x0;
 
+        /* Only fill out 16-bit segments if we have it. */
+#ifdef has_rmode_access
         /* 16-bit code segment. */
         gdt->code16_limit       = 0xFFFF;
         gdt->code16_base        = 0x0;
@@ -202,6 +204,7 @@ static inline void setup_gdt_and_gdt_desc()
         gdt->data16_access      = 0b10010010;
         gdt->data16_gran        = 0b00001111;
         gdt->data16_base_high   = 0x0;
+#endif
 
         /* Setup the description for the GDT. */
         gdtDesc->size = (uint16)sizeof(*gdt);

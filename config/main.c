@@ -90,6 +90,8 @@ int32 main(int args, char *argv[])
 
 	fclose(makefile);
 
+	free(format);
+	free(mformat);
 
 	return 0;
 }

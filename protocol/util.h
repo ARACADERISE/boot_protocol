@@ -32,6 +32,15 @@ uint8 grab_byte_i(uint32 bytes, uint8 pos)
     return (bytes >> (8 * (pos - 1)) & 0xFF);
 }
 
+/* Get length of string. */
+size strlen(uint8 *string)
+{
+    size string_size = 0;
+
+    while(*(string++) != '\0') string_size++;
+    return string_size;
+}
+
 /* The variable passed to `array` has to be declared as:
  * uint16 array[size]
  * */
