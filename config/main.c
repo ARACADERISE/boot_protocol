@@ -47,6 +47,7 @@ int32 main(int args, char *argv[])
 
 	uint8 format2[strlen(format)];
 	sprintf(format2, format, 
+		yod.ss_addr*16,								
 		yod.ss_addr*16, 							// jmp 0x0:second_stage_addr
 		yod.ss_addr,								// .second_stage_addr dw addr 
 		yod.ss_addr*16, 							// .second_stage_loc dw addr
@@ -79,19 +80,19 @@ int32 main(int args, char *argv[])
 
 	uint8 mformat2[strlen(mformat)];
 	sprintf(mformat2, mformat, 
-		strdel(yod.ss_filename_bin_name,0,3),
+		strdel(yod.ss_filename_bin_o_name,0,3),
 		yod.ss_filename,
-		strdel(yod.kern_filename_bin_name,0,3),
+		strdel(yod.kern_filename_bin_o_name,0,3),
 		yod.kern_filename,
-		yod.ss_filename_bin_name,
-		yod.kern_filename_bin_name);
+		yod.ss_filename_bin_o_name,
+		yod.kern_filename_bin_o_name);
 	
 	fwrite(mformat2, sizeof(uint8), strlen(mformat2), makefile);
 
 	fclose(makefile);
 
 	free(format);
-	free(mformat);
+	//free(mformat);
 
 	return 0;
 }

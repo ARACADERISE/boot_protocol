@@ -127,32 +127,13 @@ _yaml_os_data get_yaml_os_info()
 
 	_next
 
-	/* Second stage binary file info. */
+	/* Second stage binary object file info. */
+	os_data.ss_filename_bin_o_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
+	os_data.ss_filename_bin_o_name = (uint8 *)yaml_file_data->val_data;
+	_next
+
 	os_data.ss_filename_bin_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
 	os_data.ss_filename_bin_name = (uint8 *)yaml_file_data->val_data;
-	
-	/* Read the binary file, get the size, close. */
-	FILE *ss_bin = fopen(os_data.ss_filename_bin_name, "rb");
-
-	/*yaml_assert(ss_bin, "\n\nError:\n\tCannot open %s.\n\n", os_data.ss_filename_bin_name)
-	
-	fseek(ss_bin, 0, SEEK_END);
-	os_data.ss_bin_size = ftell(ss_bin);
-	fseek(ss_bin, 0, SEEK_SET);*/
-	// TODO: Fix this. This is a bug. It expects the bin files to be filled
-	//		 out. For now, if the file does not exist, we continue.
-	if(!(ss_bin))
-	{
-		fclose(ss_bin);
-		goto cont1;
-	}
-
-	fseek(ss_bin, 0, SEEK_END);
-	os_data.ss_bin_size = ftell(ss_bin);
-	fseek(ss_bin, 0, SEEK_SET);
-
-	fclose(ss_bin);
-cont1:
 	_next
 	
 	/* Second stage address info. */
@@ -165,29 +146,12 @@ cont1:
 	_next
 
 	/* Kernel binary file info. */
+	os_data.kern_filename_bin_o_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
+	os_data.kern_filename_bin_o_name = (uint8 *)yaml_file_data->val_data;
+	_next
+
 	os_data.kern_filename_bin_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
 	os_data.kern_filename_bin_name = (uint8 *)yaml_file_data->val_data;
-	
-	/* Read the binary file, get the size, close. */
-	FILE *kern_bin = fopen(os_data.kern_filename_bin_name, "rb");
-
-	/*yaml_assert(kern_bin, "\n\nError:\n\tCannot open %s.\n\n", os_data.kern_filename_bin_name)
-	
-	fseek(kern_bin, 0, SEEK_END);
-	os_data.kern_bin_size = ftell(kern_bin);
-	fseek(kern_bin, 0, SEEK_SET);*/
-	if(!(kern_bin))
-	{
-		fclose(kern_bin);
-		goto cont2;
-	}
-
-	fseek(kern_bin, 0, SEEK_END);
-	os_data.kern_bin_size = ftell(kern_bin);
-	fseek(kern_bin, 0, SEEK_SET);
-
-	fclose(kern_bin);
-cont2:
 	_next
 
 	/* Kernel address info. */

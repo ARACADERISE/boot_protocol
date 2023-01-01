@@ -11,6 +11,7 @@ global enter_rmode
 ; =======================
 ;
 use32
+address equ 0x500A
 init_pm:
 
     mov ax, 0x10
@@ -20,12 +21,6 @@ init_pm:
     mov fs, ax
     mov gs, ax
 
-    mov al, 'S'
-
-    mov byte [0xB8000], al
-    mov byte [0xB8002], 'E'
-    mov byte [0xB8004], 'X'
-
-    jmp 0x8:0x8500
+    jmp 0x8:address
 
 %include "boot/gdt.asm"

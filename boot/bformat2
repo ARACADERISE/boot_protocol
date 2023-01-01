@@ -46,11 +46,15 @@ add [Info.sector], ax
 mov ax, [Info.sector]
 mov [sector_addr], ax
 
+mov ax, 0x%lx
+mov [kernel_addr], ax
+
 jmp word 0x0:0x%lx
 
 jmp $
 
 sector_addr		equ 0x5000
+kernel_addr		equ 0x500A
 
 Info:
 	; Sector information

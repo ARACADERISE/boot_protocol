@@ -21,16 +21,20 @@ typedef struct yaml_os_data
 	size			ss_addr;
 	uint16			ss_size;				// second stage source code file size
 	uint8			*ss_filename;			// second stage source code file name
-	uint16			ss_filename_bin_size;	// second stage binary file name size
-	uint8			*ss_filename_bin_name;	// second stage binary file name
+	uint16			ss_filename_bin_o_size;	// second stage binary file name size
+	uint8			*ss_filename_bin_o_name;	// second stage binary file name
+	uint16			ss_filename_bin_size;
+	uint8			*ss_filename_bin_name;
 	size			ss_bin_size;			// size(in bytes) of binary file
 	
 	// Description of kernel
 	size			kern_addr;
 	uint16			kern_filename_size;		// kernel source code file size
 	uint8			*kern_filename;			// kernel source code file name
-	uint16			kern_filename_bin_size;	// kernel binary file name size
-	uint8			*kern_filename_bin_name;// kernel binary file name
+	uint16			kern_filename_bin_o_size;	// kernel binary file name size
+	uint8			*kern_filename_bin_o_name;// kernel binary file name
+	uint16			kern_filename_bin_size;
+	uint8			*kern_filename_bin_name;
 	size			kern_bin_size;			// size(in bytes) of binary file
 } _yaml_os_data;
 
@@ -40,12 +44,14 @@ static const char * const needed_names[] = {
 	"os_type",
 
 	// Second stage information
-	"second_stage_binary",
+	"second_stage_o_binary",
+	"second_stage_bin_binary",
 	"second_stage_addr",
 	"second_stage_source_code_file",
 
 	// Kernel information
-	"kernel_binary",
+	"kernel_o_binary",
+	"kernel_bin_binary",
 	"kernel_addr",
 	"kernel_source_code_file"
 };
