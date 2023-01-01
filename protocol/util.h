@@ -42,6 +42,20 @@ size strlen(uint8 *string)
 }
 
 /* The variable passed to `array` has to be declared as:
+ * uint8 array[size]. */
+void memsetb(uint8 *array, uint8 value, size count)
+{
+    size i = 0;
+
+    while(count > 0)
+    {
+        array[i] = value;
+        i++;
+        count--;
+    }
+}
+
+/* The variable passed to `array` has to be declared as:
  * uint16 array[size]
  * */
 void memsetw(uint16 *array, uint16 value, size count)

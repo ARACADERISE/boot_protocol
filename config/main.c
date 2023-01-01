@@ -25,9 +25,9 @@ int32 main(int args, char *argv[])
 	_yaml_os_data yod = open_and_parse_yaml("../boot.yaml");
 
 	/* Open MBR format. */
-	FILE* boot_format = fopen("../boot/bformat2", "rb");
+	FILE* boot_format = fopen("formats/boot_format", "rb");
 
-	config_assert(boot_format, "Error openeing ../boot/bformat2.\n\tWas it deleted?\n")
+	config_assert(boot_format, "Error openeing ../boot/boot_format.\n\tWas it deleted?\n")
 
 	fseek(boot_format, 0, SEEK_END);
 	size_t format_size = ftell(boot_format);
@@ -46,8 +46,7 @@ int32 main(int args, char *argv[])
 	format = realloc(format, (strlen(format) + 60) * sizeof(*format));
 
 	uint8 format2[strlen(format)];
-	sprintf(format2, format, 
-		yod.ss_addr*16,								
+	sprintf(format2, format,
 		yod.ss_addr*16, 							// jmp 0x0:second_stage_addr
 		yod.ss_addr,								// .second_stage_addr dw addr 
 		yod.ss_addr*16, 							// .second_stage_loc dw addr
@@ -59,7 +58,34 @@ int32 main(int args, char *argv[])
 
 	fclose(boot_file);
 
-	FILE* makefile_format = fopen("makefile_format", "r");
+	/* Read in format(`protocol/gdt/gdt_ideals.asm`) and write in the address. */
+	FILE* bit32_jump_format = fopen("../protocol/gdt/gdt_ideals.asm", "rb");
+
+	config_assert(bit32_jump_format, "Error opening `../protocol/gdt/gdt_ideals.asm`.\n")
+
+	fseek(bit32_jump_format, 0, SEEK_END);
+	size_t bit32_jump_format_size = ftell(bit32_jump_format);
+	fseek(bit32_jump_format, 0, SEEK_SET);
+
+	config_assert(bit32_jump_format_size > 0, "File must've been deleted :(.\n")
+
+	uint8 *jump_format = calloc(bit32_jump_format_size, sizeof(*jump_format));
+	fread(jump_format, bit32_jump_format_size, sizeof(uint8), bit32_jump_format);
+
+	fclose(bit32_jump_format);
+
+	FILE* bit32_jump = fopen("../protocol/gdt/gdt_ideals.asm", "wb");
+
+	config_assert(bit32_jump, "Error opening `../protocol/gdt/gdt_ideals.asm`.\n")
+
+	jump_format = realloc(jump_format, (strlen(jump_format) + 60) * sizeof(*jump_format));
+	uint8 jump_format2[strlen(jump_format)];
+	sprintf(jump_format2, jump_format, yod.kern_addr*16);
+	fwrite(jump_format2, strlen(jump_format2), sizeof(uint8), bit32_jump);
+
+	fclose(bit32_jump);
+
+	FILE* makefile_format = fopen("formats/makefile_format", "r");
 
 	config_assert(makefile_format, "Error opening makefile format.\n")
 
@@ -92,7 +118,7 @@ int32 main(int args, char *argv[])
 	fclose(makefile);
 
 	free(format);
-	//free(mformat);
+	free(mformat);
 
 	return 0;
 }

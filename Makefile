@@ -2,3 +2,4 @@
 
 build:
 	@cd config && make build
+    

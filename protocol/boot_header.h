@@ -28,8 +28,8 @@ extern void print_str();
 #include "tools/print.h"
 #endif
 
-#ifndef protocol_mouse
-#include "mouse/mouse.h"
+#ifndef protocol_disk
+#include "disk/disk.h"
 #endif
 
 #ifndef protocol_gdt_api

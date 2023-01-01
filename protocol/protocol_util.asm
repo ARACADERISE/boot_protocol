@@ -9,6 +9,7 @@ use16
 %include "protocol/extra/tests.asm"
 %include "protocol/mouse/mouse.asm"
 %include "protocol/tools/print.asm"
+%include "protocol/disk/disk.asm"
 
 ; TODO: Make these into "magic numbers"
 ; For now, this works well

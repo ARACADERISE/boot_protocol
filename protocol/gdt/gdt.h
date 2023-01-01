@@ -154,11 +154,13 @@ void load_32bit()
     /* Yes, I know. This is very, very excessive checking.*/
     if(gdt == NULL || gdtDesc == NULL || (gdt == NULL && gdtDesc == NULL))
     {
-        print_str("Error from `load_32bit`:\nThe gdt or gdt description(or both) is NULL :(");
+        print("Error from `load_32bit`:\nThe gdt or gdt description(or both) is NULL :(");
         halt
     }
 
     save_gdt_and_load(*gdtDesc, *gdt);
+    print("Hey");
+    halt
 }
 
 /* Setting up the description of the GDT. */
