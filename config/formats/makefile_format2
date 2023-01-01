@@ -10,13 +10,10 @@ run: build
 build:
 	@nasm protocol/protocol_util.s -f elf32 -o bin/protocol_util.o
 	@gcc ${FLAGS} -o %s %s
-	@gcc ${FLAGS} -o %s %s
-	@ld -m elf_i386 -T../linker.ld -nostdlib --nmagic -o bin/boot.out %s bin/protocol_util.o
 	@ld -m elf_i386 -T../kernel.ld -nostdlib --nmagic -o bin/kernel.out %s bin/protocol_util.o
-	@objcopy -O binary bin/boot.out bin/boot.bin
 	@objcopy -O binary bin/kernel.out bin/kernel.bin
 	@nasm boot/boot.s -f bin -o bin/bootloader.bin
-	@cat bin/bootloader.bin bin/boot.bin bin/kernel.bin > bin/OS.image
+	@cat bin/bootloader.bin bin/kernel.bin > bin/OS.image
 
 clean:
 	@./config/clean

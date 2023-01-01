@@ -97,6 +97,7 @@ _yaml_os_data get_yaml_os_info()
 {
 	/* Init _yaml_os_data. */
 	_yaml_os_data os_data;
+	os_data.has_second_stage = false;
 
 	/* Point to the first instance of `yaml_file_data`. */
 	yaml_file_data = all_yaml_data;
@@ -109,17 +110,6 @@ _yaml_os_data get_yaml_os_info()
 	 * */
 	yaml_assert(yaml_file_data_size >= sizeof(needed_names)/sizeof(needed_names[0]), "\n\nError:\n\tMissing some information in `boot.yaml`.\n")
 
-	/* Make sure all the names exist, in order. */
-	for(uint32 i = 0; i < yaml_file_data_size; i++)
-	{
-		yaml_assert(strcmp((uint8*)yaml_file_data->user_defined, needed_names[ind]) == 0, "\n\nError:\n\tMissing `%s` in yaml file.\n", needed_names[ind])
-
-		ind++;
-		_next
-	}
-	for(uint32 i = 0; i < yaml_file_data_size; i++)
-		_back
-
 	/* Check the type of OS. */
 	if(strcmp((uint8*)yaml_file_data->val_data, "32bit") == 0) os_data.type = 0x02;
 	else if(strcmp((uint8*)yaml_file_data->val_data, "64bit") == 0) os_data.type = 0x03;
@@ -127,22 +117,29 @@ _yaml_os_data get_yaml_os_info()
 
 	_next
 
-	/* Second stage binary object file info. */
-	os_data.ss_filename_bin_o_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
-	os_data.ss_filename_bin_o_name = (uint8 *)yaml_file_data->val_data;
-	_next
+	/* Do we have a second stage? */
+	if(strcmp((uint8 *)yaml_file_data->val_data, "yes")==0)
+	{
+		os_data.has_second_stage = true;
+		_next
 
-	os_data.ss_filename_bin_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
-	os_data.ss_filename_bin_name = (uint8 *)yaml_file_data->val_data;
-	_next
-	
-	/* Second stage address info. */
-	os_data.ss_addr = convert_hex_to_dec((uint8 *)yaml_file_data->val_data);
-	_next
+		/* Second stage binary object file info. */
+		os_data.ss_filename_bin_o_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
+		os_data.ss_filename_bin_o_name = (uint8 *)yaml_file_data->val_data;
+		_next
 
-	/* Second stage source code file info. */
-	os_data.ss_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
-	os_data.ss_filename = (uint8 *)yaml_file_data->val_data;
+		os_data.ss_filename_bin_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
+		os_data.ss_filename_bin_name = (uint8 *)yaml_file_data->val_data;
+		_next
+		
+		/* Second stage address info. */
+		os_data.ss_addr = convert_hex_to_dec((uint8 *)yaml_file_data->val_data);
+		_next
+
+		/* Second stage source code file info. */
+		os_data.ss_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
+		os_data.ss_filename = (uint8 *)yaml_file_data->val_data;
+	}
 	_next
 
 	/* Kernel binary file info. */

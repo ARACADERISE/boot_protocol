@@ -17,6 +17,8 @@ typedef struct yaml_os_data
 {
 	uint8			type;					// 2 = 32bit, 3 = 64bit
 
+	bool			has_second_stage;
+
 	// Description of second stage bootloader
 	size			ss_addr;
 	uint16			ss_size;				// second stage source code file size
@@ -44,10 +46,11 @@ static const char * const needed_names[] = {
 	"os_type",
 
 	// Second stage information
-	"second_stage_o_binary",
+	"has_second_stage",
+	/*"second_stage_o_binary",
 	"second_stage_bin_binary",
 	"second_stage_addr",
-	"second_stage_source_code_file",
+	"second_stage_source_code_file",*/
 
 	// Kernel information
 	"kernel_o_binary",

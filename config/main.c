@@ -24,44 +24,81 @@ int32 main(int args, char *argv[])
 	/* Get all the information we need. */
 	_yaml_os_data yod = open_and_parse_yaml("../boot.yaml");
 
-	/* Open MBR format. */
-	FILE* boot_format = fopen("formats/boot_format", "rb");
+	uint8 *format = NULL;
+	printf("%d", yod.has_second_stage);
+	if(yod.has_second_stage == true)
+	{
+		/* Open MBR format. */
+		FILE* boot_format = fopen("formats/boot_format", "rb");
 
-	config_assert(boot_format, "Error openeing ../boot/boot_format.\n\tWas it deleted?\n")
+		config_assert(boot_format, "Error openeing ../boot/boot_format.\n\tWas it deleted?\n")
 
-	fseek(boot_format, 0, SEEK_END);
-	size_t format_size = ftell(boot_format);
-	fseek(boot_format, 0, SEEK_SET);
+		fseek(boot_format, 0, SEEK_END);
+		size_t format_size = ftell(boot_format);
+		fseek(boot_format, 0, SEEK_SET);
 
-	config_assert(format_size > 0, "Error with size of ../boot/bformat2.\n\tWas all the content removed?\n")
+		config_assert(format_size > 0, "Error with size of ../boot/bformat2.\n\tWas all the content removed?\n")
 
-	uint8 *format = calloc(format_size, sizeof(*format));
-	fread(format, sizeof(uint8), format_size, boot_format);
+		format = calloc(format_size, sizeof(*format));
+		fread(format, sizeof(uint8), format_size, boot_format);
 
-	fclose(boot_format);
+		fclose(boot_format);
 
-	/* Write MBR. */
-	FILE* boot_file = fopen("../boot/boot.asm", "w");
+		/* Write MBR. */
+		FILE* boot_file = fopen("../boot/boot.s", "w");
 
-	format = realloc(format, (strlen(format) + 60) * sizeof(*format));
+		format = realloc(format, (strlen(format) + 60) * sizeof(*format));
 
-	uint8 format2[strlen(format)];
-	sprintf(format2, format,
-		yod.ss_addr*16, 							// jmp 0x0:second_stage_addr
-		yod.ss_addr,								// .second_stage_addr dw addr 
-		yod.ss_addr*16, 							// .second_stage_loc dw addr
-		yod.kern_addr, 								// .kernel_addr dw addr
-		yod.kern_addr*16, 							// .kernel_loc dw addr
-		strdel(yod.ss_filename_bin_name, 0, 3), 	// second_stage: incbin second stage binary
-		strdel(yod.kern_filename_bin_name, 0, 3));	// kernel: incbin kernel binary
-	fwrite(format2, sizeof(uint8), strlen(format2), boot_file);
+		uint8 format2[strlen(format)];
+		sprintf(format2, format,
+			yod.ss_addr*16, 							// jmp 0x0:second_stage_addr
+			yod.ss_addr,								// .second_stage_addr dw addr 
+			yod.ss_addr*16, 							// .second_stage_loc dw addr
+			yod.kern_addr, 								// .kernel_addr dw addr
+			yod.kern_addr*16, 							// .kernel_loc dw addr
+			strdel(yod.ss_filename_bin_name, 0, 3), 	// second_stage: incbin second stage binary
+			strdel(yod.kern_filename_bin_name, 0, 3));	// kernel: incbin kernel binary
+		fwrite(format2, sizeof(uint8), strlen(format2), boot_file);
 
-	fclose(boot_file);
+		fclose(boot_file);
+	} else
+	{
+		FILE* boot_format = fopen("formats/boot_format2", "rb");
+
+		config_assert(boot_format, "Error openeing ../boot/boot_format.\n\tWas it deleted?\n")
+
+		fseek(boot_format, 0, SEEK_END);
+		size_t format_size = ftell(boot_format);
+		fseek(boot_format, 0, SEEK_SET);
+
+		config_assert(format_size > 0, "Error with size of ../boot/bformat2.\n\tWas all the content removed?\n")
+
+		format = calloc(format_size, sizeof(*format));
+		fread(format, sizeof(uint8), format_size, boot_format);
+
+		fclose(boot_format);
+
+		/* Write MBR. */
+		FILE* boot_file = fopen("../boot/boot.s", "w");
+
+		format = realloc(format, (strlen(format) + 60) * sizeof(*format));
+
+		uint8 format2[strlen(format)];
+		sprintf(format2, format,
+			yod.kern_addr*16,							// jmp 0x8:kernel_address
+			yod.kern_addr, 								// .kernel_addr dw addr
+			yod.kern_addr*16, 							// .kernel_loc dw addr
+			strdel(yod.kern_filename_bin_name, 0, 3)	// kernel: incbin kernel binary
+		);
+		fwrite(format2, sizeof(uint8), strlen(format2), boot_file);
+
+		fclose(boot_file);
+	}
 
 	/* Read in format(`protocol/gdt/gdt_ideals.asm`) and write in the address. */
-	FILE* bit32_jump_format = fopen("../protocol/gdt/gdt_ideals.asm", "rb");
+	FILE* bit32_jump_format = fopen("../protocol/gdt/gdt_ideals.s", "rb");
 
-	config_assert(bit32_jump_format, "Error opening `../protocol/gdt/gdt_ideals.asm`.\n")
+	config_assert(bit32_jump_format, "Error opening `../protocol/gdt/gdt_ideals.s`.\n")
 
 	fseek(bit32_jump_format, 0, SEEK_END);
 	size_t bit32_jump_format_size = ftell(bit32_jump_format);
@@ -74,9 +111,9 @@ int32 main(int args, char *argv[])
 
 	fclose(bit32_jump_format);
 
-	FILE* bit32_jump = fopen("../protocol/gdt/gdt_ideals.asm", "wb");
+	FILE* bit32_jump = fopen("../protocol/gdt/gdt_ideals.s", "wb");
 
-	config_assert(bit32_jump, "Error opening `../protocol/gdt/gdt_ideals.asm`.\n")
+	config_assert(bit32_jump, "Error opening `../protocol/gdt/gdt_ideals.s`.\n")
 
 	jump_format = realloc(jump_format, (strlen(jump_format) + 60) * sizeof(*jump_format));
 	uint8 jump_format2[strlen(jump_format)];
@@ -85,40 +122,74 @@ int32 main(int args, char *argv[])
 
 	fclose(bit32_jump);
 
-	FILE* makefile_format = fopen("formats/makefile_format", "r");
+	uint8 *mformat = NULL;
+	if(yod.has_second_stage == true)
+	{
+		FILE* makefile_format = fopen("formats/makefile_format", "r");
 
-	config_assert(makefile_format, "Error opening makefile format.\n")
+		config_assert(makefile_format, "Error opening makefile format.\n")
 
-	fseek(makefile_format, 0, SEEK_END);
-	size_t makefile_size = ftell(makefile_format);
-	fseek(makefile_format, 0, SEEK_SET);
+		fseek(makefile_format, 0, SEEK_END);
+		size_t makefile_size = ftell(makefile_format);
+		fseek(makefile_format, 0, SEEK_SET);
 
-	config_assert(makefile_size > 0, "Error with size of makefile format. Was it deleted?\n")
+		config_assert(makefile_size > 0, "Error with size of makefile format. Was it deleted?\n")
 
-	uint8 *mformat = calloc(makefile_size, sizeof(*mformat));
-	fread(mformat, sizeof(uint8), makefile_size, makefile_format);
+		mformat = calloc(makefile_size, sizeof(*mformat));
+		fread(mformat, sizeof(uint8), makefile_size, makefile_format);
 
-	fclose(makefile_format);
+		fclose(makefile_format);
 
-	FILE* makefile = fopen("../Makefile", "w");
+		FILE* makefile = fopen("../Makefile", "w");
 
-	mformat = realloc(mformat, (strlen(mformat) + 60) * sizeof(*mformat));
+		mformat = realloc(mformat, (strlen(mformat) + 60) * sizeof(*mformat));
 
-	uint8 mformat2[strlen(mformat)];
-	sprintf(mformat2, mformat, 
-		strdel(yod.ss_filename_bin_o_name,0,3),
-		yod.ss_filename,
-		strdel(yod.kern_filename_bin_o_name,0,3),
-		yod.kern_filename,
-		yod.ss_filename_bin_o_name,
-		yod.kern_filename_bin_o_name);
-	
-	fwrite(mformat2, sizeof(uint8), strlen(mformat2), makefile);
+		uint8 mformat2[strlen(mformat)];
+		sprintf(mformat2, mformat, 
+			strdel(yod.ss_filename_bin_o_name,0,3),
+			yod.ss_filename,
+			strdel(yod.kern_filename_bin_o_name,0,3),
+			yod.kern_filename,
+			yod.ss_filename_bin_o_name,
+			yod.kern_filename_bin_o_name);
+		
+		fwrite(mformat2, sizeof(uint8), strlen(mformat2), makefile);
 
-	fclose(makefile);
+		fclose(makefile);
+	} else
+	{
+		FILE* makefile_format = fopen("formats/makefile_format2", "r");
 
-	free(format);
-	free(mformat);
+		config_assert(makefile_format, "Error opening makefile format.\n")
+
+		fseek(makefile_format, 0, SEEK_END);
+		size_t makefile_size = ftell(makefile_format);
+		fseek(makefile_format, 0, SEEK_SET);
+
+		config_assert(makefile_size > 0, "Error with size of makefile format. Was it deleted?\n")
+
+		mformat = calloc(makefile_size, sizeof(*mformat));
+		fread(mformat, sizeof(uint8), makefile_size, makefile_format);
+
+		fclose(makefile_format);
+
+		FILE* makefile = fopen("../Makefile", "w");
+
+		mformat = realloc(mformat, (strlen(mformat) + 60) * sizeof(*mformat));
+
+		uint8 mformat2[strlen(mformat)];
+		sprintf(mformat2, mformat, 
+			strdel(yod.kern_filename_bin_o_name,0,3),
+			yod.kern_filename,
+			yod.kern_filename_bin_o_name);
+		
+		fwrite(mformat2, sizeof(uint8), strlen(mformat2), makefile);
+
+		fclose(makefile);
+	}
+
+	//free(format);
+	//free(mformat);
 
 	return 0;
 }

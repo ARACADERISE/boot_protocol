@@ -4,10 +4,7 @@
 os_type: "bit32"
 
 # Second stage information
-second_stage_o_binary: "../bin/boot.o"
-second_stage_bin_binary: "../bin/boot.bin"
-second_stage_addr: 0x7E0
-second_stage_source_code_file: "../main.c"
+has_second_stage: "no"
 
 # kernel information
 kernel_o_binary: "../bin/kernel.o"
