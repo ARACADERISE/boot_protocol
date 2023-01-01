@@ -104,6 +104,11 @@ _yaml_os_data get_yaml_os_info()
 	/* Index of `needed_names`. */
 	size ind = 0;
 
+	/* Check and make sure the amount of data we obtained from the yaml file
+	 * is equal to(or greater than) the amount of data we require. 
+	 * */
+	yaml_assert(yaml_file_data_size >= sizeof(needed_names)/sizeof(needed_names[0]), "\n\nError:\n\tMissing some information in `boot.yaml`.\n")
+
 	/* Make sure all the names exist, in order. */
 	for(uint32 i = 0; i < yaml_file_data_size; i++)
 	{
@@ -129,13 +134,25 @@ _yaml_os_data get_yaml_os_info()
 	/* Read the binary file, get the size, close. */
 	FILE *ss_bin = fopen(os_data.ss_filename_bin_name, "rb");
 
-	yaml_assert(ss_bin, "\n\nError:\n\tCannot open %s.\n\n", os_data.ss_filename_bin_name)
+	/*yaml_assert(ss_bin, "\n\nError:\n\tCannot open %s.\n\n", os_data.ss_filename_bin_name)
 	
+	fseek(ss_bin, 0, SEEK_END);
+	os_data.ss_bin_size = ftell(ss_bin);
+	fseek(ss_bin, 0, SEEK_SET);*/
+	// TODO: Fix this. This is a bug. It expects the bin files to be filled
+	//		 out. For now, if the file does not exist, we continue.
+	if(!(ss_bin))
+	{
+		fclose(ss_bin);
+		goto cont1;
+	}
+
 	fseek(ss_bin, 0, SEEK_END);
 	os_data.ss_bin_size = ftell(ss_bin);
 	fseek(ss_bin, 0, SEEK_SET);
 
 	fclose(ss_bin);
+cont1:
 	_next
 	
 	/* Second stage address info. */
@@ -154,13 +171,23 @@ _yaml_os_data get_yaml_os_info()
 	/* Read the binary file, get the size, close. */
 	FILE *kern_bin = fopen(os_data.kern_filename_bin_name, "rb");
 
-	yaml_assert(kern_bin, "\n\nError:\n\tCannot open %s.\n\n", os_data.kern_filename_bin_name)
+	/*yaml_assert(kern_bin, "\n\nError:\n\tCannot open %s.\n\n", os_data.kern_filename_bin_name)
 	
+	fseek(kern_bin, 0, SEEK_END);
+	os_data.kern_bin_size = ftell(kern_bin);
+	fseek(kern_bin, 0, SEEK_SET);*/
+	if(!(kern_bin))
+	{
+		fclose(kern_bin);
+		goto cont2;
+	}
+
 	fseek(kern_bin, 0, SEEK_END);
 	os_data.kern_bin_size = ftell(kern_bin);
 	fseek(kern_bin, 0, SEEK_SET);
 
 	fclose(kern_bin);
+cont2:
 	_next
 
 	/* Kernel address info. */
