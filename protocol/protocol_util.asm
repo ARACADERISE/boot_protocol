@@ -7,7 +7,6 @@ use16
 ;
 
 %include "protocol/extra/tests.asm"
-%include "protocol/mouse/mouse.asm"
 %include "protocol/tools/print.asm"
 %include "protocol/disk/disk.asm"
 
