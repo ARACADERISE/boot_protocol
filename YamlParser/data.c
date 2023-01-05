@@ -62,7 +62,8 @@ static inline size determine_size(enum data_types type)
         default: break;
     }
 
-    /* If this isn't the right size(2 bytes), then I guess oh well. */
+    /* If this isn't then right size(2 bytes), then the compiler
+     * can go fuck itself because everything should check out. */
     return sizeof(unsigned short);
 }
 
