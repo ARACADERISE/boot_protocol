@@ -31,10 +31,29 @@
   <b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/second_stage_macros.md">second_stage_macros.md</a></u></b></br>
   <ul>
     <li>Learn all macros that are used for a second-stage bootloader</li>
+    <li>You will learn the following macros:</li>
+    <ul>
+      <li>bit16_bit32_GDT</li>
+      <li>default_gdt</li>
+    </ul>
     <li>Learn what each macro does, what affects it has and how it works</li>
   </ul>
 </li>
-<li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/gdt.md">gdt.md</a></u></b></li>
-<li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/loading_kernel.md">loading_kernel.md</a></u></b></li>
-<li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/memory_map.md">memory_map.md</a></u></b></li>
+<li>
+  <b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/gdt.md">gdt.md</a></u></b></br>
+</li>
+<li>
+  <b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/loading_kernel.md">loading_kernel.md</a></u></b></br>
+</li>
+<li>
+  <b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/memory_map.md">memory_map.md</a></u></b></br>
+  <ul>
+    <li>Learn what functions are available to you to efficiently read the memory map and configure it</li>
+    <li>Learn how to use the memory map</li>
+    <li>Learn how the protocol handles memory<li>
+    <li>Learn how the protocol reserves 5 sectors for "critical" kernel data</li>
+    <li>Learn how the protocol formats the memory map, and learn how the protocol releases the "pool of memory" into the memory map</li>
+    <li>Learn what memory the protocol marks as "read only", and what memory the protocol marks as "writeable/readable"</li>
+  </ul>
+</li>
 </ul>
