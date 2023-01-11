@@ -19,7 +19,7 @@
     <li>You will learn the following settings:</li>
     <ul>
       
-      `hey`
+      hey
       
       
     </ul>
