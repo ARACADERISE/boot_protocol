@@ -25,17 +25,6 @@
       <li>BIT32_GDT_DEF_VID_MODE</li>
       <li>BIT32_GDT_VESA_VID_MODE</li>
     </ul>
-    <li>Other things you will learn:</li>
-    <ul>
-      <li>Learn how the bootloader(MBR) is configured</li>
-      <li>Learn how the protocol loads the second-stage bootloader</li>
-      <li>Learn why the protocol loads the second-stage bootloader code at address <b><i><u>0x7E00</u></i></b></li>
-    </ul>
-  </ul>
-</li>
-<li>
-  <b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/second_stage_macros.md">second_stage_macros.md</a></u></b></br>
-  <ul>
     <li>Learn all macros that are used for a second-stage bootloader</li>
     <li>You will learn the following macros:</li>
     <ul>
@@ -43,6 +32,12 @@
       <li>default_gdt</li>
     </ul>
     <li>Learn what each macro does, what affects it has and how it works</li>
+    <li>Other things you will learn:</li>
+    <ul>
+      <li>Learn how the bootloader(MBR) is configured</li>
+      <li>Learn how the protocol loads the second-stage bootloader</li>
+      <li>Learn why the protocol loads the second-stage bootloader code at address <b><i><u>0x7E00</u></i></b></li>
+    </ul>
   </ul>
 </li>
 <li>
