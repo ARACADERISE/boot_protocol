@@ -13,7 +13,7 @@
 
 ```default_gdt```
 
-<p>If you want the protocol to fill out the GDT struct fields <i>for you</i>, you must define the above macro. If the above macro <i>is not</i> defined, you will have to manually fill out the GDT.</br>Note: If you initialize the second stage bootloader with a setting other than the ones that load a clean GDT/GDT description into memory(<i><u>CLEAN_GDT_DEF_VID_MODE</u></i>,<i><u>CLEAN_GDT_VESA_VID_MODE</u></i>,<i><u>DEFAULT_ALL</u></i>), the macro definition <b><i><u>default_gdt</u></i></b> is useless.</p>
+<p>If you want the protocol to fill out the GDT struct fields <i>for you</i>, you must define the above macro. If the above macro <i>is not</i> defined, you will have to manually fill out the GDT.</br>Note: If you initialize the second stage bootloader with a setting other than the ones that load a clean GDT/GDT description into memory(<b><i><u>CLEAN_GDT_DEF_VID_MODE</u></i></b> , <b><i><u>CLEAN_GDT_VESA_VID_MODE</u></i></b> , <b><i><u>DEFAULT_ALL</u></i></b>), the macro definition <b><i><u>default_gdt</u></i></b> is useless.</p>
 
 <li>Finally, after you have defined the according macros depending on your requirements, you will include the protocols boot header file.</br>For a second-stage bootloader with a clean 32-bit/16-bit GDT/GDT description loaded into memory, 32-bit/16-bit GDT support, and for a second-stage bootloader that makes the protocol fill out the GDT, the code should look something like: </li>
 
