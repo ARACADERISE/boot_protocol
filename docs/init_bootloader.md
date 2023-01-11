@@ -29,7 +29,7 @@
 #define bit32_bit16_GDT
 #include "boot_protocol/boot_header.h"
 ```
-
+</br></br>
 <p>And, for a second-stage bootloader with a already-working 32-bit only GDT/GDT description loaded into memory and 32-bit only GDT support, the code will be:</p>
 
 ```c
