@@ -11,7 +11,7 @@
 ## Outline
 <h4>If you're writing your own second-stage bootloader C code:</h4>
 <ul>
-<li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/init_bootloader.md">init_bootloader.md</a></u></b></li>
+<li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/init_bootloader.md">init_bootloader.md</a></u></b></br><ul><li>Hi</li></ul></li>
 <li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/second_stage_macros.md">second_stage_macros.md</a></u></b></li>
 <li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/gdt.md">gdt.md</a></u></b></li>
 <li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/loading_kernel.md">loading_kernel.md</a></u></b></li>
