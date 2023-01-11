@@ -7,3 +7,13 @@
 
 ## Contributions
 <p>As of current, I am not open to any contributions. I am attempting to get a working boot protocol up and running <i>by myself</i>.</br>After I am capable of getting the protocol in a working state(a working beta version that can be used efficiently), I will be open to contributions for at that time I am sure there will be a few ideas people have come up with to add better, or make better, functionality.</p>
+
+## Outline
+<h4>If you're writing your own second-stage bootloader C code:</h4>
+<ul>
+<li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/init_bootloader.md">init_bootloader.md</a></u></b></li>
+<li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/second_stage_macros.md">second_stage_macros.md</a></u></b></li>
+<li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/gdt.md">gdt.md</a></u></b></li>
+<li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/loading_kernel.md">loading_kernel.md</a></u></b></li>
+<li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/memory_map.md">memory_map.md</a></u></b></li>
+</ul>
