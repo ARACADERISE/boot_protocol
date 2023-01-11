@@ -41,6 +41,13 @@
 </li>
 <li>
   <b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/gdt.md">gdt.md</a></u></b></br>
+  <ul>
+    <li>Learn what a GDT is</li>
+    <li>Learn how the protocol loads a pre-existing or a empty GDT into memory via the function <b><i><u>init_bootloader</u></i></b></li>
+    <li>Learn how the protocol is capable of determining whether a GDT has 16-bit segments or not</li>
+    <li>Learn how the protocol keeps a status on the GDT</li>
+    <li>Learn how the function <b><i><u>load_kernel</u></i></b> loads the GDT description depending on if it's a empty GDT/GDT descriptiong or a already-working GDT/GDT description</li>
+  </ul>
 </li>
 <li>
   <b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/loading_kernel.md">loading_kernel.md</a></u></b></br>
