@@ -75,4 +75,9 @@
     <li>Learn what memory the protocol marks as "read only", and what memory the protocol marks as "writeable/readable"</li>
   </ul>
 </li>
+  <li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/additional_second_stage_info.md">additional_second_stage_info.md</a></u></b></br>
+  <ul>
+    <li>Any additional information the programmer might need to know</li>
+  </ul>
+</li>
 </ul>
