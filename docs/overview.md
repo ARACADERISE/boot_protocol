@@ -51,7 +51,7 @@
     <li>Learn what functions are available to you to efficiently read the memory map and configure it</li>
     <li>Learn how to use the memory map</li>
     <li>Learn how the protocol handles memory<li>
-    <li>Learn how the protocol reserves 5 sectors for "critical" kernel data</li>
+    <li>* MIGHT DELETE</br>Learn how the protocol reserves 5 sectors for "critical" kernel/bootloader data</li>
     <li>Learn how the protocol formats the memory map, and learn how the protocol releases the "pool of memory" into the memory map</li>
     <li>Learn what memory the protocol marks as "read only", and what memory the protocol marks as "writeable/readable"</li>
   </ul>
