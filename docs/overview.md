@@ -11,8 +11,28 @@
 ## Outline
 <h4>If you're writing your own second-stage bootloader C code:</h4>
 <ul>
-<li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/init_bootloader.md">init_bootloader.md</a></u></b></br><ul><li>Hi</li></ul></li>
-<li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/second_stage_macros.md">second_stage_macros.md</a></u></b></li>
+<li>
+  <b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/init_bootloader.md">init_bootloader.md</a></u></b></br>
+  <ul>
+    <li>Learn all settings that can be passed via `init_bootloader`</li>
+    <li>Learn how the protocol initializes the second-stage bootloader</li>
+    <li>You will learn the following settings:</li>
+    <ul>
+      
+      ```
+      bro
+      ```
+      
+    </ul>
+  </ul>
+</li>
+<li>
+  <b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/second_stage_macros.md">second_stage_macros.md</a></u></b></br>
+  <ul>
+    <li>Learn all macros that are used for a second-stage bootloader</li>
+    <li>Learn what each macro does, what affects it has and how it works</li>
+  </ul>
+</li>
 <li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/gdt.md">gdt.md</a></u></b></li>
 <li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/loading_kernel.md">loading_kernel.md</a></u></b></li>
 <li><b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/memory_map.md">memory_map.md</a></u></b></li>
