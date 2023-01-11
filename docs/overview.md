@@ -14,7 +14,7 @@
 <li>
   <b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/init_bootloader.md">init_bootloader.md</a></u></b></br>
   <ul>
-    <li>Learn all settings that can be passed via `init_bootloader`</li>
+    <li>Learn all settings that can be passed via <b><i><u>init_bootloader</u></i></b></li>
     <li>Learn how the protocol initializes the second-stage bootloader</li>
     <li>You will learn the following settings:</li>
     <ul>
