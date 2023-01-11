@@ -37,3 +37,5 @@
 ```
 
 </ol>
+
+<h3><i>Side Note: The macros are defined <b>before</b> we include the protocols boot header file because the header file requires those macros be defined prior to the header file being included.</i></h3></br>
