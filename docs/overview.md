@@ -18,7 +18,8 @@
     <li>Learn how the protocol initializes the second-stage bootloader</li>
     <li>You will learn the following settings:</li>
     <ul>
-      <li>CLEAN_GDT_DEF_VIDEO_MODE</li>
+      <li>CLEAN_GDT_DEF_VID_MODE</li>
+      <li>CLEAN_GDT_VESA_VID_MODE</li>
       <li>DEFAULT_ALL - Same as CLEAN_GDT_DEF_VIDEO_MODE</li>
       <li>BIT16_BIT32_GDT_DEF_VID_MODE</li>
       <li>BIT16_BIT32_GDT_VESA_VID_MODE</li>
