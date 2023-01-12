@@ -3,10 +3,16 @@
 
 ## Complete Guide
 <ol>
-  <li>In <b><u>boot.yaml</u></b>, the first thing we <i>have</i> to do is specify the <i>type of OS</i>("bit32", "bit64") that we are writing.</br>This is done via <b><u>os_type</u></b>.</br>Here is an example of setting the type of OS to 32-bit:</li>
+  <li>In <b><u>boot.yaml</u></b>, the first thing we <i>have</i> to do is specify the <i>type of OS</i>("bit32", "bit64") that we are writing.</br>This is done via <b><u>os_type</u></b>.</br></br>Setting the OS type to 32-bit:</li>
   
   ```yaml
     os_type: "bit32"
+  ```
+  
+  <p>Setting the OS type to 64-bit:</li>
+  
+  ```yaml
+    os_type: "bit64"
   ```
 
 
