@@ -1,6 +1,9 @@
 ## Second stage bootloader, in C
 <p>FAMP enables the user to write 16-bit C code for the second stage bootloader. The second stage bootloader is, however, optional. See <b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/boot_yaml_file.md">boot_yaml_file.md</a></u></b> for more information.</br></p>
 
+## First, what about the MBR?
+<p>If you don't know, FAMP does not ship with a bootloader(MBR), it ships with <i>formats</i> of a MBR, second stage bootloader and other ideals that come together to make the OS work. The MBR requires the <i>binary</i> files of the kernel and second-stage bootloader C code(if you wrote a custom second-stage bootloader in C). If you want more information over how the MBR is ultamitely configured, see <b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/boot_yaml_file.md">boot_yaml_file.md</a></u></b> where it explains what goes into the file <b><u><i>boot.yaml</i></u></b> and how the file <b><u><i>boot.yaml</i></u></b> helps the protocol fill out the MBR format.</br></p>
+
 ## How to setup the second stage bootloader
 <p>As of current, the protocol has both 32-bit only GDT support and 32-bit/16-bit GDT support. This is going to change into the protocol only having support for a 32-bit/16-bit GDT.</p></br></br>
 <ol>
