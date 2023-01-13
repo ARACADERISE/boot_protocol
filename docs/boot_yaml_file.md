@@ -83,3 +83,6 @@
   ```
   
 </ol>
+
+## What more?
+<p>To be more extensive, I have written my own YAML parser. I did this so I could imply <i>my own functionality</i>, and so that way I could easily read the <b>boot.yaml</b> file and assign the data accordingly.</br>The protocol takes the <i>source code files</i> passed via <b>second_stage_source_code_file</b> and <b>kernel_source_code_file</b> and generates the according binary object(.o) files passed via <b>second_stage_bin_o_filename</b> and <b>kernel_bin_o_filename</b>.</br>The protocol then takes the binary object(.o) files, and links them. The linker scripts are filled out automatically by the protocol. The protocol locates the second-stage bootlaoder C code(if there is any) at the address <code>0x7E00</code>, and maps the kernel into higher-half.</br>The protocol produces binary output(.out) files from the linker. It then <code>objdump</code>s the .out files and assigns the output to whatever .bin file was passed via <b>second_stage_bin_filename</b> and <b>kernel_bin_filename</b></p>
