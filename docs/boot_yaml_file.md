@@ -41,5 +41,6 @@
   </ul>
   <ul>
     <li>The next thing the protocol will need to know is the binary file(.bin) where the <i>flat binary</i> of the second-stage bootloader will be written to</li>
+  <code>hey</code>
   </ul>
 </ol>
