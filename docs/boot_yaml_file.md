@@ -32,10 +32,12 @@
     <li>First, make sure you have a directory in the parent directory of your OS code where the binary files will be stored</li>
     <li>Once you have that, the first thing the protocol needs from you is the binary object(.o) file where the second-stage binary will be written to:</li>
     <p>P.S: The binary files that you give to <i>both</i> the second-stage bootloader fields and the kernel fields <i>do not</i> need to exist. The protocol <i>creates</i> the binaries <i>for you</i></p></br>
+    
     ```yaml
       has_second_stage: "yes" # yes, we have a second-stage bootloader written in C
       second_stage_bin_o_filename: "bin/second_stage.o" # binary object(.o) file where the second-stage bootloader binary will be written to
     ```
+    
   </ul>
   <ul>
     <li>The next thing the protocol will need to know is the binary file(.bin) where the <i>flat binary</i> of the second-stage bootloader will be written to</li>
