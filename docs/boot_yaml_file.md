@@ -64,5 +64,22 @@
   kernel_bin_filename: "bin/kernel.bin"
   kernel_source_code_file: "kernel.c"
   ```
+  </br>
+  <p>The complete <b>boot.yaml</b> file <i>without</i> a second-stage bootloader will look like:</p>
+  
+  ```yaml
+  os_type: "bit32" # or "bit64" for 64-bit OS
+  
+  # Second-stage information
+  has_second_stage: "no"
+  
+  # If you continue to specify information about the second-stage bootloader
+  # an error will occur
+  
+  # Kernel information
+  kernel_bin_o_filename: "bin/kernel.o"
+  kernel_bin_filename: "bin/kernel.bin"
+  kernel_source_code_file: "kernel.c"
+  ```
   
 </ol>
