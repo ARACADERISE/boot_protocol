@@ -34,9 +34,18 @@
     <p>P.S: The binary files that you give to <i>both</i> the second-stage bootloader fields and the kernel fields <i>do not</i> need to exist. The protocol <i>creates</i> the binaries <i>for you</i></p></br>
     <li>The next thing the protocol needs to know is the binary file(.bin) where the <i>flat binary</i> of the second-stage bootloader will be written: <b>second_stage_bin_filename</b></li>
     <li>Then, the protocol needs to know the <i>source code file</i> of the second-stage bootloader: <b>second_stage_source_code_file</b></li>
-    <li>Example:</li>
-      
-      yaml
-      # Yes, we have a second stage bootloader
   </ul>
+  <li>Here is an example of what the <b><u>boot.yaml</u></b> would look like with a second-stage bootloader written in C:</li>
+  
+  ```yaml
+    # Yes, we have a second stage bootloader
+    has_second_stage: "yes"
+    # Binary object(.o) file where the second-stage bootloaders binary will be written to
+    second_stage_bin_o_filename: "bin/second_stage.o"
+    # Binary file(.bin) where the seonc-stage bootloaders flat binary will be written to
+    second_stage_bin_filename: "bin/second_stage.bin"
+    # Source code for the second-stage bootloader
+    second_stage_source_code_file: "second-stage.c"
+  ```
+  
 </ol>
