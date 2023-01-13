@@ -15,13 +15,13 @@
     os_type: "bit64"
   ```
 
-  <li>Next, if you <i>do not</i> have your own second-stage bootloader binary code, do the following:</li>
+  <li>Next, if you <i>did not</i> write your own second-stage bootloader code in C, do the following:</li>
   
   ```yaml
     has_second_stage: "no"
   ```
   
-  <p>If you <i>do have</i> a binary file for your second-stage bootloader C code, do the following:</p>
+  <p>If you <i>did write</i> your own second-stage bootloader code in C, do the following:</p>
   
   ```yaml
     has_second_stage: "yes"
