@@ -36,7 +36,6 @@
     
       has_second_stage: "yes" # yes, we have a second-stage bootloader written in C
       second_stage_bin_o_filename: "bin/second_stage.o" # binary object(.o) file where the second-stage bootloader binary will be written to
-    ```
     
   </ul>
   <ul>
