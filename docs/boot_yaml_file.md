@@ -30,17 +30,8 @@
   <p>If you have a second-stage bootloader written in C, then the following information is needed:</p>
   <ul>
     <li>First, make sure you have a directory in the parent directory of your OS code where the binary files will be stored</li>
-    <li>Once you have that, the first thing the protocol needs from you is the binary object(.o) file where the second-stage binary will be written to:</li>
+    <li>Once you have that, the first thing the protocol needs from you is the binary object(.o) file where the second-stage binary will be written to: <b>second_stage_bin_o_filename</b></li>
     <p>P.S: The binary files that you give to <i>both</i> the second-stage bootloader fields and the kernel fields <i>do not</i> need to exist. The protocol <i>creates</i> the binaries <i>for you</i></p></br>
-    
-      # yes, we have a second-stage bootloader written in C
-      has_second_stage: "yes"
-      # binary object(.o) file where the second-stage bootloader binary will be written to
-      second_stage_bin_o_filename: "bin/second_stage.o"
-    
-  </ul>
-  <ul>
-    <li>The next thing the protocol will need to know is the binary file(.bin) where the <i>flat binary</i> of the second-stage bootloader will be written to</li>
-  <code>hey</code>
-  </ul>
+    <li>The next thing the protocol needs to know is the binary file(.bin) where the <i>flat binary</i> of the second-stage bootloader will be written: <b>second_stage_bin_filename</b></li>
+    <li>Then, the protocol needs to know the <i>source code file</i> of the second-stage bootloader: <b>second_stage_source_code_file</b></li>
 </ol>
