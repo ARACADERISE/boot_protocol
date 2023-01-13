@@ -28,7 +28,9 @@
   ```
   
   <p>If you have a second-stage bootloader written in C, then the following information is needed:</p>
-  <li>First, make sure you have a directory in the parent directory of your OS code where the binary files will be stored</li>
-  <li>Once you have that, the first thing the protocol needs from you is the binary object(.o) file where the second-stage binary will be written to:</li>
-  <p>P.S: The binary files that you give to <i>both</i> the second-stage bootloader fields and the kernel fields <i>do not</i> need to exist. The protocol <i>creates</i> the binaries <i>for you</i></p>
+  <ul>
+    <li>First, make sure you have a directory in the parent directory of your OS code where the binary files will be stored</li>
+    <li>Once you have that, the first thing the protocol needs from you is the binary object(.o) file where the second-stage binary will be written to:</li>
+    <p>P.S: The binary files that you give to <i>both</i> the second-stage bootloader fields and the kernel fields <i>do not</i> need to exist. The protocol <i>creates</i> the binaries <i>for you</i></p>
+  </ul>
 </ol>
