@@ -90,5 +90,6 @@
 ## Possible Features
 <ol>
     <li>Libraries.</br>I am aiming on adding a way for developers to write a "library" for the protocol, aswell as aiming on adding a way for people <i>using</i> the protocol to tell the protocol <i>what libraries</i> they want to use</li>
-    <li>I am attempting to add a way for developers <i>using</i> the protocol to be able to load into memory data/code they have written that they want to be able to access.</br>With this, the protocol will have to be in charge of:</br>1. Reading in the correct amount of sectors</br>2. Referencing the address the developer gives as to where the code/data will be located</br>3. Obtaining the data/labels from the address where the data/code is loaded to</li>
+    <li>I am attempting to add a way for developers <i>using</i> the protocol to be able to load into memory data/code they have written that they want to be able to access.</br></br>With this, the protocol will have to be in charge of:</br>1. Reading in the correct amount of sectors</br>2. Referencing the address the developer gives as to where the code/data will be located</br>3. Obtaining the data/labels from the address where the data/code is loaded to</li></br>
+    <p>A note to developers who aim to write a library for the protocol: the code <i>has</i> to be written <i>inside</i> labels. There can not be any "globally" scoped assembly and/or C code. As of right now, this feature will only be capable of working with assembly.</p>
 </ol>
