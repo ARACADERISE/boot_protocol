@@ -8,11 +8,11 @@ save_gdt_and_load:
 
     ; Is there already a bit32/bit16 GDT in memory that the user put there?
     cmp eax, 1
-    je .do_it
+    je .load_it
 
     ; Is there already a bit32 GDT in memory?
     cmp eax, 2
-    je .do_it
+    je .load_it
 
     ; If for some reason the gdt status is neither 1 or 0, error
     jmp .gdt_error
@@ -40,13 +40,13 @@ save_gdt_and_load:
     cmp ax, 0
     je .gdt_error
 
-    jmp .do_it
+    jmp .load_it
 .gdt_error:
     mov si, sum
     call print
 
     jmp .hl
-.do_it:
+.load_it:
 
     jmp load_gdt
 

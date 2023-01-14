@@ -215,7 +215,7 @@ static inline void setup_gdt_and_gdt_desc()
 #else
     if(*gdt_status == 0)
     {
-        print_str("Error in `setup_gdt_desc`:\n  Did you forget to `init_bootloader`?\n  Perhaps you forgot to setup your GDT?\n\nFor future reference, put `#define default_gdt` if you want Moca Protocol to \nfill out your GDT.\n");
+        print("Error in `setup_gdt_desc`:\n  Did you forget to `init_bootloader`?\n  Perhaps you forgot to setup your GDT?\n\nFor future reference, put `#define default_gdt` if you want Moca Protocol to \nfill out your GDT.\n");
         __asm__("cli;hlt");
     }
 #endif

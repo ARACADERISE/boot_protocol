@@ -1,18 +1,43 @@
 use16
 
+global move_cursor
+move_cursor:
+    push ebp
+    mov ebp, esp
+
+    ; column
+    mov dl, [ebp + 8]
+    ; row
+    mov dh, [ebp + 12]
+
+    pop ebp
+
+    mov  bh, 0
+    mov  ah, 02h
+    int  10h
+
+    ret
+
 global print
 print:
 	mov ah, 0x0e
 .print:
 	mov al, [si]
 	cmp al, 0x0
+    cmp al, 0x0A
+    je .reformat
 	je .end_print
 	int 0x10
-	
+    jmp .cont
+.reformat:
+    mov ah, 0x0E
+    mov al, 'A'
+    int 0x10
+    hlt
+.cont:
 	add si, 1
 
 	jmp .print
-
 .end_print:
 	xor ax, ax
 	mov si, ax
@@ -22,7 +47,14 @@ global print_char
 print_char:
     mov ah, 0x0e                ; TTY function to display character in AL
     int 0x10                    ; Make BIOS call
+    
+    cmp al, 0x0A
+    je .format
     ret
+.format:
+    mov ah, 0x0E
+    mov al, 0x0D
+    int 0x10
 
 ; Function: print_word_hex
 ;           Print a 16-bit unsigned integer in hexadecimal on specified

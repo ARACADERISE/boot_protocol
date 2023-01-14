@@ -47,4 +47,7 @@ void outp(uint16 port, uint8 data)
         __asm__ __volatile__ ("outb %0, %1" : : "dN"(port), "a"(data));
 }
 
+/* For user-convenience. */
+#define starting_point          __attribute__((section("__start")))
+
 #endif
