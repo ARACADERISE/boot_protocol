@@ -16,7 +16,8 @@
         - Furthermore, we implied the requirement of second-stage bootloader being loaded in at physical address 0x7E00, regardless
     - Added `kern_linker_format` - A linker-script format for the kernel
         - 1
-            - See `todo` for more infor
+            - See `todo` for more info
     - If there is a second-stage bootloader(`has_second_stage` has the value "yes"), the protocol now makes sure the according information
       is given
-      
+        - 2
+            - See `todo` for more info
