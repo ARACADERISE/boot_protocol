@@ -164,3 +164,27 @@ save_gdt_and_load
 
 <h3>Why would someone want a 16-bit/32-bit GDT instead of just a 32-bit GDT?</h3>
 <p>The main advantage of this is <i>being able to go back to real-mode</i>. FAMP supports just that. It is flexible in that it is able to run a OS with a 16-bit/32-bit GDT or a 32-bit <b>ONLY</b> GDT. When it comes to kernel code, the developer is given functionality such as <b><u>enter_rmode</u></b> , <b><u>enter_rmode_and_stay</u></b> , <b><u>leave_rmode</u></b> etc. These functions will <i>error</i> if the developer <i>does not</i> have a 16-bit/32-bit GDT.</p>
+
+<h3>What is <b><i>set_gdt_status</i></b>?</h3>
+<p><b><u>set_gdt_status</u></b> is a function that FAMP offers to <i>manually set</i> the GDT status. This is for if you're manually filling out the GDT/GDT description.</br>The function takes in a "<i>setting</i>". Here are the settings that can be passed via <b><u>set_gdt_status</u></b>:</p>
+
+```c
+enum gdt_status_settings
+{
+    NO_GDT          = 0x00,
+    BIT16_BIT32_GDT = 0x01,
+    BIT32_ONLY_GDT  = 0x02
+}
+```
+
+<p>It <i>could</i> be considered "good practice" to do the following after initializing the boot with a clean GDT/GDT description loaded into memory:</p>
+
+```c
+void starting_point bootloader_main()
+{
+    init_bootloader(CLEAN_GDT_DEF_VID_MODE);
+    set_gdt_status(NO_GDT);
+}
+```
+
+<p>Reason being, doing the above <i>makes sure</i> the GDT status signifies that there <b>is no GDT</b> loaded into memory. It enforces "safety" amongst the feature of keeping a status on the GDT. Odds are, setting the GDT status to <b><u>NO_GDT</u></b> <i>after</i> running <b><u>init_bootloader</u></b> is useless, but it never hurts to be safe :)</p>
