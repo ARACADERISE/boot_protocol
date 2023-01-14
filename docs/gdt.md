@@ -110,7 +110,7 @@ typedef struct GDT
 <h3>Loading of the GDT</h3>
 <p>FAMPs GDT api offers multiple different functions for configuring the GDT and ultimately loading the GDT.</br></br>For the user, all you have to do is invoke the function <b><u>load_kernel</u></b>.</br> The function <b><u>load_kernel</u></b> will do the following:</p>
 <ol>
-    <li>Setup GDT/GDT description(if you load a clean(unset) GDT/GDT description into memory via <b><u>init_bootloader</u></b>). This is done via:</li>
+    <li>Setup GDT/GDT description. This is done via:</li>
     
 ```c
 static inline void setup_gdt_and_gdt_desc();
