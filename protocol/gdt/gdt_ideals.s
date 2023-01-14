@@ -20,7 +20,7 @@ init_pm:
     mov fs, ax
     mov gs, ax
 
-    jmp 0x8:0x%lx
+    jmp 0x8:0x{0}
 
 %%include "boot/gdt.s"
     

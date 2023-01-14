@@ -8,9 +8,17 @@ subprocess.run('rm -rf boot/boot.s', shell=True, cwd=os.getcwd())
 with open('Makefile', 'w') as f:
     f.write('''.PHONY: build
 
+FLAGS = -masm=intel -O1 -Wno-error -c -nostdinc -nostdlib -fno-builtin -fno-stack-protector -ffreestanding -m32
 build:
-	@cd config && make build
-    ''')
+	@cd config && python3 quick_edit.py
+	@nasm protocol/protocol_util.s -f elf32 -o ../bin/protocol_util.o
+	@gcc ${FLAGS} -o ../bin/second_stage.o ../main.c
+	@gcc ${FLAGS} -o ../bin/kernel.o ../kernel.c
+	@ld -m elf_i386 -Tlinker/linker.ld -nostdlib --nmagic -o ../bin/boot.out ../bin/second_stage.o ../bin/protocol_util.o
+	@ld -m elf_i386 -Tlinker/kernel.ld -nostdlib --nmagic -o ../bin/kernel.out ../bin/kernel.o ../bin/protocol_util.o
+	@objcopy -O binary ../bin/boot.out ../bin/second_stage.bin
+	@objcopy -O binary ../bin/kernel.out ../bin/kernel.bin
+	@cd config && make build''')
     f.close()
 
 with open('protocol/gdt/gdt_ideals.s', 'w') as f:
@@ -36,8 +44,16 @@ init_pm:
     mov fs, ax
     mov gs, ax
 
-    jmp 0x8:0x%lx
+    jmp 0x8:0x{0}
 
 %%include "boot/gdt.s"
     ''')
     f.close()
+
+with open('linker/linker.ld', 'w') as file:
+    file.write('')
+    file.close()
+
+with open('linker/kernel.ld', 'w') as file:
+    file.write('')
+    file.close()

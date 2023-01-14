@@ -62,7 +62,8 @@ static inline size determine_size(enum data_types type)
         default: break;
     }
 
-    /* If this isn't the right size(2 bytes), then oh well ig. */
+    /* If this isn't then right size(2 bytes), then the compiler
+     * can go fuck itself because everything should check out. */
     return sizeof(unsigned short);
 }
 
@@ -122,17 +123,25 @@ _yaml_os_data get_yaml_os_info()
 		os_data.has_second_stage = true;
 		_next
 
+		os_data.ss_entry_point = (uint8 *)yaml_file_data->val_data;
+		_next;
+
 		/* Second stage binary object file info. */
 		os_data.ss_filename_bin_o_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
 		os_data.ss_filename_bin_o_name = (uint8 *)yaml_file_data->val_data;
 		_next
 
-		os_data.ss_filename_bin_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
+		/* Get size of second-stage binary. */
+		uint8 ss_bin_name[50] = "../../";
+		FILE* ss_bin = fopen((const uint8 *)strcat(ss_bin_name, (uint8 *)yaml_file_data->val_data), "rb");
+		yaml_assert(ss_bin, "Error opening second-stage binary file `%s`.\n", ss_bin_name)
+
+		fseek(ss_bin, 0, SEEK_END);
+		os_data.ss_filename_bin_size = ftell(ss_bin);
+		fseek(ss_bin, 0, SEEK_SET);
+
+		fclose(ss_bin);
 		os_data.ss_filename_bin_name = (uint8 *)yaml_file_data->val_data;
-		_next
-		
-		/* Second stage address info. */
-		os_data.ss_addr = convert_hex_to_dec((uint8 *)yaml_file_data->val_data);
 		_next
 
 		/* Second stage source code file info. */
@@ -141,12 +150,25 @@ _yaml_os_data get_yaml_os_info()
 	}
 	_next
 
+	/* Kernel entry point. */
+	os_data.kern_entry_point = (uint8 *)yaml_file_data->val_data;
+	_next
+
 	/* Kernel binary file info. */
 	os_data.kern_filename_bin_o_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
 	os_data.kern_filename_bin_o_name = (uint8 *)yaml_file_data->val_data;
 	_next
 
-	os_data.kern_filename_bin_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
+	/* Get kernel binary size. */
+	uint8 kern_bin_name[50] = "../../";
+	FILE* kern_bin = fopen((const uint8 *)strcat(kern_bin_name, (uint8 *)yaml_file_data->val_data), "rb");
+	yaml_assert(kern_bin, "Error opening kernel binary file`%s`.\n", kern_bin_name)
+
+	fseek(kern_bin, 0, SEEK_END);
+	os_data.kern_filename_bin_size = ftell(kern_bin);
+	fseek(kern_bin, 0, SEEK_SET);
+
+	fclose(kern_bin);
 	os_data.kern_filename_bin_name = (uint8 *)yaml_file_data->val_data;
 	_next
 

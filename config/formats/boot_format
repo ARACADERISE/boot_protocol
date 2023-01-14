@@ -46,7 +46,7 @@ add [Info.sector], ax
 mov ax, [Info.sector]
 mov [sector_addr], ax
 
-jmp word 0x0:0x%lx
+jmp word 0x0:0x7E00
 
 jmp $
 
@@ -57,8 +57,8 @@ Info:
 	.sector				db 0x02
 	; Second stage information
 	.second_stage_size	dw ((second_stageE - second_stage) / 512) + 2
-	.second_stage_addr	dw 0x0%lx
-	.second_stage_loc	dw 0x%lx
+	.second_stage_addr	dw 0x07E0
+	.second_stage_loc	dw 0x7E00
 	; Kernel information
 	.kernel_size		dw ((kernelE - kernel) / 512) + 1
 	.kernel_addr		dw 0x0%lx

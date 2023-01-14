@@ -20,22 +20,23 @@ typedef struct yaml_os_data
 	bool			has_second_stage;
 
 	// Description of second stage bootloader
-	size			ss_addr;
+	uint8			*ss_entry_point;		// entry point of second-stage code
 	uint16			ss_size;				// second stage source code file size
 	uint8			*ss_filename;			// second stage source code file name
 	uint16			ss_filename_bin_o_size;	// second stage binary file name size
 	uint8			*ss_filename_bin_o_name;	// second stage binary file name
-	uint16			ss_filename_bin_size;
+	size			ss_filename_bin_size;
 	uint8			*ss_filename_bin_name;
 	size			ss_bin_size;			// size(in bytes) of binary file
 	
 	// Description of kernel
+	uint8			*kern_entry_point;
 	size			kern_addr;
 	uint16			kern_filename_size;		// kernel source code file size
 	uint8			*kern_filename;			// kernel source code file name
 	uint16			kern_filename_bin_o_size;	// kernel binary file name size
 	uint8			*kern_filename_bin_o_name;// kernel binary file name
-	uint16			kern_filename_bin_size;
+	size			kern_filename_bin_size;
 	uint8			*kern_filename_bin_name;
 	size			kern_bin_size;			// size(in bytes) of binary file
 } _yaml_os_data;

@@ -212,7 +212,7 @@ begin:
 		default: break;
 	}
 
-	yaml_assert(is_ascii(lex->curr_char), "Error on line %ld:\n\tInvalid value `%c`.\n", lex->line, lex->curr_char);
+	yaml_assert(is_ascii(lex->curr_char), "Error on line %ld:\n\tInvalid value `%c`(%x).\n", lex->line, lex->curr_char,lex->curr_char);
 
 	/* Get user defined value. */
 	uint8 *user_def_ = get_word(lex);

@@ -1,0 +1,9 @@
+1/12/2023
+    - 1
+        - Added linker directory to `boot_protocol`
+        - Added `linker.ld` and `kernel.ld` to `linker` directory
+        - See `todo` for more info
+    - 2
+        - `boot.yaml` is now located in the parent directory of the OS code, not the inside the `boot_protocol` directory
+    - 3
+        - Refer to `todo`
