@@ -1,9 +1,9 @@
 use16
 global enter_rmode
 
-%include "protocol/gdt/enter_rmode.s"
-%include "protocol/gdt/gdt_load.s"
-%include "protocol/gdt/save_and_load_gdt.s"
+%%include "protocol/gdt/enter_rmode.s"
+%%include "protocol/gdt/gdt_load.s"
+%%include "protocol/gdt/save_and_load_gdt.s"
 
 ;
 ; =======================
@@ -20,7 +20,7 @@ init_pm:
     mov fs, ax
     mov gs, ax
 
-    jmp 0x8:0x9000
+    jmp 0x8:0x{0}
 
-%include "boot/gdt.s"
+%%include "boot/gdt.s"
     
