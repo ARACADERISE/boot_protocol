@@ -1,0 +1,7 @@
+.PHONY: run
+.PHONY: clean
+
+run:
+	@cd boot_protocol && make
+clean:
+	@cd boot_protocol && make clean

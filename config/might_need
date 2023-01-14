@@ -1,0 +1,31 @@
+/* Write linker scripts. */
+	FILE* ss_linker = fopen("../linker/linker.ld", "w");
+	format = read_format((const uint8 *)"formats/ss_linker_format", "rb");
+
+	config_assert(ss_linker, "Error opening `boot_protocol/linker/linker.ld`.\n")
+
+	/* Create static memory. Allow for additional 60 characters. */
+	uint8 ss_linker_format[strlen(format)+60];
+
+	/* Apply values and write. */
+	sprintf(ss_linker_format, format,
+		yod.ss_entry_point,
+		(0x7E00 + (((yod.ss_filename_bin_size / 512)) * 512))+1);
+	fwrite(ss_linker_format, sizeof(uint8), strlen(ss_linker_format), ss_linker);
+	fclose(ss_linker);
+
+	FILE* kern_linker = fopen("../linker/kernel.ld", "w");
+	format = read_format((const uint8 *)"formats/kern_linker_format", "rb");
+
+	config_assert(kern_linker, "Error opening `boot_protocol/linker/kernel.ld`.\n")
+
+	/* Create static memory. Allow for additional 60 characters. */
+	uint8 kern_linker_format[strlen(format)+60];
+
+	/* Apply values and write. */
+	sprintf(kern_linker_format, format, 
+		yod.kern_entry_point,
+		((yod.kern_addr*16) + (((yod.kern_filename_bin_size / 512)) * 512))+1);
+	fwrite(kern_linker_format, strlen(kern_linker_format), sizeof(*kern_linker_format), kern_linker);
+	
+	fclose(kern_linker);

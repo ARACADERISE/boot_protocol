@@ -1,0 +1,108 @@
+org 0x7C00
+use16
+
+xor ax, ax
+mov es, ax
+mov ds, ax
+
+cli
+mov bp, 0x7C00
+mov sp, bp
+mov ss, ax
+sti
+
+mov ax, 0x07E0
+mov es, ax
+xor bx, bx
+
+mov ah, 0x02
+mov al, 0x02
+mov ch, 0x00
+mov cl, 0x02
+mov dh, 0x00
+mov dl, 0x80
+int 0x13
+jc failed
+
+jmp 0x0:0x7E00
+
+jmp $
+
+failed:
+    mov ah, 0x0E
+    mov al, 'E'
+    int 0x10
+.floop:
+    jmp .floop
+
+sector_addr		equ 0x5000
+
+times 510 - ($ - $$) db 0x0
+dw 0xAA55
+
+mov ax, [Info.kernel_addr]
+mov es, ax
+xor bx, bx
+
+mov ah, 0x02
+mov al, [Info.kernel_size]
+mov ch, 0x00
+mov cl, 0x04
+mov dh, 0x00
+mov dl, 0x80
+int 0x13
+jc failed2
+
+mov ah, 0x00
+mov al, 0x03
+int 0x10
+
+in al, 0x92
+or al, 0x02
+out 0x92, al
+
+cli
+lgdt [working_bit32_bit16_GDTDesc]
+mov eax, cr0
+or eax, 0x01
+mov cr0, eax
+
+jmp word 0x08:init_pm
+
+use32
+init_pm:
+    init_pm:
+
+    mov ax, 0x10
+    mov ds, ax
+    mov ss, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+
+    jmp 0x8:0x%lx
+
+jmp $
+
+%%include "boot/gdt.s"
+
+Info:
+	; Sector information
+	.sector				db 0x02
+	; Kernel information
+	.kernel_size		dw ((kernelE - kernel) / 512) + 1
+	.kernel_addr		dw 0x0%lx
+	.kernel_loc			dw 0x%lx
+
+failed2:
+    mov ah, 0x0E
+    mov al, 'E'
+    int 0x10
+.floop2:
+    jmp .floop2
+
+times 1536 - ($ - $$) db 0x0
+
+kernel: incbin "%s"
+kernelE:
+    
