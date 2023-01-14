@@ -7,3 +7,17 @@
         - `boot.yaml` is now located in the parent directory of the OS code, not the inside the `boot_protocol` directory
     - 3
         - Refer to `todo`
+
+1/13/2023
+    - Added `quick_edit.py`, a Python script that quickly fills out/writes the formats for the linker script 
+      and fills out the format for `gdt_ideals.s`
+    - Binary files are now created before the configuration of the MBR, user-makefile, protocol makefile and whatever else
+      gets configured via `main.c`
+    - Added `ss_linker_format` - A linker-script format for the second-stage bootloader
+        - Furthermore, we implied the requirement of second-stage bootloader being loaded in at physical address 0x7E00, regardless
+    - Added `kern_linker_format` - A linker-script format for the kernel
+        - 1
+            - See `todo` to see the TODO for mapping higher-half kernel.
+    - If there is a second-stage bootloader(`has_second_stage` has the value "yes"), the protocol now makes sure the according information
+      is given
+      

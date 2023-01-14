@@ -1,7 +1,13 @@
-1:
-    - TODO: Make it to where users pass entry points of second-stage/kernel, then format the linker scripts accordingly
-    - TODO: Locate second-stage at 0x7E00, locate kernel at higher-half
-3:
-    - TODO: Make it to where `boot.yaml` requires the user to tell the protocol where binary files are stored, example
-        - bin_dir: "bin"
-    - TODO: Make the protocol create the bin directory for the user
+1/12/2023
+    1:
+        - TODO: Make it to where users pass entry points of second-stage/kernel, then format the linker scripts accordingly
+        - TODO: Locate second-stage at 0x7E00, locate kernel at higher-half
+    3:
+        - TODO: Make it to where `boot.yaml` requires the user to tell the protocol where binary files are stored, example
+            - bin_dir: "bin"
+        - TODO: Make the protocol create the bin directory for the user
+
+1/13/2023
+    1:
+        - TODO: Make it to where `linker/kernel.ld` maps kernel into higher-half
+        

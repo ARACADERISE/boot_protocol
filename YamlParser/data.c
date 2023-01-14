@@ -123,6 +123,9 @@ _yaml_os_data get_yaml_os_info()
 		os_data.has_second_stage = true;
 		_next
 
+		/* There should be checks here that make sure the required data is given for second-stage information,
+		 * but `quick_edit.py` already does this for us. This was not planned, by the way. */
+
 		os_data.ss_entry_point = (uint8 *)yaml_file_data->val_data;
 		_next;
 

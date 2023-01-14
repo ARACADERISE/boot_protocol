@@ -48,16 +48,21 @@ static const char * const needed_names[] = {
 
 	// Second stage information
 	"has_second_stage",
-	/*"second_stage_o_binary",
-	"second_stage_bin_binary",
-	"second_stage_addr",
-	"second_stage_source_code_file",*/
 
 	// Kernel information
+	"kernel_entry_point",
 	"kernel_o_binary",
 	"kernel_bin_binary",
 	"kernel_addr",
 	"kernel_source_code_file"
+};
+
+/* If there is a second stage, these are the needed names. */
+static const char * const ss_needed_names[] = {
+	"second_stage_entry_point",
+	"second_stage_bin_o_filename",
+	"second_stage_bin_filename",
+	"second_stage_source_code_file"
 };
 
 /* Types of data. */
