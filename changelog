@@ -1,12 +1,11 @@
 1/12/2023
+    - Added linker directory to `boot_protocol`
+    - Added `linker.ld` and `kernel.ld` to `linker` directory
     - 1
-        - Added linker directory to `boot_protocol`
-        - Added `linker.ld` and `kernel.ld` to `linker` directory
         - See `todo` for more info
-    - 2
-        - `boot.yaml` is now located in the parent directory of the OS code, not the inside the `boot_protocol` directory
+    - `boot.yaml` is now located in the parent directory of the OS code, not the inside the `boot_protocol` directory
     - 3
-        - Refer to `todo`
+        - See `todo` for more info
 
 1/13/2023
     - Added `quick_edit.py`, a Python script that quickly fills out/writes the formats for the linker script 
@@ -17,7 +16,7 @@
         - Furthermore, we implied the requirement of second-stage bootloader being loaded in at physical address 0x7E00, regardless
     - Added `kern_linker_format` - A linker-script format for the kernel
         - 1
-            - See `todo` to see the TODO for mapping higher-half kernel.
+            - See `todo` for more infor
     - If there is a second-stage bootloader(`has_second_stage` has the value "yes"), the protocol now makes sure the according information
       is given
       
