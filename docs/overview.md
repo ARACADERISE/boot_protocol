@@ -54,7 +54,6 @@
 <li>
   <b><u><a href="https://github.com/MocaCDev/boot_protocol/blob/main/docs/loading_kernel.md">loading_kernel.md</a></u></b></br>
   <ul>
-    <li>Learn how the function <b><i><u>load_kernel</u></i></b> loads the GDT description depending on if it's a empty GDT/GDT description or a already-working GDT/GDT description</li>
     <li>Learn how the protocol loads the kernel into memory</li>
     <li>Learn how the protocol <i>links</i> the kernel</li>
     <li>Learn what a higher-half kernel is - FAMP supports higher-half kernels only</li>
