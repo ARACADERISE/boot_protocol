@@ -50,10 +50,6 @@ init_pm:
     ''')
     f.close()
 
-with open('linker/linker.ld', 'w') as file:
-    file.write('')
-    file.close()
-
-with open('linker/kernel.ld', 'w') as file:
-    file.write('')
-    file.close()
+# Delete linker scripts. They will be recreated anyway
+subprocess.run('rm -rf linker/linker.ld', shell=True, cwd=os.getcwd())
+subprocess.run('rm -rf linker/kernel.ld', shell=True, cwd=os.getcwd())
