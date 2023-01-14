@@ -1,11 +1,15 @@
 1/12/2023
     1:
         - TODO: Make it to where users pass entry points of second-stage/kernel, then format the linker scripts accordingly
+            - Status: Done
         - TODO: Locate second-stage at 0x7E00, locate kernel at higher-half
+            - Status: Done
     3:
         - TODO: Make it to where `boot.yaml` requires the user to tell the protocol where binary files are stored, example
             - bin_dir: "bin"
+            - Status: Work-in-progress
         - TODO: Make the protocol create the bin directory for the user
+            - Status: Done
 
 1/13/2023
     1:
