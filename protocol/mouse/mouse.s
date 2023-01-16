@@ -30,7 +30,7 @@ config_mouse:
     jmp .finish
 .no_mouse:
     mov si, noMouseMsg
-    call print
+    call asm_print
     ret
 .finish:
     ;mov si, mouse_success

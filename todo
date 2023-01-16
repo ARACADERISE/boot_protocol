@@ -28,3 +28,47 @@
             - `config2.c` will be the current `main.c` inside `boot_protocol/config`
             - `config2.c` will continue to use the `Makefile` inside `boot_protocol/config`, meanwhile, `config1.c` will just have
               its binary object file shipped with the protocol
+    extra:    
+        - TODO: Implement a better printing api for bootloader
+        - TODO: Clean up ALL code
+        - TODO: Color print errors?
+        - TODO: Add in macros that users(and myself) can use to easily run assembly commands
+        - TODO: Implement a small dissassembler for FAMP
+        - TODO: Make it to where FAMP complies only with a custom binary format?
+
+1/14/2023
+    1:
+        - TODO: Make the protocol use the `bin_folder` variable available via `boot.yaml`
+            - With this, the user won't need to put the folder where a binary file is to be located.
+              `bin_folder` will be used throughout the protocol to make sure binaries get placed accoringly
+    
+    Extras:
+        - TODO: Create C program strictly for second stage and kernel binary files
+            - The C program that works with the second stage binary will append data to the binary over the second-stage bootloaders
+              memory. This data includes type of memory, the amount of memory, what access the programmer has to the memory, and the "activity"
+              of the memory, or, another words, if the memory is meant to be used later on or not.
+            - The C program that works with the kernel binary will do the same as the C program that works with the second stage bootloader
+              binary. It'll append data to the end of the binary file that explains things about the kernels memory.
+        - TODO: Add "FAMP Tools".
+            - "FAMP Tools" is a group of tools that can be used to make the programmers experience using FAMP better.
+            - The collection of tools includes, but won't be limited to:
+                - `famp-init $new_dir_name` - init a new directory with all needed tools to get you started
+                    - `famp-init` not only creates a new directory for you, sets up all needed tools and makes sure FAMP is installed locally,
+                      it also generates example templates.
+                - `famp-reset` - resets the entire code-base of the directory.
+                    - Regardless what you had, as soon as you run this, it deletes everything and invokes `famp-init`
+                - `famp-config` - configures the binaries needed to create the finale OS image
+                    - This is automatically ran via `famp-run`. `famp-config` generates the binary files for the second-stage C bootloader(if there is one)
+                      and for the kernel. `famp-run` invokes `famp-config`, then proceeds to generate the MBR binary and after it generates the MBR
+                      binary, it combines all the binary files into one image
+                - `famp-mema-save $mem_address $for` - Implement a feature where the protocol reserves 512 bytes of memory for memory addresses
+                    - The user will use `famp-mema-save` to save a memory address within the 512 bytes
+                    - `for` takes `second-stage` or `kernel`
+                    - Example: `famp-mema-save 0x8D00 second-stage`
+        - TODO: Make `init_bootloader` check for memory map
+            - Store the result in a memory address that will be checked/returned by the protocol when the user calls `check_memory_map_availability`
+        - TODO: Make `init_bootloader` default to default video mode(`0xB8000`) if VESA video mode is not supported
+        - TODO: With the protocol reserving 512 bytes(1 sector) for the user to save memory addresses, we need a function that obtains this information
+            - Protocol will need two different arrays, or structs(either or). One for kernel memory addresses and one for second-stage bootloader memory addresses
+            - I would say add a feature where the programmer can specify what can be done with the memory address, however, that would take up more memory than need-be.
+              Also, odds are, the memory addresses they are saving will be used for both reading and writing purposes.

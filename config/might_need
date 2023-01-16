@@ -29,3 +29,16 @@
 	fwrite(kern_linker_format, strlen(kern_linker_format), sizeof(*kern_linker_format), kern_linker);
 	
 	fclose(kern_linker);
+    /* Read in format(`protocol/gdt/gdt_ideals.s`) and write in the address. */
+	format = read_format((const uint8 *)"../protocol/gdt/gdt_ideals.s", "rb");
+
+	FILE* bit32_jump = fopen("../protocol/gdt/gdt_ideals.s", "wb");
+
+	config_assert(bit32_jump, "Error opening `../protocol/gdt/gdt_ideals.s`.\n")
+
+	format = realloc(format, (strlen(format) + 60) * sizeof(*format));
+	uint8 jump_format2[strlen(format)];
+	sprintf(jump_format2, format, yod.kern_addr*16);
+	fwrite(jump_format2, strlen(jump_format2), sizeof(uint8), bit32_jump);
+
+	fclose(bit32_jump);

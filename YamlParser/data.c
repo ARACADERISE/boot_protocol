@@ -116,6 +116,7 @@ _yaml_os_data get_yaml_os_info()
 	else os_data.type = 0x02;
 
 	_next
+	_next
 
 	/* Do we have a second stage? */
 	if(strcmp((uint8 *)yaml_file_data->val_data, "yes")==0)

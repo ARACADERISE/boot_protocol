@@ -42,8 +42,8 @@ save_gdt_and_load:
 
     jmp .load_it
 .gdt_error:
-    mov si, sum
-    call print
+    mov si, gdt_load_error
+    call asm_print
 
     jmp .hl
 .load_it:
@@ -51,10 +51,10 @@ save_gdt_and_load:
     jmp load_gdt
 
 .failed:
-    mov si, sum2
-    call print
+    mov si, sector_read_error
+    call asm_print
 .hl:
     jmp .hl
 
-sum db "Error loading the GDT :(", 0x0
-sum2 db "Error loading sectors for kernel :(", 0x0
+gdt_load_error db "Error loading the GDT :(", 0x0
+sector_read_error db "Error loading sectors for kernel :(", 0x0

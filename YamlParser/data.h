@@ -46,6 +46,9 @@ static const char * const needed_names[] = {
 	// Type of os. 32bit or 64bit
 	"os_type",
 
+	// Binary folder where all binaries will be kept
+	"bin_folder",
+
 	// Second stage information
 	"has_second_stage",
 

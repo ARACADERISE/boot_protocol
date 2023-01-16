@@ -21,3 +21,15 @@
       is given
         - 2
             - See `todo` for more info
+
+1/14/2023
+    - Linker scripts no longer manually put a byte after the last byte of the sector
+        - With this, `format.c` pads out all binary files to 512 byte blocks(sectors)
+    - Fixed `clean.py`. It wasn't deleting all .bin, .o and .out files within the binary folder
+    - Programmers now have to tell the protocol the folder of where the binary files are located. This is done via `bin_folder`
+        - 1
+            - See `todo` for more info
+    - Linker scripts are as-is. The protocol does not tweak with the linker scripts.
+        - As of current, the protocol loads kernel at 0x9000.
+        - This will change when the protocol is mature enough to do paging(for higher-half kernel)
+    - `quick_edit.py` now only writes to `boot_protocol/gdt/gdt_ideals.s`, as well as checks if all the required data exists

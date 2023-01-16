@@ -31,7 +31,7 @@ read_disk:
     ret
 .read_disk_failed:
     mov si, disk_failure
-    call print
+    call asm_print
 
 .loop:
     jmp .loop

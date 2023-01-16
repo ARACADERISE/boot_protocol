@@ -91,19 +91,14 @@ int32 main(int args, char *argv[])
 		fclose(boot_file);
 	}
 
-	/* Read in format(`protocol/gdt/gdt_ideals.asm`) and write in the address. */
-	/*format = read_format((const uint8 *)"../protocol/gdt/gdt_ideals.s", "rb");
-
-	FILE* bit32_jump = fopen("../protocol/gdt/gdt_ideals.s", "wb");
-
-	config_assert(bit32_jump, "Error opening `../protocol/gdt/gdt_ideals.s`.\n")
-
-	format = realloc(format, (strlen(format) + 60) * sizeof(*format));
-	uint8 jump_format2[strlen(format)];
-	sprintf(jump_format2, format, yod.kern_addr*16);
-	fwrite(jump_format2, strlen(jump_format2), sizeof(uint8), bit32_jump);
-
-	fclose(bit32_jump);*/
+	/* TODO: Figure out what we're doing here. Do we want to format `gdt_ideals.s` with C, or continue to do it via `quick_edit.py`?
+	 *
+	 * As of current, `quick_edit.py` deals with making sure the file `boot.yaml` has all the
+	 * required data as well as writing to the file `protocol/gdt/gdt_ideals.asm`.
+	 * I would like to make this happen in C, however, currently, there is a road block as
+	 * the kernel/second-stage binary files HAVE to exist for this file(`main.c`,`main.o`) to run, however, this file NEEDS to run(if its configuring `gdt_ideals.s`)
+	 * before the according binary files are generated. So, currently, we're in a stalemate.
+	 */
 
 	uint8 *mformat = NULL;
 	if(yod.has_second_stage == true)
@@ -111,7 +106,7 @@ int32 main(int args, char *argv[])
 		mformat = read_format((const uint8 *)"formats/makefile_format", "r");
 
 		/* Create static memory. Allow for additional 60 characters. */
-		uint8 mformat1[strlen(mformat)+60];
+		uint8 mformat1[strlen(mformat)+120];
 
 		/* Apply values and write. */
 		sprintf(mformat1, mformat, 
@@ -121,6 +116,7 @@ int32 main(int args, char *argv[])
 			yod.kern_filename,
 			yod.ss_filename_bin_o_name,
 			yod.kern_filename_bin_o_name,
+			ss_bin_file, kern_bin_file,
 			ss_bin_file, kern_bin_file,
 			ss_bin_file, kern_bin_file);
 		
@@ -132,7 +128,7 @@ int32 main(int args, char *argv[])
 		mformat = read_format("formats/makefile_format2", "r");
 
 		/* Create static memory. Allow for additional 60 characters. */
-		uint8 mformat2[strlen(mformat)+60];
+		uint8 mformat2[strlen(mformat)+120];
 
 		/* Apply values and write. */
 		sprintf(mformat2, mformat, 

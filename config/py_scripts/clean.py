@@ -1,8 +1,17 @@
 import subprocess
 import os
+import yaml
 
-subprocess.run('rm -rf bin/*.bin && rm -rf bin/*.o && rm -rf bin/*.out', shell=True, cwd=os.getcwd())
-subprocess.run('rm -rf bin/*.image', shell=True, cwd=os.getcwd())
+yaml_data = None
+with open('../boot.yaml', 'r') as file:
+    yaml_data = yaml.full_load(file)
+    file.close()
+
+# Delete all binaries
+subprocess.run(f'rm -rf ../{yaml_data["bin_folder"]}/*.bin', shell=True, cwd=os.getcwd())
+subprocess.run(f'rm -rf ../{yaml_data["bin_folder"]}/*.o', shell=True, cwd=os.getcwd())
+subprocess.run(f'rm -rf ../{yaml_data["bin_folder"]}/*.out', shell=True, cwd=os.getcwd())
+subprocess.run(f'rm -rf ../{yaml_data["bin_folder"]}/*.image', shell=True, cwd=os.getcwd())
 subprocess.run('rm -rf boot/boot.s', shell=True, cwd=os.getcwd())
 
 with open('Makefile', 'w') as f:
@@ -10,7 +19,7 @@ with open('Makefile', 'w') as f:
 
 FLAGS = -masm=intel -O1 -Wno-error -c -nostdinc -nostdlib -fno-builtin -fno-stack-protector -ffreestanding -m32
 build:
-	@./config/scripts/quick_edit
+	@./config/scripts/quick_edit -gdt_ideals
 	@nasm protocol/protocol_util.s -f elf32 -o ../bin/protocol_util.o
 	@gcc ${FLAGS} -o ../bin/second_stage.o ../main.c
 	@gcc ${FLAGS} -o ../bin/kernel.o ../kernel.c
@@ -49,7 +58,3 @@ init_pm:
 %%include "boot/gdt.s"
     ''')
     f.close()
-
-# Delete linker scripts. They will be recreated anyway
-subprocess.run('rm -rf linker/linker.ld', shell=True, cwd=os.getcwd())
-subprocess.run('rm -rf linker/kernel.ld', shell=True, cwd=os.getcwd())

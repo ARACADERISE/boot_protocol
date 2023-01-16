@@ -13,7 +13,7 @@ poll_mouse:
     mov bx, 0x0002              ; Set display page to 0 (BH) and color green (BL)
 
     mov si, xcoord
-    call print
+    call asm_print
 
     mov ax, [mouseX]            ; Retrieve current mouse coordinates. Disable interrupts
 
@@ -22,10 +22,10 @@ poll_mouse:
 
     call print_word_hex         ; Print the mouseX coordinate
     mov si, delimCommaSpc
-    call print
+    call asm_print
 
     mov si, ycoord
-    call print
+    call asm_print
 
     mov ax, [mouseY]
 
@@ -34,7 +34,7 @@ poll_mouse:
     
     call print_word_hex         ; Print the mouseY coordinate
     mov si, delimCommaSpc
-    call print
+    call asm_print
 
     mov al, [curStatus]
 

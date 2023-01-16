@@ -154,11 +154,10 @@ init_bootloader:
 
     ret
 .error:
-    mov ah, 0x0E
-    mov al, 'E'
-    int 0x10
-
-    cli
-    hlt
+    mov si, invalid
+    call asm_print
+.error_hlt:
+    jmp .error_hlt
     
+invalid: db "Invalid setting passed to `init_bootloader`", 0x0D, 0x0A, 0x00
 %include "protocol/gdt/gdt_ideals.s"

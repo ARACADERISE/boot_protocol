@@ -18,8 +18,8 @@ move_cursor:
 
     ret
 
-global print
-print:
+global asm_print
+asm_print:
 	mov ah, 0x0e
 .print:
 	mov al, [si]
