@@ -59,6 +59,8 @@
   ```yaml
   os_type: "bit32" # or "bit64" for 64-bit OS
   
+  bin_dir: "bin"
+  
   # Second-stage information
   has_second_stage: "yes"
   second_stage_bin_o_filename: "bin/second_stage.o"
@@ -75,6 +77,8 @@
   
   ```yaml
   os_type: "bit32" # or "bit64" for 64-bit OS
+  
+  bin_dir: "bin"
   
   # Second-stage information
   has_second_stage: "no"
