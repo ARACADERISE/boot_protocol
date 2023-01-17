@@ -15,7 +15,7 @@
     os_type: "bit64"
   ```
   
-  <li>Then, after that, you have to tell the protocol where the bin folder is. This is done via <b><u>bin_folder</u></b></li>
+  <li>Then, after that, you have to tell the protocol where the bin folder is. This is done via <b><u>bin_folder</u></b>:</li>
   
   ```yaml
   bin_folder: "bin"
