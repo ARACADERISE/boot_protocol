@@ -1,10 +1,8 @@
 #ifndef format
-#define format#include <stdio.h>
-
+#define format
+#include <stdio.h>
 #include <stdlib.h>
-
 #include <string.h>
-
 #include <stdbool.h>
 
 #define bytes_per_sector 512
@@ -21,13 +19,7 @@ typedef unsigned int uint32;
 
 /* "Magic numbers". */
 static
-const uint8 magic_id[] = {
-    0x2B,
-    0xFF,
-    0x2F,
-    0xDF,
-    0x88
-};
+const uint8 magic_id[] = {0x2B, 0xFF, 0x2F, 0xDF, 0x88};
 
 /* Access bytes. */
 #define access_level_one 0b00001011
@@ -88,7 +80,6 @@ typedef struct memory_stamp {
 }
 _memory_stamp;
 
-static
-const size_t memory_stamp_size = sizeof(_memory_stamp);
+static const size_t memory_stamp_size = sizeof(_memory_stamp);
 
 #endif
