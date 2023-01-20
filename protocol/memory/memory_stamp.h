@@ -2,20 +2,8 @@
 #define protocol_memory_stamp
 
 /* "Magic numbers". */
-#define memory_stamp_magic_number_id(uint8[]) {
-    0x2B,
-    0xFF,
-    0x2F,
-    0xDF,
-    0x88
-}
-#define memory_stamp_magic_id_not_found(uint8[]) {
-    0xFF,
-    0xFF,
-    0xFF,
-    0xFF,
-    0xFF
-}
+#define memory_stamp_magic_number_id(uint8[]) {0x2B, 0xFF, 0x2F, 0xDF, 0x88}
+#define memory_stamp_magic_id_not_found(uint8[]) {0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
 
 typedef struct memory_stamp {
     /* Memory stamps "magic number" referencing the start to the memory stamp. */
@@ -89,9 +77,9 @@ static _memory_stamp * find_memory_stamp_offset_address() {
     _memory_stamp * mem_stamp = NULL;
 
     redo:
-        /* If `addr` surpasses, or is strictly at, `0x9000`, fill out the memory stamp with default values. */
-        if (addr >= 0x9000)
-            goto default_values;
+    /* If `addr` surpasses, or is strictly at, `0x9000`, fill out the memory stamp with default values. */
+    if (addr >= 0x9000)
+        goto default_values;
 
     /* Dereference pointer, get value. */
     byte = * ptr_addr;
@@ -131,8 +119,8 @@ static _memory_stamp * find_memory_stamp_offset_address() {
     /* If `addr` does not surpass `0x9000`(kernel memory), then the following code will run.*/
     assign_accordingly:
 
-        /* Decrement the `ptr_addr` pointer so we are accessing the correct data. */
-        ptr_addr--;
+    /* Decrement the `ptr_addr` pointer so we are accessing the correct data. */
+    ptr_addr--;
 
     /* Assign a `_memory_stamp` pointer to the current address(`addr`). */
     mem_stamp = (_memory_stamp * ) ptr_addr;
