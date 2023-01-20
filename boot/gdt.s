@@ -60,11 +60,6 @@ working_bit32_GDTDesc:
     dw working_bit32_GDTDesc - working_bit32_GDT - 1
     dd working_bit32_GDT
 
-
-g_GDT_address       equ 0xA000
-g_GDT_desc_addr     equ 0xAA00
-g_GDT_status:       equ 0xC000
-
 g_GDT32_16:      
             ; NULL descriptor
             .n                      dq 1
@@ -102,5 +97,5 @@ g_GDT32_16:
             .ddata16_base_high              db 0                        ; base high
 
 g_GDTDesc:
-    .size dw 0x0
-    .addr dd 0x0
+    .size dw 0x0001
+    .addr dd 0x000000

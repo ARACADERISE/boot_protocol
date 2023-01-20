@@ -1,4 +1,4 @@
-ENTRY(kmain)
+ENTRY({0})
 SECTIONS
 {
     . = 0x9000;
@@ -15,4 +15,7 @@ SECTIONS
         *(.rodata*);
         *(COMMON*);
     }
+
+    /* Should we remove this? */
+    .sig : AT(0x{1}) {SHORT(0x00);}
 }

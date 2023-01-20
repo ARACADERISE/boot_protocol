@@ -1,9 +1,15 @@
 ENTRY(main)
 SECTIONS
 {
-    . = 0x7E00;
-    begin_symbol = .;
-    .text : AT(0x7E00)
+    /* Important memory addresses for FAMP. */
+    g_gdt_address = 0x7E00;
+    g_gdt_desc_address = 0x7E30;
+    g_gdt_status_address = 0x7E38;
+
+    /* Second-stage starts at 0x7F00. */
+    . = 0x7F00;
+    second_stage_start = .;
+    .text : AT(0x7F00)
     {
         *(__start*);
         *(.text*);
@@ -15,7 +21,6 @@ SECTIONS
         *(.data*);
         *(COMMON*);
     }
-    end_symbol = .;
-
-    /*.sig : AT(0x8F00) {SHORT(0xFF);}*/
+    
+    second_stage_end = .;
 }

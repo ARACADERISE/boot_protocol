@@ -2,7 +2,6 @@
 
 FLAGS = -masm=intel -O1 -Wno-error -c -nostdinc -nostdlib -fno-builtin -fno-stack-protector -ffreestanding -m32
 build:
-	@./config/scripts/quick_edit -gdt_ideals
 	@nasm protocol/protocol_util.s -f elf32 -o ../bin/protocol_util.o
 	@gcc ${FLAGS} -o ../bin/second_stage.o ../main.c
 	@gcc ${FLAGS} -o ../bin/kernel.o ../kernel.c

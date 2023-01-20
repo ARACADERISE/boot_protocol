@@ -56,7 +56,7 @@ static const char * const needed_names[] = {
 	"kernel_entry_point",
 	"kernel_o_binary",
 	"kernel_bin_binary",
-	"kernel_addr",
+	//"kernel_addr",
 	"kernel_source_code_file"
 };
 

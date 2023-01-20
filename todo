@@ -30,6 +30,13 @@
               its binary object file shipped with the protocol
     extra:    
         - TODO: Implement a better printing api for bootloader
+            - `FAMP_log_info` - Log general information
+                - This will, generally, be used more as a way to "store" information over what's happening
+                - With this, I can add a function like `show_all_log_info` and it will print, in a "fancy" way, all the logs
+                - This might be helpful with just keeping up on what the protocol has done so far
+            - `FAMP_log` - Directly print stuff in the emulator window. Normally used if there was a general error
+            - `FAMP_log_error` - "Fancy" printing for error. This will directly print stuff to the emulator window
+        - TODO: Make all "backend" code have `__` before there names
         - TODO: Clean up ALL code
         - TODO: Color print errors?
         - TODO: Add in macros that users(and myself) can use to easily run assembly commands
@@ -49,6 +56,12 @@
               of the memory, or, another words, if the memory is meant to be used later on or not.
             - The C program that works with the kernel binary will do the same as the C program that works with the second stage bootloader
               binary. It'll append data to the end of the binary file that explains things about the kernels memory.
+        - TODO: Make it to where the protocols configuration places a "memory stamp" at the end of the binary files that it formats
+            - The protocol formats binary files to be padded out to multiples of 512 byte blocks(sectors)
+            - The protocol puts a section of data describing the binaries memory at the end of the binary
+            - TODO: Make it to where the protocol checks for the "memory stamp" at the end of all the according binary addresses
+                - The "memory stamp" at the end of the binary file is required
+                - The "memory stamp" at the end of the binary file helps gives critical information over the memory
         - TODO: Add "FAMP Tools".
             - "FAMP Tools" is a group of tools that can be used to make the programmers experience using FAMP better.
             - The collection of tools includes, but won't be limited to:
@@ -65,6 +78,8 @@
                     - The user will use `famp-mema-save` to save a memory address within the 512 bytes
                     - `for` takes `second-stage` or `kernel`
                     - Example: `famp-mema-save 0x8D00 second-stage`
+                - `famp-check $file` - checks a binary file for the "memory stamp" the protocols configuration
+                  puts at the end of the binary file
         - TODO: Make `init_bootloader` check for memory map
             - Store the result in a memory address that will be checked/returned by the protocol when the user calls `check_memory_map_availability`
         - TODO: Make `init_bootloader` default to default video mode(`0xB8000`) if VESA video mode is not supported
@@ -72,3 +87,26 @@
             - Protocol will need two different arrays, or structs(either or). One for kernel memory addresses and one for second-stage bootloader memory addresses
             - I would say add a feature where the programmer can specify what can be done with the memory address, however, that would take up more memory than need-be.
               Also, odds are, the memory addresses they are saving will be used for both reading and writing purposes.
+
+1/16/2023
+    - 1
+        - TODO: with the famp tool `famp-mema-save`, the protocol will have to place a "memory stamp" at the end of the binary
+            - The binary file where data over memory addresses needs the "memory stamp"
+        - TODO: If the user tells the protocol to load anything else into memory, the protocol has to make sure to put a "memory stamp"
+                at the end of the binary.
+            - With this, there will be a new FAMP tool - `famp-create-binary $source_code_file`
+                - `famp-create-binary` takes in a source code file, and will generate a binary file that pads out to multiples of 512 byte blocks(sectors)
+                - The tool also puts a "memory stamp" in the last 40 or so bytes of the binary
+                - FAMP tools will become a huge part in the protocols flexibility
+                - With `famp-create-binary`, another tool arises - `famp-create-image`
+                    - `famp-create-image` takes all the binary files from `boot.yaml`, as well as all the binary files passed via `famp-create-binary`
+                       and combines them all into one image.
+                    - There will have to be some sort of json file or something where we keep information over binary files etc
+
+1/17/2023
+    - 1
+        - TODO: Should we delete the assembly stub `print_char`?
+            - We are, now, manually printing out a char via AH=0EH,INT=10H using C's inline assembly
+            - For some reason, the `print` function, with using `print_char`, not manually printing the char itself,
+              caused the assembly stub `save_gdt_and_load` to not work.. at all. With doing it manually, that problem was fixed.
+            - No idea why `print_char` caused the protocol to break, and manually doing it works but.. `print_char` is quite useless

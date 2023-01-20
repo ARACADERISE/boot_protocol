@@ -33,3 +33,65 @@
         - As of current, the protocol loads kernel at 0x9000.
         - This will change when the protocol is mature enough to do paging(for higher-half kernel)
     - `quick_edit.py` now only writes to `boot_protocol/gdt/gdt_ideals.s`, as well as checks if all the required data exists
+
+1/16/2023
+    - `clean.py` now uses data from `boot.yaml` to write clean formats to files with the according data
+    - `quick_edit.py` is now no longer used(as of current). `boot_protocol/protocol/gdt/gdt_ideals.s` no longer needs to be formatted.
+      The temporary kernel address is 0x9000, so we hard-coded the jump from real-mode to 32-bit mode
+        - With this, `kernel_addr` is no longer needed in `boot.yaml`
+    - Started to add "memory stamp" feature.
+        - 1
+            - See `todo` for more info
+
+1/17/2023
+    - `print_word_hex` in `print.s` now puts a newline at the end of the stub
+    - `format.c` is now comptabile with formatting separate binary files
+        - With this, we did away with the TODO over creating separate c programs, one strictly for the second stage bootloader binary and one strictly for kernel binary
+    - The protocol now writes a "memory stamp" in the last X amount of bytes of the last sector of the binary
+    - Added critical addresses to `linker.ld`
+        - This includes `g_gdt_address`, `g_gdt_desc_address` and `g_gdt_status_address
+    - The second-stage bootloader is now located at `0x7F00`
+        - The memory region from 0x7E00 to 0x7F00 is used for critial memory addresses that the protocol needs
+    - Added `second_stage_start` and `second_stage_end` symbols
+    - Made it to where the protocol obtains the memory stamp at the end of the binary files
+        - Added in `find_memory_stamp_offset_address`, which returns a char pointer to the start of the memory map(we reference the memory stamp 1 byte at a time to find)
+    - Tweaked with `print.h`
+        - The function `print` now no longer uses the assembly stub `print_char`
+            - This fixes the issue of whatever tf what happening with the function. It caused the assembly stub that
+              loads 32-bit mode not to work, or it forced the overall emulator to halt.. which is weird. But it works not
+            - 1
+                - See `todo` for more info
+        - The function now manually puts a newline, manually puts tabs etc
+
+1/19/2023
+    - In `gdt/gdt.h`, the variable `gdt` and `gdtDesc` were set to addresses that were not being used for the intended functionality.
+      We now use `g_gdt_address` and `g_gdt_desc_address` in place of the former `gdt` and `gdtDesc`
+        - With this, the `null` descriptor of a "clean" GDT will have a value of `1`.
+            - This is so the protocal can dereference the pointer of `g_gdt_address` and check if the value is 1, or zero
+    - The function `setup_gdt_and_gdt_desc` no longer errors if `default_gdt` is not defined and the gdt status is zero
+        - This is something that the function `load_32bit` is now entitled to do
+    - Added `memory_stamp_magic_id_not_found`, a macro constant that is assigned to the `memory_stamp_magic_number` field of the struct `memory_stamp`
+      if the `memory_stamp_magic_number_id` was not found anywhere in the binary file
+    - The "magic number" the references the start of the memory stamp is now no longer a 32-bit integer
+        - Instead, the "magic number" referencing the start of the memory stamp is made up of 5 separate bytes
+        - [0x2B, 0xFF, 0x2F, 0xDF, 0x88]
+    - Protocol fills out the memory stamp with default values if it doesn't find the designated bytes for the "magic number" id
+        - The value `memory_stamp_magic_number` gets assigned the values
+        - [0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+        - Everything else gets assigned the value zero
+    - `format.c` now is able to take a new argument `--jpad`
+        - `--jpad` tells the code that we just want to pad out the binary with zeros
+        - This will be used mainly on binary object(.o) files before linking so the linker generates a more
+          accurate ending address.
+    - With the change of the "magic number", the function `find_memory_stamp_offset_address` has been changed as well
+        - It now keeps a increment on the total amount of bytes its found
+        - Once it has found all the bytes, it continues
+        - If it finds that the address of `addr` is up to, or pass, the address of the kernel, it'll break the loop, assign default values
+          to the memory stamp and return. 
+    - Began to add the feature where we grab the return value from a specific register
+        - Functions such as `grab_return_value_from` and `grab_return_val_in_eax`
+    - Added `__test_address`
+        - This takes in a starting address, the offset(in bytes) from this address, and a conditional address
+        - `__test_address` adds the offset(in bytes) to the starting address and thus checks if it is greater than the conditional address
+    - Started to add more descriptive comments in all files
+    - Started to make all "back-end" function begin with two underscored
