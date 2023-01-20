@@ -1,47 +1,55 @@
 #ifndef format
-#define format
-#include <stdio.h>
+#define format#include <stdio.h>
+
 #include <stdlib.h>
+
 #include <string.h>
+
 #include <stdbool.h>
 
-#define bytes_per_sector		512
-#define minimum_sectors			2
-typedef unsigned char			uint8;
-typedef unsigned short			uint16;
-typedef unsigned int            uint32;
+#define bytes_per_sector 512
+#define minimum_sectors 2
+typedef unsigned char uint8;
+typedef unsigned short uint16;
+typedef unsigned int uint32;
 
 /* Ids. */
-#define boot_id_1       0x0A
-#define boot_id_2       0x0B
-#define user_id         0x1A
-#define kernel_id       0x2A
+#define boot_id_1 0x0A
+#define boot_id_2 0x0B
+#define user_id 0x1A
+#define kernel_id 0x2A
 
 /* "Magic numbers". */
-static const uint8 magic_id[] = {0x2B, 0xFF, 0x2F, 0xDF, 0x88};
+static
+const uint8 magic_id[] = {
+    0x2B,
+    0xFF,
+    0x2F,
+    0xDF,
+    0x88
+};
 
 /* Access bytes. */
-#define access_level_one        0b00001011
-#define access_level_two        0b00001001
-#define access_level_three      0b00001000
+#define access_level_one 0b00001011
+#define access_level_two 0b00001001
+#define access_level_three 0b00001000
 
-typedef struct memory_stamp
-{
+typedef struct memory_stamp {
     /* "Magic Number" referencing the start to the memory stamp. */
-    uint8      memory_stamp_magic_number[5];
+    uint8 memory_stamp_magic_number[5];
 
     /* "user", "kernel", "boot" */
-    uint8       memory_id;
-    
+    uint8 memory_id;
+
     /* Binary size in sectors. */
-    uint16      sectors;
-    
+    uint16 sectors;
+
     /* Estimate size(in bytes). */
-    size_t      estimate_size_in_bytes;
-    
+    size_t estimate_size_in_bytes;
+
     /* Has the memory been released/overwritten? */
-    bool        is_overwritten;
-    
+    bool is_overwritten;
+
     /* Information over access.
      *
      * bits 0-1: 
@@ -66,19 +74,21 @@ typedef struct memory_stamp
      *  Reserved for protocol.
      *  If this bit is set, something went wrong with the memory
      */
-    uint8       access;
+    uint8 access;
 
     /* Binary name.
      * A static allocated size of 30-bytes should be good enough, right? */
     //uint8       bin_name[30];
-    
-    /* Beginning address. */
-    uint16      beginning_address;
-    
-    /* Ending address. */
-    uint16      ending_address;
-} _memory_stamp;
 
-static const size_t memory_stamp_size = sizeof(_memory_stamp);
+    /* Beginning address. */
+    uint16 beginning_address;
+
+    /* Ending address. */
+    uint16 ending_address;
+}
+_memory_stamp;
+
+static
+const size_t memory_stamp_size = sizeof(_memory_stamp);
 
 #endif
