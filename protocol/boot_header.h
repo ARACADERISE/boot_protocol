@@ -1,8 +1,8 @@
 #ifndef protocol_boot_header
 #define protocol_boot_header
 
-#ifndef protocol_types#include "types.h"
-
+#ifndef protocol_types
+#include "types.h"
 #endif
 
 /* The C code has to be 16-bit for second-stage bootloader. */
@@ -20,32 +20,33 @@ extern void init_bootloader(int8);
 extern void __test_address(uint16);
 
 /* Other ideals for the protocol*/
-#ifndef protocol_util#include "util.h"
-
+#ifndef protocol_util
+#include "util.h"
 #endif
 
-#ifndef protocol_asm_help#include "tools/asm_help.h"
-
+#ifndef protocol_asm_help
+#include "tools/asm_help.h"
 #endif
 
-#ifndef protocol_print#include "tools/print.h"
-
+#ifndef protocol_print
+#include "tools/print.h"
 #endif
 
-#ifndef protocol_memory_stamp#include "memory/memory_stamp.h"
-
+#ifndef protocol_memory_stamp
+#include "memory/memory_stamp.h"
 #endif
 
-#ifndef protocol_disk#include "disk/disk.h"
-
+#ifndef protocol_disk
+#include "disk/disk.h"
 #endif
 
-#ifndef protocol_gdt_api#include "gdt.h"
-
+#ifndef protocol_gdt_api
+#include "gdt.h"
 #endif
 
 uint8 inp(uint16 port) {
     uint8 rv;
+    
     __asm__ __volatile__("in %0, %1": "=a"(rv): "dN"(port));
     return rv;
 }
