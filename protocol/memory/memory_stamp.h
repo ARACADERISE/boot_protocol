@@ -68,7 +68,7 @@ static _memory_stamp *find_memory_stamp_offset_address() {
      *  stamp has 5 bytes to it 
      */
     uint8 addr = (uint8) second_stage_end;
-    uint8 *ptr_addr = (uint8 * ) & second_stage_end;
+    uint8 *ptr_addr = (uint8 *) & second_stage_end;
     uint16 bytes_iterated = 0;
     uint8 byte = 0;
     uint8 total = 0;
@@ -132,7 +132,7 @@ static _memory_stamp *find_memory_stamp_offset_address() {
     default_values:
 
     /* Assign address at an offset from the last address of `addr`. */
-    mem_stamp = (_memory_stamp * )(addr - sizeof(_memory_stamp));
+    mem_stamp = (_memory_stamp *)(addr - sizeof(_memory_stamp));
 
     /* Assign memory stamp magic number id that specified the memory stamp was not found. */
     for (uint8 i = 0; i < 5; i++) {
