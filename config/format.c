@@ -1,8 +1,8 @@
 #include "format.h"
 
-size_t get_file_size(char * filename) {
+size_t get_file_size(char *filename) {
     /* Open up the file, check if it exists. If not, error. */
-    FILE * f = fopen(filename, "rb");
+    FILE *f = fopen(filename, "rb");
 
     if (!(f)) {
         fprintf(stderr, "Error!");
@@ -24,8 +24,8 @@ size_t get_file_size(char * filename) {
     return file_size;
 }
 
-static inline void write_padding(_memory_stamp * mem_info, uint16 padding_needed, uint8 * filename) {
-    FILE * f = fopen(filename, "a");
+static inline void write_padding(_memory_stamp *mem_info, uint16 padding_needed, uint8 *filename) {
+    FILE *f = fopen(filename, "a");
     uint8 padding[padding_needed];
     memset(padding, 0, padding_needed);
 
@@ -130,7 +130,7 @@ int main(int args, char * argv[]) {
     memset(padding, 0, padding_needed);
 
     /* Write padding to file. */
-    write_padding( & mem_info, padding_needed, argv[1]);
+    write_padding(&mem_info, padding_needed, argv[1]);
 
     return 0;
 }
