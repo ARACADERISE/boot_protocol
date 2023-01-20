@@ -58,7 +58,7 @@ _memory_stamp;
 const uint16 _memory_stamp_size = sizeof(_memory_stamp);
 
 /* Find where the memory stamp resides. */
-static _memory_stamp * find_memory_stamp_offset_address() {
+static _memory_stamp *find_memory_stamp_offset_address() {
     /* Start at given end of the second stage. 
      * `addr` will be used to keep track of the address(it can't go over `0x9000`)
      * `ptr_addr` will be used to obtain bytes from the binary.
@@ -68,13 +68,13 @@ static _memory_stamp * find_memory_stamp_offset_address() {
      *  stamp has 5 bytes to it 
      */
     uint8 addr = (uint8) second_stage_end;
-    uint8 * ptr_addr = (uint8 * ) & second_stage_end;
+    uint8 *ptr_addr = (uint8 * ) & second_stage_end;
     uint16 bytes_iterated = 0;
     uint8 byte = 0;
     uint8 total = 0;
 
     /* Create instance of `_memory_stamp`. Set to NULL. */
-    _memory_stamp * mem_stamp = NULL;
+    _memory_stamp *mem_stamp = NULL;
 
     redo:
     /* If `addr` surpasses, or is strictly at, `0x9000`, fill out the memory stamp with default values. */
@@ -82,7 +82,7 @@ static _memory_stamp * find_memory_stamp_offset_address() {
         goto default_values;
 
     /* Dereference pointer, get value. */
-    byte = * ptr_addr;
+    byte = *ptr_addr;
 
     /* Check byte to current index(`total`) in `memory_stamp_magic_number_id` which stores a series
      * of bytes that reference the start of the memory stamp.
@@ -131,8 +131,8 @@ static _memory_stamp * find_memory_stamp_offset_address() {
     /* The variable `addr` passed `0x9000`(kernel memory). Assign default values. */
     default_values:
 
-        /* Assign address at an offset from the last address of `addr`. */
-        mem_stamp = (_memory_stamp * )(addr - sizeof(_memory_stamp));
+    /* Assign address at an offset from the last address of `addr`. */
+    mem_stamp = (_memory_stamp * )(addr - sizeof(_memory_stamp));
 
     /* Assign memory stamp magic number id that specified the memory stamp was not found. */
     for (uint8 i = 0; i < 5; i++) {
