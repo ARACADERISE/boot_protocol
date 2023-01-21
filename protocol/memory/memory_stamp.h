@@ -2,8 +2,8 @@
 #define protocol_memory_stamp
 
 /* "Magic numbers". */
-#define memory_stamp_magic_number_id(uint8[]) {0x2B, 0xFF, 0x2F, 0xDF, 0x88}
-#define memory_stamp_magic_id_not_found(uint8[]) {0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
+#define memory_stamp_magic_number_id (uint8[]){0x2B, 0xFF, 0x2F, 0xDF, 0x88}
+#define memory_stamp_magic_id_not_found (uint8[]){0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
 
 typedef struct memory_stamp {
     /* Memory stamps "magic number" referencing the start to the memory stamp. */
