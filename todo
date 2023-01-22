@@ -123,3 +123,5 @@
     - TODO: Implement a file system
         - TODO: Figure out what type of filesystem(try and find one that is easy to implement)
             - Possibly https://wiki.osdev.org/ISO_9660
+            - The "memory stamp" feature might be able to be used with the filesystem
+            - If it comes to it, I can make my own sort of "filesystem" depending on how other filesystem work
