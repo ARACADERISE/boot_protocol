@@ -18,6 +18,11 @@ enum memory_stamp_type
 #define second_stage_memory_id  0x0B
 #define user_memory_id          0x1A
 
+/* Access bytes. */
+#define access_level_one 0b00001011
+#define access_level_two 0b00001001
+#define access_level_three 0b00001000
+
 typedef struct memory_stamp {
     /* Memory stamps "magic number" referencing the start to the memory stamp. */
     uint8 memory_stamp_magic_number[5];
@@ -88,8 +93,8 @@ static _memory_stamp *__obtain_memory_stamp(enum memory_stamp_type mem_stamp_typ
     /* Store the memory stamp data. */
     _memory_stamp *mem_stamp = NULL;
 
-    /* Loop until we find `0x2B 0x87`, which are the first two bytes of the memory stamps
-     * "magic number".
+    /* Loop until we find `0x2B 0x84 0x83`, which are the first three
+     * bytes of the memory stamps "magic number".
      */
     redo:
     while(*addr != 0x2B)
