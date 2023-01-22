@@ -1,0 +1,28 @@
+ENTRY({0})
+SECTIONS
+{
+    /* Important memory addresses for FAMP. */
+    g_gdt_address = 0x7E00;
+    g_gdt_desc_address = 0x7E30;
+    g_gdt_status_address = 0x7E38;
+
+    /* The kernel starts at address 0xA000. */
+    . = 0xA000;
+    kernel_start = .;
+
+    .text : AT(0xA000)
+    {
+        *(__start*);
+        *(.text*);
+    }
+
+    .data :
+    {
+        *(.bss*);
+        *(.data*);
+        *(.rodata*);
+        *(COMMON*);
+    }
+
+    kernel_end = .;
+}
