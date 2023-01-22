@@ -1,12 +1,6 @@
 #ifndef protocol_gdt
 #define protocol_gdt
 
-
-/* Constants for `init_bootloader` function. */
-/* Helps with configuring certain aspects of the protocol such as what type of GDT. */
-//#define gdt_bit32_bit16         0x3216
-//#define gdt_bit32_only          0x32
-
 /* What is the status of GDT?
  * 0 - GDT/GDT Descriptor needs to be loaded to memory.
  * 1 - There is an already-working GDT/GDT Descriptor loaded in memory. 
@@ -170,7 +164,8 @@ void __load_32bit()
         print("\n  Error from `load_32bit`:\n  There is not a valid GDT/GDT description loaded into memory :(\n      -> Did you forget to `init_bootloader`?\n      -> Perhaps you forgot to setup your GDT?\n\n  For future reference, put `#define default_gdt` if you want FAMP to \n  fill out your GDT.\n\n  Do Note: `default_gdt` only works with the following settings:\n      1. `DEFAULT_ALL`\n      2. `CLEAN_GDT_DEF_VID_MODE`\n      3. `CLEAN_GDT_VESA_VID_MODE`");
         halt
     }
-    print("\n\nSaying goodbye to second-stage.\nSaying hello to Kernel :D.");
+    
+    /* Lets get into 32-bit mode fast!! */
     __save_gdt_and_load(*g_gdt_desc_address, *g_gdt_address);
 }
 
