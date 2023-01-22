@@ -107,4 +107,11 @@
     - Figured out why protocol would error randomly
         - It's due to the fact I wasn't preserving the stack
         - Now, in assembly stubs where this is critical, we `pusha` at the beginning and `popa` at the end
-        
+
+1/22/2023
+    - Changed `find_memory_stamp_offset_address` to `__obtain_memory_stamp`
+        - `memory_stamp_magic_number_id` now has the values
+            - [0x2B, 0x84, 0x83, 0x82, 0x81]
+    - Added `__print_char_color` which prints a colored character via BIOS teletyping
+        - 1
+            - See `todo` for more info

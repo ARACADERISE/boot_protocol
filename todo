@@ -114,3 +114,12 @@
 1/21/2023
     - 1
         - TODO: Change the name `find_memory_stamp_offset_address` to `obtain_memory_stamp`
+
+1/22/2023
+    - 1
+        - TODO: Make the function `__print_char_color` take in a `color_attr`
+            - So, the function will take in
+                - `__print_char_color(uint8 character, uint8 page, enum color_attr color)`
+    - TODO: Implement a file system
+        - TODO: Figure out what type of filesystem(try and find one that is easy to implement)
+            - Possibly https://wiki.osdev.org/ISO_9660
