@@ -2,7 +2,7 @@
 #define protocol_memory_stamp
 
 /* "Magic numbers". */
-#define memory_stamp_magic_number_id        (uint8[]){0x2B, 0x84, 0x83, 0x82, 0x82}
+#define memory_stamp_magic_number_id        (uint8[]){0x2B, 0x84, 0x83, 0x82, 0x81}
 #define memory_stamp_magic_id_not_found     (uint8[]){0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
 
 /* Types of memory stamps. */
@@ -72,6 +72,7 @@ typedef struct memory_stamp {
     uint16 ending_address;
 } _memory_stamp;
 
+/* TODO: Do we need this? This should probably get removed. */
 const uint16 _memory_stamp_size = sizeof(_memory_stamp);
 
 /*
@@ -110,6 +111,12 @@ static _memory_stamp *__obtain_memory_stamp(enum memory_stamp_type mem_stamp_typ
      * Assign `mem_stamp` to the according address(`addr`). 
      */
     mem_stamp = (_memory_stamp *) addr;
+
+    /* First, make sure the 5 bytes representing the start to the memory stamp
+     * are correct.
+     */
+    for(uint8 i = 0; i < 5; i++)
+        if(mem_stamp->memory_stamp_magic_number[i] != memory_stamp_magic_number_id[i]) goto redo;
 
     /* Make sure the memory id of the memory stamp that was found is the same as the memory stamp we are expecting to obtain. 
      * If it does not match, we return NULL.
