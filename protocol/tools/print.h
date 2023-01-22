@@ -10,6 +10,30 @@ extern void __print_word_hex();
 /* Print 8-bit(byte) hex value. */
 extern void __print_byte_hex();
 
+/* Color attributes for `__print_char_color`. */
+enum color_attr
+{
+    black           = 0x00,
+    blue            = 0x01,
+    green           = 0x02,
+    cyan            = 0x03,
+    red             = 0x04,
+    magenta         = 0x05,
+    brown           = 0x06,
+    light_grey      = 0x07,
+    dark_grey       = 0x08,
+    light_blue      = 0x09,
+    lime_green      = 0x0A,
+    light_cyan      = 0x0B,
+    light_red       = 0x0C,
+    light_magenta   = 0x0D,
+    yellow          = 0x0E,
+    white           = 0x0F
+};
+
+/* Print character in color via BIOS teletyping(AH=0x09, AL=character, INT=0x10). */
+extern void __print_char_color(uint8,uint8,uint8);
+
 /*
  *  print: "front-end" function
  *
