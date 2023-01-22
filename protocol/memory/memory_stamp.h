@@ -101,7 +101,9 @@ static _memory_stamp *__obtain_memory_stamp(enum memory_stamp_type mem_stamp_typ
     /* And, after `0x84` it should be `0x83`. With this, we know that we have the correct place in memory. */
     if(!(*(addr+2)) == 0x83) goto redo;
 
-    /* If we reach here, `0x2B 0x87` was found. Assign `mem_stamp` the according address. */
+    /* If we reach here, `0x2B 0x84 0x83` was found. 
+     * Assign `mem_stamp` to the according address(`addr`). 
+     */
     mem_stamp = (_memory_stamp *) addr;
 
     /* Make sure the memory id of the memory stamp that was found is the same as the memory stamp we are expecting to obtain. 
