@@ -52,6 +52,38 @@ __print_char:
     ret
 
 ;
+;   __print_char_color: back-end stub
+;
+;       Display single character to screen in color using real-mode BIOS teletyping interrupt AH=0x0E, AL=character, INT=0x10
+;
+;       Input: 
+;           uint8 character(al, ebp + 8)
+;           uint8 page(bh, ebp + 12)
+;           uint8 color(bl, ebp + 16)
+;       Required Register:
+;           AL=character
+;       Output:
+;           None
+;       On Error: This stub does not error
+;
+global __print_char_color
+__print_char_color:
+    push ebp
+    mov ebp, esp
+
+    mov al, [ebp + 8]
+    mov bh, [ebp + 12]
+    mov bl, [ebp + 16]
+
+    pop ebp
+
+    MOV AH,09H
+    MOV CX, 1      ; Character count
+    INT 10h
+
+    ret
+
+;
 ;   __asm_print: back-end stub
 ;
 ;       Print to screen using real-mode BIOS teletyping interrupt AH=0x0E, AL=character, INT=0x10
@@ -119,7 +151,7 @@ __print_word_hex:
 
     popa
     ret
-    
+
 ;
 ;   __print_byte_hex: back-end stub
 ;
