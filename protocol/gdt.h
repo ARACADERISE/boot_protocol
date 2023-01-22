@@ -30,7 +30,15 @@ static void set_gdt_status(enum gdt_status_settings setting)
     *gdt_status = setting;
 }
 
-/* Load the GDT and jump to 32-bit C code. */
+/*
+ *  load_kernel: "front-end" function
+ *
+ *  Load GDT description into memory, setup 32-bit mode and jump
+ *
+ *  Input: None
+ *  Output: None
+ *  On Error: This function does not error directly
+ */
 static inline void load_kernel()
 {
     /* `c` is referencing the bytecode value. So, the first bytecode of
@@ -41,8 +49,8 @@ static inline void load_kernel()
         print_str("YES");
     __asm__("cli;hlt");*/
 
-    setup_gdt_and_gdt_desc();
-    load_32bit();
+    __setup_gdt_and_gdt_desc();
+    __load_32bit();
 }
 
 #endif

@@ -4,8 +4,20 @@
 ; Inputs:   None
 ; Returns:  None
 ; Clobbers: None
-global poll_mouse
-poll_mouse:
+;
+;
+;   __poll_mouse: back-end stub
+;
+;       Obtain new information over mouse
+;
+;       Input: 
+;           None
+;       Output:
+;           None
+;       On Error: This stub does not error
+;
+global __poll_mouse
+__poll_mouse:
     push ax
     push bx
     push dx

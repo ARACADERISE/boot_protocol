@@ -78,7 +78,7 @@ int main(int args, char * argv[]) {
 
     /* "Magic number" referencing that the memory stamp is starting. */
     for (uint8 i = 0; i < 5; i++)
-        mem_info.memory_stamp_magic_number[i] = magic_id[i];
+        mem_info.memory_stamp_magic_number[i] = memory_stamp_magic_number_id[i];
 
     /* Decipher what type of binary we're generating a memory stamp for. 
      * `--kernel` deciphers the memory stamp is describing memory over the kernel
@@ -91,7 +91,7 @@ int main(int args, char * argv[]) {
 
     mem_info.is_overwritten = false; // The memory is, by default, not overwritten. The protocol treats all memory as critical unless otherwise specified
     if (mem_info.memory_id == kernel_id)
-        mem_info.beginning_address = 0x9000;
+        mem_info.beginning_address = 0xA000;
     else
         mem_info.beginning_address = 0x7F00; // The second-stage bootloader is located 256-bytes after the MBR. That is because there is critical information being stored in between 0x7E00 and 0x7F00
 

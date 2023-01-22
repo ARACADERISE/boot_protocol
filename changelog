@@ -95,3 +95,16 @@
         - `__test_address` adds the offset(in bytes) to the starting address and thus checks if it is greater than the conditional address
     - Started to add more descriptive comments in all files
     - Started to make all "back-end" function begin with two underscored
+
+1/21/2023
+    - `find_memory_stamp_offset_address` now works
+        - 1
+            - See `todo` for more info
+        - The function now takes in a "setting". The "setting" tells the function what memory id to look for
+        - If the function obtains a memory stamp where the memory id does not match, it will return `NULL`
+    - `memory_stamp_magic_number_id` now has the values
+        - [0x2B, 0x87, 0x87, 0x87, 0x87]
+    - Figured out why protocol would error randomly
+        - It's due to the fact I wasn't preserving the stack
+        - Now, in assembly stubs where this is critical, we `pusha` at the beginning and `popa` at the end
+        

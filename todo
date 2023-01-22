@@ -110,3 +110,7 @@
             - For some reason, the `print` function, with using `print_char`, not manually printing the char itself,
               caused the assembly stub `save_gdt_and_load` to not work.. at all. With doing it manually, that problem was fixed.
             - No idea why `print_char` caused the protocol to break, and manually doing it works but.. `print_char` is quite useless
+
+1/21/2023
+    - 1
+        - TODO: Change the name `find_memory_stamp_offset_address` to `obtain_memory_stamp`

@@ -21,6 +21,17 @@ mouse_success: db "Success on setting up & initializing mouse", 0xD, 0xA, 0x0
 %include "protocol/mouse/mouse_callback.s"
 %include "protocol/mouse/poll_mouse.s"
 
+;
+;   __config_mouse: back-end stub
+;
+;       Setup the mouse
+;
+;       Input: 
+;           None
+;       Output:
+;           None
+;       On Error: This stub does not error
+;
 global __config_mouse
 __config_mouse:
     call __mouse_initialize
@@ -47,7 +58,7 @@ get_mouse_until:
 
     pop ebp
 
-    call poll_mouse
+    call __poll_mouse
 
     mov ax, [mouseX]
     mov bx, [mouseY]
@@ -64,7 +75,7 @@ get_mouse_until:
 
 global get_mouse_until_both
 get_mouse_until_both:
-    call poll_mouse
+    call __poll_mouse
 
     mov dx, [mouseX_addr]
     mov bx, [mouseY_addr]

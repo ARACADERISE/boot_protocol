@@ -4,9 +4,9 @@
 ;       I don't know yet
 ;
 ;       Input: 
-;           N/A
+;           None
 ;       Output:
-;           N/A
+;           None
 ;       On Error: This stub does not error
 ;
 global __test_address

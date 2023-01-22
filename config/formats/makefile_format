@@ -15,8 +15,8 @@ build:
 	@ld -m elf_i386 -Tlinker/kernel.ld -nostdlib --nmagic -o ../bin/kernel.out ../%s ../bin/protocol_util.o
 	@objcopy -O binary ../bin/boot.out %s
 	@objcopy -O binary ../bin/kernel.out %s
-	@./config/format.o %s --second_stage
-	@./config/format.o %s --kernel
+	@./bin/format.o %s --second_stage
+	@./bin/format.o %s --kernel
 	@nasm boot/boot.s -f bin -o ../bin/bootloader.bin
 	@cat ../bin/bootloader.bin %s %s > ../bin/OS.image
 

@@ -1,9 +1,14 @@
-; Function: mouse_initialize
-;           Initialize the mouse if present
 ;
-; Inputs:   None
-; Returns:  CF = 1 if error, CF=0 success
-; Clobbers: AX
+;   __mouse_initialize: back-end stub
+;
+;       Check if mouse is supported, then configure the mouse if it is
+;
+;       Input: 
+;           None
+;       Output:
+;           None
+;       On Error: This stub does not error
+;
 global __mouse_initialize
 __mouse_initialize:
     push es
@@ -34,18 +39,23 @@ __mouse_initialize:
     clc                         ; CF=0 is success
     jmp .__finished
 .__no_mouse:
-    stc                         ; CF=1 is error
+    ret
 .__finished:
     pop bx
     pop es
     ret
 
-; Function: mouse_enable
-;           Enable the mouse
 ;
-; Inputs:   None
-; Returns:  None
-; Clobbers: AX
+;   __mouse_enable: back-end stub
+;
+;       Enable mouse. This allows for mouse-packets to be recieved
+;
+;       Input: 
+;           None
+;       Output:
+;           None
+;       On Error: This stub does not error
+;
 global __mouse_enable
 __mouse_enable:
     push es
@@ -73,6 +83,17 @@ __mouse_enable:
 ; Inputs:   None
 ; Returns:  None
 ; Clobbers: AX
+;
+;   __mouse_disable: back-end stub
+;
+;       Disable the mouse. This makes it to where mouse-packets are no longer sent
+;
+;       Input: 
+;           None
+;       Output:
+;           None
+;       On Error: This stub does not error
+;
 global __mouse_disable
 __mouse_disable:
     push es

@@ -23,7 +23,7 @@ typedef struct sectors
 
 extern void __read_disk(uint16 sectors, uint16 addr);
 
-/* Read the sectors :D (fuck assembly, it's being a bitch today for some reason)*/
+/* Read the sectors :D (screw assembly, it's being a bitch today for some reason)*/
 void read_sectors(uint16 addr, uint8 sector_count)
 {
     __read_disk(sector_count, addr);

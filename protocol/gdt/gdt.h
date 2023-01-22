@@ -151,8 +151,16 @@ extern _gdt_desc g_gdt_desc_address[];
  * already-existing GDT that has been previously loaded into memory. */
 extern void __save_gdt_and_load(_gdt_desc gdtDesc, _GDT gdt);
 
-/* Load the GDT. */
-void load_32bit()
+/* 
+ *  __load_32bit: back-end function
+ *
+ *  Load the GDT into memory, and jump to 32-bit mode.
+ *
+ *  Input: None
+ *  Output: None
+ *  On Error: This function does not error
+ */
+void __load_32bit()
 {
     /* Make sure there is a valid GDT/GDT description in memory.
      * Yes, this is somewhat "excessive checking".. better safe then sorry.
@@ -166,8 +174,16 @@ void load_32bit()
     __save_gdt_and_load(*g_gdt_desc_address, *g_gdt_address);
 }
 
-/* Setting up the description of the GDT. */
-static inline void setup_gdt_and_gdt_desc()
+/*
+ *  __setup_gdt_and_gdt_desc: back-end function
+ *
+ *  Assign default values to each field of the GDT struct
+ *
+ *  Input: None
+ *  Output: None
+ *  On Error: This function does not error
+ */
+static inline void __setup_gdt_and_gdt_desc()
 {
 #ifdef default_gdt
     /* If `gdt_status` is 1, that means there is a already-working GDT/GDT descriptor loaded into memory. */

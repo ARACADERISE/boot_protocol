@@ -17,19 +17,19 @@ __save_gdt_and_load:
     ; Do we need to load a already-working gdt into memory?
     mov eax, [g_GDT_status]
     cmp eax, 0
-    je .load_new_gdt
+    je .__load_new_gdt
 
     ; Is there already a bit32/bit16 GDT in memory that the user put there?
     cmp eax, 1
-    je .load_it
+    je .__load_it
 
     ; Is there already a bit32 GDT in memory?
     cmp eax, 2
-    je .load_it
+    je .__load_it
 
     ; If for some reason the gdt status is neither 1 or 0, error
-    jmp .gdt_error
-.load_new_gdt:
+    jmp .__gdt_error
+.__load_new_gdt:
     push ebp
     mov ebp, esp
 
@@ -47,27 +47,22 @@ __save_gdt_and_load:
     mov ax, [g_GDTDesc.size]
 
     cmp ax, 0
-    je .gdt_error
+    je .__gdt_error
 
     mov ax, [g_GDTDesc.addr]
     cmp ax, 0
-    je .gdt_error
+    je .__gdt_error
 
-    jmp .load_it
-.gdt_error:
+    jmp .__load_it
+.__gdt_error:
     mov si, gdt_load_error
     call __asm_print
 
-    jmp .hl
-.load_it:
-
+    jmp .__hl
+.__load_it:
     jmp __load_gdt
-
-.failed:
-    mov si, sector_read_error
-    call __asm_print
-.hl:
-    jmp .hl
+.__hl:
+    jmp .__hl
 
 gdt_load_error db "Error loading the GDT :(", 0x0
 sector_read_error db "Error loading sectors for kernel :(", 0x0

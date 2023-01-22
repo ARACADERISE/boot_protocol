@@ -14,7 +14,7 @@ use16
 ;
 global __move_cursor
 __move_cursor:
-    push ebp
+    pusha
     mov ebp, esp
 
     ; column
@@ -22,11 +22,11 @@ __move_cursor:
     ; row
     mov dh, [ebp + 12]
 
-    pop ebp
-
     mov  bh, 0
     mov  ah, 02h
     int  10h
+
+    popa
 
     ret
 
@@ -44,8 +44,10 @@ __move_cursor:
 ;       On Error: This stub does not error
 ;
 __print_char:
+    pusha
     mov ah, 0x0E
     int 0x10
+    popa
 
     ret
 
@@ -62,6 +64,7 @@ __print_char:
 ;
 global __asm_print
 __asm_print:
+    pusha
 	mov ah, 0x0e
 .print:
 	mov al, [si]
@@ -81,19 +84,24 @@ __asm_print:
 
 	jmp .print
 .end_print:
+    popa
 	xor ax, ax
 	mov si, ax
 	ret
 
-; Function: __print_word_hex
-;           Print a 16-bit unsigned integer in hexadecimal on specified
-;           page and in a specified color if running in a graphics mode
 ;
-; Inputs:   AX = Unsigned 16-bit integer to print
+;   __print_word_hex: back-end stub
+;
+;       Print 16-bit(word) hex value
+;
+;       Input: 
+;           AX = 16-bit number to print
 ;           BH = Page number
-;           BL = foreground color (graphics modes only)
-; Returns:  None
-; Clobbers: Mone
+;           BL = forground color
+;       Output:
+;           None
+;       On Error: This stub does not error
+;
 global __print_word_hex
 __print_word_hex:
     pusha
@@ -111,16 +119,20 @@ __print_word_hex:
 
     popa
     ret
-
-; Function: __print_byte_hex
-;           Print a 8-bit unsigned integer in hexadecimal on specified
-;           page and in a specified color if running in a graphics mode
+    
 ;
-; Inputs:   AL = Unsigned 8-bit integer to print
+;   __print_byte_hex: back-end stub
+;
+;       Print 8-bit(byte) hex value
+;
+;       Input: 
+;           AL = 8-bit number to print
 ;           BH = Page number
-;           BL = foreground color (graphics modes only)
-; Returns:  None
-; Clobbers: Mone
+;           BL = forground color
+;       Output:
+;           None
+;       On Error: This stub does not error
+;
 global __print_byte_hex
 __print_byte_hex:
     push ax

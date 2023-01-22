@@ -18,8 +18,7 @@ typedef unsigned int uint32;
 #define kernel_id 0x2A
 
 /* "Magic numbers". */
-static
-const uint8 magic_id[] = {0x2B, 0xFF, 0x2F, 0xDF, 0x88};
+static const uint8 memory_stamp_magic_number_id[] = {0x2B, 0x84, 0x83, 0x82, 0x81};
 
 /* Access bytes. */
 #define access_level_one 0b00001011
@@ -34,7 +33,7 @@ typedef struct memory_stamp {
     uint8 memory_id;
 
     /* Binary size in sectors. */
-    uint16 sectors;
+    uint8 sectors;
 
     /* Estimate size(in bytes). */
     size_t estimate_size_in_bytes;
@@ -77,8 +76,7 @@ typedef struct memory_stamp {
 
     /* Ending address. */
     uint16 ending_address;
-}
-_memory_stamp;
+} _memory_stamp;
 
 static const size_t memory_stamp_size = sizeof(_memory_stamp);
 

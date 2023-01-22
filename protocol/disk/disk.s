@@ -1,3 +1,15 @@
+;
+;   __read_disk: back-end stub
+;
+;       Read X amount of sectors into memory address Y
+;
+;       Input: 
+;           uint16 sectors(ax, ebp + 8, assigned to `sector_count`)
+;           uint16 address(ax, ebp + 12, assigned to `address`)
+;       Output:
+;           None
+;       On Error: halt
+;
 global __read_disk
 sector_count        dw 0x0
 address             dw 0x0

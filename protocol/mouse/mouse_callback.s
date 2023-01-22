@@ -12,6 +12,17 @@
 ; Clobbers: None
 
 ARG_OFFSETS      equ 6          ; Offset of args from BP
+;
+;   __mouse_callback: back-end stub
+;
+;       Obtain new X/Y values of the mouse
+;
+;       Input: 
+;           None
+;       Output:
+;           None
+;       On Error: This stub does not error
+;
 global __mouse_callback
 __mouse_callback:
     push bp                     ; Function prologue

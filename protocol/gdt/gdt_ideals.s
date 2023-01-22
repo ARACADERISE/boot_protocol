@@ -10,6 +10,18 @@ global enter_rmode
 ;       32-bit code
 ; =======================
 ;
+
+;
+;   __init_pm: back-end stub
+;
+;       Initialize 32-bit mode/assign `0x10` to segment registers
+;
+;       Input: 
+;           None
+;       Output:
+;           None
+;       On Error: This stub does not error
+;
 use32
 __init_pm:
 
@@ -20,7 +32,7 @@ __init_pm:
     mov fs, ax
     mov gs, ax
 
-    jmp 0x8:0x9000
+    jmp 0x8:0xA000
 
 %include "boot/gdt.s"
     

@@ -32,11 +32,11 @@ use32
 enter_rmode:
     mov ax, [0xC000]
     cmp ax, 0x02
-    jne .load
+    jne .__load
 
     ; Cannot go to realmode, 32-bit only GDT.
     ret
-.load:
+.__load:
     ; This is not done
     ; Add in functionality for arguments
     ; make argument take in a integer that

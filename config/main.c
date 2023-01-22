@@ -65,8 +65,8 @@ int32 main(int args, char *argv[])
 
 		uint8 format2[strlen(format)];
 		sprintf(format2, format,
-			yod.kern_addr, 								// .kernel_addr dw addr
-			yod.kern_addr*16, 							// .kernel_loc dw addr
+			0x0A00,//yod.kern_addr, 								// .kernel_addr dw addr
+			0xA000,//yod.kern_addr*16, 							// .kernel_loc dw addr
 			strcat(ss_bin_file, yod.ss_filename_bin_name), 	// second_stage: incbin second stage binary
 			strcat(kern_bin_file, yod.kern_filename_bin_name));	// kernel: incbin kernel binary
 		fwrite(format2, sizeof(uint8), strlen(format2), boot_file);

@@ -14,6 +14,9 @@ subprocess.run(f'rm -rf ../{yaml_data["bin_folder"]}/*.out', shell=True, cwd=os.
 subprocess.run(f'rm -rf ../{yaml_data["bin_folder"]}/*.image', shell=True, cwd=os.getcwd())
 subprocess.run('rm -rf boot/boot.s', shell=True, cwd=os.getcwd())
 
+# Delete all local binaries
+subprocess.run('rm -rf bin/*.o', shell=True, cwd=os.getcwd())
+
 flags = '{FLAGS}'
 
 with open('Makefile', 'w') as f:
@@ -21,6 +24,7 @@ with open('Makefile', 'w') as f:
 
 FLAGS = -masm=intel -O1 -Wno-error -c -nostdinc -nostdlib -fno-builtin -fno-stack-protector -ffreestanding -m32
 build:
+	@gcc config/format.c -o bin/format.o
 	@nasm protocol/protocol_util.s -f elf32 -o ../bin/protocol_util.o
 	@gcc ${flags} -o ../{yaml_data["second_stage_bin_o_filename"]} ../{yaml_data["second_stage_source_code_file"]}
 	@gcc ${flags} -o ../{yaml_data["kernel_o_binary"]} ../{yaml_data["kernel_source_code_file"]}
