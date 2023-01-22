@@ -1,4 +1,6 @@
 import yaml
+import subprocess
+import os
 
 # `boot.yaml` data
 yaml_data = None
@@ -7,6 +9,9 @@ yaml_data = None
 with open('../boot.yaml', 'r') as file:
     yaml_data = yaml.full_load(file)
     file.close()
+
+# Make the directory
+subprocess.run('mkdir linker', shell=True, cwd=os.getcwd())
 
 # `linker.ld` SECTIONS info
 bootloader_section_data = '''{
