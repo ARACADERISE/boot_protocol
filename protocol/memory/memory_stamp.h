@@ -2,8 +2,8 @@
 #define protocol_memory_stamp
 
 /* "Magic numbers". */
-#define memory_stamp_magic_number_id (uint8[]){0x2B, 0x84, 0x83, 0x82, 0x82}
-#define memory_stamp_magic_id_not_found (uint8[]){0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
+#define memory_stamp_magic_number_id        (uint8[]){0x2B, 0x84, 0x83, 0x82, 0x82}
+#define memory_stamp_magic_id_not_found     (uint8[]){0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
 
 /* Types of memory stamps. */
 enum memory_stamp_type
@@ -14,14 +14,14 @@ enum memory_stamp_type
 };
 
 /* Macros for above enum. */
-#define kernel_memory_id        0x2A
-#define second_stage_memory_id  0x0B
-#define user_memory_id          0x1A
+#define kernel_memory_id                    0x2A
+#define second_stage_memory_id              0x0B
+#define user_memory_id                      0x1A
 
 /* Access bytes. */
-#define access_level_one 0b00001011
-#define access_level_two 0b00001001
-#define access_level_three 0b00001000
+#define access_level_one                    0b00001011
+#define access_level_two                    0b00001001
+#define access_level_three                  0b00001000
 
 typedef struct memory_stamp {
     /* Memory stamps "magic number" referencing the start to the memory stamp. */
