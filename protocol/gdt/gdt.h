@@ -145,6 +145,25 @@ extern _gdt_desc g_gdt_desc_address[];
  * already-existing GDT that has been previously loaded into memory. */
 extern void __save_gdt_and_load(_gdt_desc gdtDesc, _GDT gdt);
 
+/* GDT status settings for `set_gdt_status`. */
+enum gdt_status_settings
+{
+    NO_GDT              = 0x00,
+    BIT16_BIT32_GDT     = 0x01,
+    BIT32_ONLY_GDT      = 0x02
+};
+
+/* Manually set the GDT status with a setting(`NO_GDT`, `BIT16_BIT32_GDT` or `BIT32_ONLY_GDT`).
+ * 
+ * Side Note: `set_gdt_status(NO_GDT)` is quite useless, especially if you load a clean GDT/GDT description into memory.
+ *            `set_gdt_status(NO_GDT)` can also screw you up if you load a already-working GDT/GDT description into memory -
+ *             this will force you to either make the protocol fill out the GDT, or you yourself. 
+ */
+static void set_gdt_status(enum gdt_status_settings setting)
+{
+    *gdt_status = setting;
+}
+
 /* 
  *  __load_32bit: back-end function
  *
@@ -161,7 +180,7 @@ void __load_32bit()
      */
     if(g_gdt_address->null_desc == 1 || g_gdt_desc_address->size == 1 || *gdt_status == 0)
     {
-        print("\n  Error from `load_32bit`:\n  There is not a valid GDT/GDT description loaded into memory :(\n      -> Did you forget to `init_bootloader`?\n      -> Perhaps you forgot to setup your GDT?\n\n  For future reference, put `#define default_gdt` if you want FAMP to \n  fill out your GDT.\n\n  Do Note: `default_gdt` only works with the following settings:\n      1. `DEFAULT_ALL`\n      2. `CLEAN_GDT_DEF_VID_MODE`\n      3. `CLEAN_GDT_VESA_VID_MODE`");
+        print("\n  Error from `load_32bit`:\n  There is not a valid GDT/GDT description loaded into memory :(\n      -> Did you forget to `init_bootloader`?\n      -> Perhaps you forgot to setup your GDT?\n\n  For future reference, put `#define default_gdt` if you want FAMP to \n  fill out your GDT.\n\n  Do Note: `default_gdt` only works with the following settings:\n      1. `DEFAULT_ALL`\n      2. `CLEAN_GDT_DEF_VID_MODE`\n      3. `CLEAN_GDT_VESA_VID_MODE`\0");
         halt
     }
     
@@ -185,46 +204,48 @@ static inline void __setup_gdt_and_gdt_desc()
     /* If `gdt_status` is 0, that means there needs to be a working GDT/GDT descriptor loaded into memory */
     if(*gdt_status == 0)
     {
-        gdt->null_desc          = 0,
+        g_gdt_address->null_desc          = 0,
 
         /* 32-bit code segment. */
-        gdt->code32_limit       = 0xFFFF;
-        gdt->code32_base        = 0x0;
-        gdt->code32_base2       = 0x0;
-        gdt->code32_access      = 0b10011010;
-        gdt->code32_gran        = 0b11001111;
-        gdt->code32_base_high   = 0x0;
+        g_gdt_address->code32_limit       = 0xFFFF;
+        g_gdt_address->code32_base        = 0x0;
+        g_gdt_address->code32_base2       = 0x0;
+        g_gdt_address->code32_access      = 0b10011010;
+        g_gdt_address->code32_gran        = 0b11001111;
+        g_gdt_address->code32_base_high   = 0x0;
 
         /* 32-bit data segment. */
-        gdt->data32_limit       = 0xFFFF;
-        gdt->data32_base        = 0x0;
-        gdt->data32_base2       = 0x0;
-        gdt->data32_access      = 0b10010010;
-        gdt->data32_gran        = 0b11001111;
-        gdt->data32_base_high   = 0x0;
+        g_gdt_address->data32_limit       = 0xFFFF;
+        g_gdt_address->data32_base        = 0x0;
+        g_gdt_address->data32_base2       = 0x0;
+        g_gdt_address->data32_access      = 0b10010010;
+        g_gdt_address->data32_gran        = 0b11001111;
+        g_gdt_address->data32_base_high   = 0x0;
 
         /* Only fill out 16-bit segments if we have it. */
 #ifdef has_rmode_access
         /* 16-bit code segment. */
-        gdt->code16_limit       = 0xFFFF;
-        gdt->code16_base        = 0x0;
-        gdt->code16_base2       = 0x0;
-        gdt->code16_access      = 0b10011010;
-        gdt->code16_gran        = 0b00001111;
-        gdt->code16_base_high    = 0x0;
+        g_gdt_address->code16_limit       = 0xFFFF;
+        g_gdt_address->code16_base        = 0x0;
+        g_gdt_address->code16_base2       = 0x0;
+        g_gdt_address->code16_access      = 0b10011010;
+        g_gdt_address->code16_gran        = 0b00001111;
+        g_gdt_address->code16_base_high    = 0x0;
 
         /* 16-bit data segment. */
-        gdt->data16_limit       = 0xFFFF;
-        gdt->data16_base        = 0x0;
-        gdt->data16_base2       = 0x0;
-        gdt->data16_access      = 0b10010010;
-        gdt->data16_gran        = 0b00001111;
-        gdt->data16_base_high   = 0x0;
+        g_gdt_address->data16_limit       = 0xFFFF;
+        g_gdt_address->data16_base        = 0x0;
+        g_gdt_address->data16_base2       = 0x0;
+        g_gdt_address->data16_access      = 0b10010010;
+        g_gdt_address->data16_gran        = 0b00001111;
+        g_gdt_address->data16_base_high   = 0x0;
 #endif
 
         /* Setup the description for the GDT. */
-        gdtDesc->size = (uint16)sizeof(*gdt);
-        gdtDesc->address = (uint32)gdt;
+        g_gdt_desc_address->size = (uint16)sizeof(*g_gdt_address);
+        g_gdt_desc_address->address = (uint32)g_gdt_address;
+
+        set_gdt_status(BIT16_BIT32_GDT);
     }
 #endif
 }

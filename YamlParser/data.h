@@ -53,7 +53,6 @@ static const char * const needed_names[] = {
 	"has_second_stage",
 
 	// Kernel information
-	"kernel_entry_point",
 	"kernel_o_binary",
 	"kernel_bin_binary",
 	//"kernel_addr",
@@ -62,7 +61,6 @@ static const char * const needed_names[] = {
 
 /* If there is a second stage, these are the needed names. */
 static const char * const ss_needed_names[] = {
-	"second_stage_entry_point",
 	"second_stage_bin_o_filename",
 	"second_stage_bin_filename",
 	"second_stage_source_code_file"

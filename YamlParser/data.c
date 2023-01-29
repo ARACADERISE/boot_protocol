@@ -124,11 +124,6 @@ _yaml_os_data get_yaml_os_info()
 		os_data.has_second_stage = true;
 		_next
 
-		/* There should be checks here that make sure the required data is given for second-stage information,
-		 * but `quick_edit.py` already does this for us. This was not planned, by the way. */
-
-		os_data.ss_entry_point = (uint8 *)yaml_file_data->val_data;
-		_next;
 
 		/* Second stage binary object file info. */
 		os_data.ss_filename_bin_o_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
@@ -154,10 +149,6 @@ _yaml_os_data get_yaml_os_info()
 	}
 	_next
 
-	/* Kernel entry point. */
-	os_data.kern_entry_point = (uint8 *)yaml_file_data->val_data;
-	_next
-
 	/* Kernel binary file info. */
 	os_data.kern_filename_bin_o_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
 	os_data.kern_filename_bin_o_name = (uint8 *)yaml_file_data->val_data;
@@ -176,14 +167,9 @@ _yaml_os_data get_yaml_os_info()
 	os_data.kern_filename_bin_name = (uint8 *)yaml_file_data->val_data;
 	_next
 
-	/* Kernel address info. */
-	os_data.kern_addr = convert_hex_to_dec((uint8 *)yaml_file_data->val_data);
-	_next
-
 	/* Kernel source code info. */
 	os_data.kern_filename_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
 	os_data.kern_filename = (uint8 *)yaml_file_data->val_data;
-	_next
 
 	/* Free `yaml_file_data`. We don't need it anymore. */
 	free(yaml_file_data);

@@ -96,7 +96,6 @@ int32 main(int args, char *argv[])
 			yod.ss_filename_bin_o_name,
 			yod.kern_filename_bin_o_name,
 			ss_bin_file, kern_bin_file,
-			ss_bin_file, kern_bin_file,
 			ss_bin_file, kern_bin_file);
 		
 		fwrite(mformat1, strlen(mformat1), sizeof(*mformat1), makefile);

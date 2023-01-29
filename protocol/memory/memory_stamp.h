@@ -86,7 +86,7 @@ const uint16 _memory_stamp_size = sizeof(_memory_stamp);
  */
 static _memory_stamp *__obtain_memory_stamp(enum memory_stamp_type mem_stamp_type) {
     /* Start from speculated end of second-stage according to linker. */
-    uint8 *addr = (uint8 *) second_stage_end;
+    uint8 *addr = (uint8 *) &second_stage_end;
 
     /* How many bytes of the memory stamps "magic number" have we found? */
     uint8 total = 0;

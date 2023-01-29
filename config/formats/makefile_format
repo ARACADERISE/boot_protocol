@@ -2,12 +2,13 @@
 .PHONY: clean
 .PHONY: build
 .PHONY: bootloader
+.PHONY: mbr_partition_table
 
 FLAGS = -masm=intel -O1 -Wno-error -c -nostdinc -nostdlib -fno-builtin -fno-stack-protector -ffreestanding -m32
 run: build
 	@qemu-system-i386 -drive format=raw,file=../bin/OS.image
 
-build:
+build: mbr_partition_table
 	@nasm protocol/protocol_util.s -f elf32 -o bin/protocol_util.o
 	@gcc ${FLAGS} -o %s ../%s
 	@gcc ${FLAGS} -o %s ../%s
@@ -17,8 +18,14 @@ build:
 	@objcopy -O binary ../bin/kernel.out %s
 	@./bin/format.o %s --second_stage
 	@./bin/format.o %s --kernel
-	@nasm boot/boot.s -f bin -o ../bin/bootloader.bin
-	@cat ../bin/bootloader.bin %s %s > ../bin/OS.image
+	@nasm boot/boot.s -f bin -o ../bin/boot.bin
+	@cat ../bin/boot.bin bin/mbr_partition_table.bin > ../bin/OS.image
+
+mbr_partition_table:
+	@gcc ${FLAGS} -o bin/mbr_partition_table.o -c boot/mbr_partition_table.c
+	@ld -m elf_i386 -Tboot/mbr_partition_table.ld -nostdlib --nmagic -o bin/mbr_partition_table.out bin/mbr_partition_table.o
+	@objcopy -O binary bin/mbr_partition_table.out bin/mbr_partition_table.bin
+	@./bin/format.o bin/mbr_partition_table.bin --jpad
 
 clean:
 	@./config/scripts/clean

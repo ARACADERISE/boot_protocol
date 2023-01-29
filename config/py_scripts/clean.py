@@ -22,9 +22,6 @@ subprocess.run('rm -rf boot/boot.s', shell=True, cwd=os.getcwd())
 # Delete all local binaries
 subprocess.run('rm -rf bin/*.o', shell=True, cwd=os.getcwd())
 
-# Delete linkers
-subprocess.run('rm -rf linker', shell=True, cwd=os.getcwd())
-
 # This is needed so we can have "{FLAGS}" put in after `@gcc`
 flags = '{FLAGS}'
 
@@ -35,7 +32,6 @@ with open('Makefile', 'w') as f:
 FLAGS = -masm=intel -O1 -Wno-error -c -nostdinc -nostdlib -fno-builtin -fno-stack-protector -ffreestanding -m32
 build:
 	@chmod +x config/scripts/*
-	@./config/scripts/config_linkers
 	@gcc config/format.c -o bin/format.o
 	@nasm protocol/protocol_util.s -f elf32 -o ../bin/protocol_util.o
 	@gcc ${flags} -o ../bin/second_stage.o ../main.c
