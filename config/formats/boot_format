@@ -2,28 +2,49 @@ org 0x7C00
 use16
 
 struc mbr_partition_table_entry
-	.Indicator:										resb 0x01
-	.FirstHead:										resb 0x01
-	.FirstSector:									resw 0x01
-	.SystemID:										resb 0x01
-	.LastHead:										resb 0x01
-	.LastSector:									resw 0x01
-	.RelativeSector:								resd 0x01
-	.SectorsCount:									resd 0x01
+	; Is this MBR partition table entry bootable?(is it describing the rest of the bootloader?)
+	; 0x80 = bootable, 0x0 = not bootable
+	.is_bootable:									resb 0x01
+	; From what sector does the program begin
+	; With this, the sector where the program begins has to be the sector where the last program ended off
+	; So, for a program after the MBR, `first_sector` would be 2
+	.first_sector:									resb 0x01
+	; Beginning address
+	.bprogram_address:								resw 0x01
+	; 0x05/0x0F for extended partition table
+	; Any other value has yet to be determined
+	.entry_type:									resb 0x01
+	; If this is `1`, the MBR partition table C program will automatically read in
+	; the needed amount of memory. If `0`, the MBR partition table C program will not load
+	; anything into memory.
+	; This is going to be more helpful later on. With this, we can primarily mark certain
+	; partitions in the extended partition table as "critical", thus, the protocol MUST
+	; read the programs residing in each partition into memory AND run them
+	.auto_read_program:								resb 0x01
+	; Just set this to zero lol
+	.relative_sector:								resd 0x01
+	; How many sectors does the program obtain?
+	; This amount * 512 will be added to `bprogram_address` to calculate the ending address
+	; of the program
+	.sector_amnt:									resd 0x01
+	; We are able to remove 2 bytes that we really didn't need
+	; Pad those 2 bytes to keep the MBR partition table entries at 16-bytes
+	.pad:											resw 0x01
 endstruc
 
-%%macro CreateEntry	9
-mbr_partition_entry%%+%%1:	istruc mbr_partition_table_entry
-	at mbr_partition_table_entry.Indicator,				db %%2
-	at mbr_partition_table_entry.FirstHead,				db %%3
-	at mbr_partition_table_entry.FirstSector,			dw %%4
-	at mbr_partition_table_entry.SystemID,				db %%5
-	at mbr_partition_table_entry.LastHead,				db %%6
-	at mbr_partition_table_entry.LastSector,			dw %%7
-	at mbr_partition_table_entry.RelativeSector,		dd %%8
-	at mbr_partition_table_entry.SectorsCount,			dd %%9
+%macro CreateEntry	9
+mbr_partition_entry%+%1:	istruc mbr_partition_table_entry
+	at mbr_partition_table_entry.is_bootable,				db %2
+	at mbr_partition_table_entry.first_sector,				db %3
+	at mbr_partition_table_entry.bprogram_address,			dw %4
+	at mbr_partition_table_entry.entry_type,				db %5
+	at mbr_partition_table_entry.eprogram_address,			db %6
+	at mbr_partition_table_entry.last_sector,	     		db %7
+	at mbr_partition_table_entry.relative_sector,		 	dd %8
+	at mbr_partition_table_entry.sector_amnt,				dd %9
+	at mbr_partition_table_entry.pad,						dw 0x0
 iend
-%%endmacro
+%endmacro
 
 jmp 0x0:start
 
