@@ -130,6 +130,7 @@
         - The above program resides in the memory region 0x500-0x900
 
 2/6/2023
+    - Rewrote all lost code from computer crash
     - Added `_MBR_partition_table_entry`
         - A C struct that stores all data that a MBR partition table entry has
     - Added:
