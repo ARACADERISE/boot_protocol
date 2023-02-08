@@ -21,6 +21,7 @@ subprocess.run('rm -rf boot/boot.s', shell=True, cwd=os.getcwd())
 
 # Delete all local binaries
 subprocess.run('rm -rf bin/*.o', shell=True, cwd=os.getcwd())
+subprocess.run('rm -rf bin/*.bin', shell=True, cwd=os.getcwd())
 
 # This is needed so we can have "{FLAGS}" put in after `@gcc`
 flags = '{FLAGS}'

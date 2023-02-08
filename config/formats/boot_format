@@ -5,12 +5,11 @@ struc mbr_partition_table_entry
 	; Is this MBR partition table entry bootable?(is it describing the rest of the bootloader?)
 	; 0x80 = bootable, 0x0 = not bootable
 	.is_bootable:									resb 0x01
-	; From what sector does the program begin
+	; From what sector does the program begin(lower 8-bits)
 	; With this, the sector where the program begins has to be the sector where the last program ended off
 	; So, for a program after the MBR, `first_sector` would be 2
-	.first_sector:									resb 0x01
-	; Beginning address
-	.bprogram_address:								resw 0x01
+	; From what cylinder does the sector reside on?(upper 8-bits)
+	.starting_sector_and_cylinder:					resw 0x01
 	; 0x05/0x0F for extended partition table
 	; Any other value has yet to be determined
 	.entry_type:									resb 0x01
@@ -21,30 +20,31 @@ struc mbr_partition_table_entry
 	; partitions in the extended partition table as "critical", thus, the protocol MUST
 	; read the programs residing in each partition into memory AND run them
 	.auto_read_program:								resb 0x01
+	; From what sector does the program end?(lower 8-bits)
+	; From what cylinder does the last sector reside on?(upper 8-bits)
+	.last_sector_and_cylinder:						resw 0x01
 	; Just set this to zero lol
 	.relative_sector:								resd 0x01
 	; How many sectors does the program obtain?
 	; This amount * 512 will be added to `bprogram_address` to calculate the ending address
 	; of the program
 	.sector_amnt:									resd 0x01
-	; We are able to remove 2 bytes that we really didn't need
-	; Pad those 2 bytes to keep the MBR partition table entries at 16-bytes
-	.pad:											resw 0x01
+	; Pad 1 byte
+	.pad:											resb 0x01
 endstruc
 
-%macro CreateEntry	9
-mbr_partition_entry%+%1:	istruc mbr_partition_table_entry
-	at mbr_partition_table_entry.is_bootable,				db %2
-	at mbr_partition_table_entry.first_sector,				db %3
-	at mbr_partition_table_entry.bprogram_address,			dw %4
-	at mbr_partition_table_entry.entry_type,				db %5
-	at mbr_partition_table_entry.eprogram_address,			db %6
-	at mbr_partition_table_entry.last_sector,	     		db %7
-	at mbr_partition_table_entry.relative_sector,		 	dd %8
-	at mbr_partition_table_entry.sector_amnt,				dd %9
-	at mbr_partition_table_entry.pad,						dw 0x0
+%%macro CreateEntry	8
+mbr_partition_entry%%+%%1:	istruc mbr_partition_table_entry
+	at mbr_partition_table_entry.is_bootable,					db %%2
+	at mbr_partition_table_entry.starting_sector_and_cylinder,	db %%3
+	at mbr_partition_table_entry.entry_type,					db %%4
+	at mbr_partition_table_entry.auto_read_program,				db %%5
+	at mbr_partition_table_entry.last_sector_and_cylinder,		dw %%6
+	at mbr_partition_table_entry.relative_sector,				dd %%7
+	at mbr_partition_table_entry.sector_amnt,					dd %%8
+	at mbr_partition_table_entry.pad,							db 0x0
 iend
-%endmacro
+%%endmacro
 
 jmp 0x0:start
 
@@ -153,22 +153,24 @@ failed:
 TIMES 0x01BE - $ + $$ db 0
 
 ; Describing extended partition table(System ID = 0xF)
-CreateEntry	1, 0, 0, Info.sector, 0xF, 0, 0, 0, 0
+; The extended partition table resigns after the MBR
+;CreateEntry	1, 0, 2, sum, 0x0F, 0x01, 0, 1
+CreateEntry 1, 0, 0x0002, 0x0F, 1, 0x0003, 0x0002, 0x01
 
 ; Perhaps we can use these 3 partitions as "extra"?
 ; Use these in place of reading in 5 sectors for an additional "pool of memory",
 ; as I have been wanting to add.
-CreateEntry	2, 0, 0, 0, 0, 0, 0, 0, 0
-CreateEntry	3, 0, 0, 0, 0, 0, 0, 0, 0
-CreateEntry	4, 0, 0, 0, 0, 0, 0, 0, 0
+CreateEntry	2, 0, 0, 0, 0, 0, 0, 0
+CreateEntry	3, 0, 0, 0, 0, 0, 0, 0
+CreateEntry	4, 0, 0, 0, 0, 0, 0, 0
 
 dw 0xAA55
 
 mbr_partition_table_program: incbin "bin/mbr_partition_table.bin"
 mbr_partition_table_program_end:
 
-second_stage: incbin "../bin/second_stage.bin"
+second_stage: incbin "%s"
 second_stageE:
 
-kernel: incbin "../bin/kernel.bin"
+kernel: incbin "%s"
 kernelE:

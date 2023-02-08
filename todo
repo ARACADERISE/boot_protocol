@@ -44,13 +44,11 @@
         - TODO: Make it to where FAMP complies only with a custom binary format?
 
 1/14/2023
-    1:
+    - 1
         - TODO: Make the protocol use the `bin_folder` variable available via `boot.yaml`
             - With this, the user won't need to put the folder where a binary file is to be located.
               `bin_folder` will be used throughout the protocol to make sure binaries get placed accoringly
-    
-    Extras:
-        - TODO: Create C program strictly for second stage and kernel binary files
+    - TODO: Create C program strictly for second stage and kernel binary files
             - The C program that works with the second stage binary will append data to the binary over the second-stage bootloaders
               memory. This data includes type of memory, the amount of memory, what access the programmer has to the memory, and the "activity"
               of the memory, or, another words, if the memory is meant to be used later on or not.
@@ -123,5 +121,25 @@
     - TODO: Implement a file system
         - TODO: Figure out what type of filesystem(try and find one that is easy to implement)
             - Possibly https://wiki.osdev.org/ISO_9660
+                - Ruled out
             - The "memory stamp" feature might be able to be used with the filesystem
             - If it comes to it, I can make my own sort of "filesystem" depending on how other filesystem work
+
+2/6/2023
+    - 1
+        - TODO: Make it to where the protocol makes sure there is no data in a unused entry
+            - If there is, the protocol should clear all the data so there isn't any sort of complications later on
+    - TODO: Read the first MBR partition table entry
+    - TODO: Read in the correct amount of memory for the extended partition table
+        - TODO: Add functionality for reading sectors(and possibly writing sectors?)
+        - TODO: Surpport reading/writing sectors in 32-bit(ATA support)
+            - TODO: Research how to read/write sectors in 32-bit mode
+    - TODO: Read the first entry of the extended partition table
+    - TODO: Run the second-stage bootloader(if there is any)
+        - TODO: Make it to where the protocols own second-stage bootloader resides in the extended partition table
+        - TODO: Make it to where the protocols own second-stage bootloader has the custom FS
+    - TODO: Read the second entry of the extended partition table(the kernel)
+    - TODO: Run the kernel
+    - TODO: Create C program the configures the extended partition table
+        - TODO: Figure out what data we want a extended partition header to obtain
+        - TODO: Figure out what data we want to describe a file

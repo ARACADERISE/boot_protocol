@@ -2,7 +2,7 @@
 
 void __attribute__((section("__start"))) main()
 {
-    __asm__("pusha\nmov ah, 0x0E\nmov al, 'H'\nint 0x10");
+    _MBR_partition_table_entry *entry = (_MBR_partition_table_entry *) (MBR_address + MBR_partition_table_entries_offset);
 
     // Halt
     while(1);

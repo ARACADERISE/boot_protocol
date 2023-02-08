@@ -128,3 +128,18 @@
         - With this, `boot.s` has also changed quite a bit
     - Critical addresses for the protocol now dwell in the memory region 0x900-0x7C00
         - The above program resides in the memory region 0x500-0x900
+
+2/6/2023
+    - Added `_MBR_partition_table_entry`
+        - A C struct that stores all data that a MBR partition table entry has
+    - Added:
+        - `MBR_partition_table_entries_offset`: Offset from beginning of MBR where partition table entries will be located
+        - `second_MBR_partition_table_entry`: Offset where the second MBR partition table entry begins
+        - `third_MBR_partition_table_entry`: Offset where the third MBR partition table entry begins
+        - `fourth_MBR_partition_table_entry`: Offset where the fourth MBR partition table entry begins
+        - `extended_partition_table_id_1`/`extended_partition_table_id_2`: IDs for extended partition table
+        - `partition_entry_unused`: Indication(zero-value) of a unused entry(protocol does nothing with the data in the entry. If a entry is unused, there should be no data assigned)
+            - 1
+                - See `todo` for more info
+        - `MBR_address`: Beginning address of the MBR(0x7C00)
+        
