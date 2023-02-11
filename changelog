@@ -130,7 +130,6 @@
         - The above program resides in the memory region 0x500-0x900
 
 2/6/2023
-    - Rewrote all lost code from computer crash
     - Added `_MBR_partition_table_entry`
         - A C struct that stores all data that a MBR partition table entry has
     - Added:
@@ -143,4 +142,40 @@
             - 1
                 - See `todo` for more info
         - `MBR_address`: Beginning address of the MBR(0x7C00)
-        
+
+2/10/2023
+    - Took away `Info` block in `boot.s`
+        - The first two entries of the MBR partition table now describe the second stage bootloader and kernel
+        - With this, the program `mbr_partition_table.c` will parse the entries, read in the according amount of sectors and depending on whether or not the entries field `.auto_read_program` is set to 1 or not it will then add it to a qeueu that the program will check after parsing all entries and run the programs in order that they were added
+        - `main.c` got updated and the default makefile format got updated as well
+            - The initial makefile to initiate everything now formats all flat binary files to multiple of 512 bytes
+            - This enables the YAML program to obtain the right size(in bytes) and enables `format.c` and `main.c` to use the actual right size instead of an estimate with it NOT formatted to multiples of 512 bytes
+        - The bootloader now does not read in sectors for second stage or kernel
+    - The macro `CreateEntry` now only needs 7 arguments:
+        - Is it bootable?
+        - Starting sector
+        - Entry type
+        - Is the protocol required to auto read the program and add it to qeueu?
+        - Last sector
+        - Sector amount
+    - `relative_sector` is, by default, zero. This value has been ruled out to NOT be touched.
+    - Updated values of:
+        - `second_MBR_partition_table_entry`
+            - `(0x1BE + 0) + 16`
+        - `third_MBR_partition_table_entry`
+            - `(0x1BE + 16) + 16`
+        - `fourth_MBR_partition_table_entry`
+            - `(0x1BE + 32) + 16`
+    - Added in the following IDs for `entry_type`:
+        - `partition_entry_ssb_id`
+            - ID referencing second stage bootloader
+            - `ssb` = (s)econd (s)tage (b)ootloader
+        - `partition_entry_kern_id`
+            - ID referencing kernel
+        - `partition_entry_FS_id`
+            - ID referencing the FS
+        - `partition_entry_critical_FS_id`
+            - ID referencing a FS that is for the protocol/kernel only
+            - With this, the FS which got assigned this ID will only store critical data/code that the kernel and or protocol want to keep out of users reach
+            - This type of FS is simply to keep critical ideals safe so it doesn't be obstructed by the user or a possible kernel process
+    - Reserved all registers in `mbr_partition_table.c`(`__asm__("pusha")`)

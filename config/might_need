@@ -42,3 +42,16 @@
 	fwrite(jump_format2, strlen(jump_format2), sizeof(uint8), bit32_jump);
 
 	fclose(bit32_jump);
+
+; Extended read wasn't working so.. I came up with my own little way :)
+Info:
+	; Sector information
+	.sector				db 0x02
+	; Second stage information
+	.second_stage_size	dw ((second_stageE - second_stage + 512) / 512)
+	.second_stage_addr	dw 0x07E0
+	.second_stage_loc	dw 0x7E00
+	; Kernel information
+	.kernel_size		dw ((kernelE - kernel) / 512)
+	.kernel_addr		dw 0x0%lx
+	.kernel_loc			dw 0x%lx

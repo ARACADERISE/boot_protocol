@@ -41,5 +41,7 @@ build:
 	@ld -m elf_i386 -Tlinker/kernel.ld -nostdlib --nmagic -o ../bin/kernel.out ../bin/kernel.o ../bin/protocol_util.o
 	@objcopy -O binary ../bin/boot.out ../bin/second_stage.bin
 	@objcopy -O binary ../bin/kernel.out ../bin/kernel.bin
+	@./bin/format.o ../bin/second_stage.bin --second_stage
+	@./bin/format.o ../bin/kernel.bin --kernel
 	@cd config && make build''')
     f.close()

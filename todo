@@ -143,3 +143,17 @@
     - TODO: Create C program the configures the extended partition table
         - TODO: Figure out what data we want a extended partition header to obtain
         - TODO: Figure out what data we want to describe a file
+
+2/10/2023
+    - TODO: Make it to where the configuration programs initiaite the MBR with only the format `boot_format`
+    - TODO: Get rid of `boot_format2` and add a format just for the protocols second stage bootloader(if the user does not have one)
+    - TODO: Make it to where the program `mbr_partition_table.c` configures the starting address of the kernel depending on the ending address of the given second stage bootloader
+    - TODO: Create program to format a disk image and mount the FS onto it
+    - TODO: Create FAMPs custom FS structures, as well as add support for other filesystems
+        - With this, add `fs_type` in `boot.yaml`
+        - `fs_type` will be optional
+        - If `fs_type` is not found in `boot.yaml` the protocol will default to using its custom FS
+        - If `fs_type` is found and the preferred FS is not yet supported the protocol will default to its custom FS
+    - TODO: Actually read in the required amount of memory for second stage bootloader, kernel and filesystem. For now, I have "dummy values" just so the overall protocol works.. for the time being
+    - TODO: line 86 in `boot_format`:
+        - Is `sector_addr` needed?

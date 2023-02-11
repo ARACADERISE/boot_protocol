@@ -18,8 +18,7 @@ build: mbr_partition_table
 	@objcopy -O binary ../bin/kernel.out %s
 	@./bin/format.o %s --second_stage
 	@./bin/format.o %s --kernel
-	@nasm boot/boot.s -f bin -o ../bin/boot.bin
-	@cat ../bin/boot.bin bin/mbr_partition_table.bin > ../bin/OS.image
+	@nasm boot/boot.s -f bin -o ../bin/OS.image
 
 mbr_partition_table:
 	@gcc ${FLAGS} -o bin/mbr_partition_table.o -c boot/mbr_partition_table.c

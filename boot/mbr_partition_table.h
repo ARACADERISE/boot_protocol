@@ -27,13 +27,17 @@ typedef uint8                   bool;
 /* Offset from beginning of `MBR_address` where the MBR partition table
  * entries should be located. */
 #define MBR_partition_table_entries_offset     0x1BE
-#define second_MBR_partition_table_entry       first_MBR_partition_table_entry + 16
-#define third_MBR_partition_table_entry        second_MBR_partition_table_entry + 16
-#define fourth_MBR_partition_table_entry       third_MBR_partition_table_entry + 16
+#define second_MBR_partition_table_entry       (0x1BE + 0) + 16
+#define third_MBR_partition_table_entry        (0x1BE + 16) + 16
+#define fourth_MBR_partition_table_entry       (0x1BE + 32) + 16
 
 /* Entry types for `MBR_partition_table_entry`. */
 #define extended_partition_table_id_1           0x05
 #define extended_partition_table_id_2           0x0F
+#define partition_entry_ssb_id                  0x0E // ssb = second-stage bootloader
+#define partition_entry_kern_id                 0x0D
+#define partition_entry_FS_id                   0x0C
+#define partition_entry_critical_FS_id          0x0B
 #define partition_entry_unused                  0x00
 // TODO: Come up with more types for the `entry_type` in `MBR_partition_table_entry`.
 
@@ -63,6 +67,6 @@ typedef struct MBR_partition_table_entry
 
     // Padding
     uint8       pad;
-} _MBR_partition_table_entry;
+} __attribute__((packed)) _MBR_partition_table_entry;
 
 #endif

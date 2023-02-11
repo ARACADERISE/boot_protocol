@@ -33,15 +33,15 @@ struc mbr_partition_table_entry
 	.pad:											resb 0x01
 endstruc
 
-%%macro CreateEntry	8
+%%macro CreateEntry	7
 mbr_partition_entry%%+%%1:	istruc mbr_partition_table_entry
 	at mbr_partition_table_entry.is_bootable,					db %%2
 	at mbr_partition_table_entry.starting_sector_and_cylinder,	db %%3
 	at mbr_partition_table_entry.entry_type,					db %%4
 	at mbr_partition_table_entry.auto_read_program,				db %%5
 	at mbr_partition_table_entry.last_sector_and_cylinder,		dw %%6
-	at mbr_partition_table_entry.relative_sector,				dd %%7
-	at mbr_partition_table_entry.sector_amnt,					dd %%8
+	at mbr_partition_table_entry.relative_sector,				dd 0x0
+	at mbr_partition_table_entry.sector_amnt,					dd %%7
 	at mbr_partition_table_entry.pad,							db 0x0
 iend
 %%endmacro
@@ -73,51 +73,6 @@ start:
 	int 0x13
 	jc failed
 
-	; Increment sector number
-	mov ax, 0x01
-	add [Info.sector], ax
-
-	; Read in users second stage bootloader
-	mov ax, [Info.second_stage_addr]
-	mov es, ax
-	xor bx, bx
-
-	mov ah, 0x02
-	mov al, [Info.second_stage_size]
-	mov ch, 0x00
-	mov cl, [Info.sector]
-	mov dh, 0x00
-	mov dl, 0x80
-	int 0x13
-	jc failed
-
-	; Update sector number
-	mov ax, [Info.second_stage_size]
-	add [Info.sector], ax
-	mov [Info.sector], ax
-
-	; Read in users kernel
-	mov ax, [Info.kernel_addr]
-	mov es, ax
-	xor bx, bx
-
-	mov ah, 0x02
-	mov al, [Info.kernel_size]
-	mov ch, 0x00
-	mov cl, [Info.sector]
-	mov dh, 0x00
-	mov dl, 0x80
-	int 0x13
-	jc failed
-
-	; Update sector number one last time
-	mov ax, [Info.kernel_size]
-	add [Info.sector], ax
-
-	; Store the value in a constant address(`sector_addr` = `0x5000`)
-	mov ax, [Info.sector]
-	mov [sector_addr], ax
-
 	; Jump to program that works with the MBR partition table
 	jmp 0x0500
 
@@ -130,19 +85,6 @@ start:
 
 sector_addr equ 0x5000
 
-; Extended read wasn't working so.. I came up with my own little way :)
-Info:
-	; Sector information
-	.sector				db 0x02
-	; Second stage information
-	.second_stage_size	dw ((second_stageE - second_stage + 512) / 512)
-	.second_stage_addr	dw 0x07E0
-	.second_stage_loc	dw 0x7E00
-	; Kernel information
-	.kernel_size		dw ((kernelE - kernel) / 512)
-	.kernel_addr		dw 0x0%lx
-	.kernel_loc			dw 0x%lx
-
 failed:
 	mov ah, 0x0E
 	mov al, 'F'
@@ -152,17 +94,15 @@ failed:
 
 TIMES 0x01BE - $ + $$ db 0
 
-; Describing extended partition table(System ID = 0xF)
-; The extended partition table resigns after the MBR
-;CreateEntry	1, 0, 2, sum, 0x0F, 0x01, 0, 1
-CreateEntry 1, 0, 0x0002, 0x0F, 1, 0x0003, 0x0002, 0x01
+; Second stage bootloader(0x0E = second-stage bootloader)
+CreateEntry 1, 0x80, 0x03, 0x0E, 1, 0x%LX, 0x%LX
 
-; Perhaps we can use these 3 partitions as "extra"?
-; Use these in place of reading in 5 sectors for an additional "pool of memory",
-; as I have been wanting to add.
-CreateEntry	2, 0, 0, 0, 0, 0, 0, 0
-CreateEntry	3, 0, 0, 0, 0, 0, 0, 0
-CreateEntry	4, 0, 0, 0, 0, 0, 0, 0
+; Kernel(0x0D = kernel)
+CreateEntry	2, 0x00, 0x%LX, 0x0D, 1, 0x%LX, 0x%LX
+
+; FS(0x0C = FileSystem)
+CreateEntry	3, 0x00, 0x%LX, 0x0C, 1, 0x%LX, 0x%LX  
+CreateEntry	4, 0, 0, 0, 0, 0, 0
 
 dw 0xAA55
 

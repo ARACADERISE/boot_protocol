@@ -105,8 +105,8 @@ int main(int args, char * argv[]) {
 
     /* Get the estimate size(in bytes) of the binary, and calculate the ending address. */
     mem_info.estimate_size_in_bytes = file_size + padding_needed;
-    mem_info.ending_address = mem_info.beginning_address + (file_size + padding_needed);
-
+    mem_info.ending_address = mem_info.beginning_address + (file_size + padding_needed) + memory_stamp_size;
+    
     printf("\n\nmem_info.beginning_address: %X\nmem_info.ending_address: %X\nmem_info.sectors: %d\nmem_info.access: %X\n\n",
         mem_info.beginning_address,
         mem_info.ending_address,
