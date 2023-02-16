@@ -1,6 +1,10 @@
 #ifndef protocol_asm_help
 #define protocol_asm_help
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* All registers that this API allows users to work with.
  * Registers like `ebp` and `esp` etc are all kinda important.
  */
@@ -79,5 +83,9 @@ uint8 grab_val_from_child(enum registers reg)
 
     return val;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

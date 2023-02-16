@@ -1,6 +1,10 @@
 #ifndef protocol_disk
 #define protocol_disk
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef protocol_types
 #include "../types.h"
 #endif
@@ -51,5 +55,9 @@ void load_needed_memory(_disk_read_info *dri)
         }
     }
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

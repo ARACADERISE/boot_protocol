@@ -60,11 +60,14 @@ int main(int args, char * argv[]) {
         file_size = get_file_size(argv[1]);
 
         /* Get the correct amount of sectors. */
-        mem_info.sectors = (file_size / bytes_per_sector) + 1;
+        mem_info.sectors = (file_size / bytes_per_sector);
+
+        if(mem_info.sectors * bytes_per_sector < file_size)
+            mem_info.sectors++;
 
         /* Calculate the amount of padding we need to pad out binary to multiples of 512-byte blocks(sectors). */
         uint16 padding_needed = ((mem_info.sectors * bytes_per_sector) - file_size);
-
+                
         write_padding(NULL, padding_needed, argv[1]);
 
         return 0;
@@ -79,44 +82,55 @@ int main(int args, char * argv[]) {
      * `--second_stage` deciphers the memory stamp is describing memory over the second-stage bootloader. 
      * I decided to just check if `--kernel` is passed, and if it isn't we default to stapling the `boot_id_2` ID to the memory id. */
     if (strcmp(argv[2], "--kernel") == 0)
+    {
+        uint8 kernel_name[10] = "kernel";
+        for(char i = 0; i < 10; i++)
+            memset(&mem_info.name[i], kernel_name[i], 1);
+        
         mem_info.memory_id = kernel_id;
+    }
     else
-        mem_info.memory_id = boot_id_2;
+    {
+        uint8 second_stage_name[20] = "second_stage";
+        for(char i = 0; i < 20; i++)
+            memset(&mem_info.name[i], second_stage_name[i], 1);
 
+        mem_info.memory_id = boot_id_2;
+    }
+    
     mem_info.is_overwritten = false; // The memory is, by default, not overwritten. The protocol treats all memory as critical unless otherwise specified
     if (mem_info.memory_id == kernel_id)
         mem_info.beginning_address = 0xA000;
     else
-        mem_info.beginning_address = 0x7F00; // The second-stage bootloader is located 256-bytes after the MBR. That is because there is critical information being stored in between 0x7E00 and 0x7F00
+        mem_info.beginning_address = 0x7E00; // The second-stage bootloader is located 256-bytes after the MBR. That is because there is critical information being stored in between 0x7E00 and 0x7F00
 
-    mem_info.access = access_level_one; // The access-level can be changes via the user or the protocol itself. Normally the protocol will change the access-level
+    mem_info.access = access_level_one; // The access-level can be changed via the user or the protocol itself. Normally the protocol will change the access-level
 
     file_size = get_file_size(argv[1]);
 
     /* Get the correct amount of sectors. */
-    mem_info.sectors = (file_size / bytes_per_sector) + 1;
+    mem_info.sectors = file_size / bytes_per_sector;
 
-    /* Make sure there is at least enough memory left for the memory stamp. */
-    if ((mem_info.sectors * bytes_per_sector) - file_size <= memory_stamp_size)
+    /* Check if we need to add a sector. If the overall sector count
+     * does not match the file size we must pad it with an extra sector.
+     */
+    if((mem_info.sectors * bytes_per_sector) < (file_size))
         mem_info.sectors++;
 
     /* Calculate the amount of padding we need to pad out binary to multiples of 512-byte blocks(sectors). */
-    uint16 padding_needed = ((mem_info.sectors * bytes_per_sector) - file_size) - memory_stamp_size;
+    uint16 padding_needed = (mem_info.sectors * bytes_per_sector) - file_size;
+    padding_needed -= memory_stamp_size;
 
     /* Get the estimate size(in bytes) of the binary, and calculate the ending address. */
-    mem_info.estimate_size_in_bytes = file_size + padding_needed;
-    mem_info.ending_address = mem_info.beginning_address + (file_size + padding_needed) + memory_stamp_size;
-    
+    mem_info.estimate_size_in_bytes = (file_size + padding_needed) + memory_stamp_size;
+    mem_info.ending_address = mem_info.beginning_address + mem_info.estimate_size_in_bytes;
+
     printf("\n\nmem_info.beginning_address: %X\nmem_info.ending_address: %X\nmem_info.sectors: %d\nmem_info.access: %X\n\n",
         mem_info.beginning_address,
         mem_info.ending_address,
         mem_info.sectors,
         mem_info.access);
-
-    /* Allocate static memory, init all indexes with zero, then write. */
-    uint8 padding[padding_needed];
-    memset(padding, 0, padding_needed);
-
+    
     /* Write padding to file. */
     write_padding(&mem_info, padding_needed, argv[1]);
 

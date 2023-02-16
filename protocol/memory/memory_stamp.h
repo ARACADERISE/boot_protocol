@@ -1,6 +1,10 @@
 #ifndef protocol_memory_stamp
 #define protocol_memory_stamp
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* "Magic numbers". */
 #define memory_stamp_magic_number_id        (uint8[]){0x2B, 0x84, 0x83, 0x82, 0x81}
 #define memory_stamp_magic_id_not_found     (uint8[]){0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
@@ -70,6 +74,9 @@ typedef struct memory_stamp {
 
     /* Ending address. */
     uint16 ending_address;
+
+    /* Name. */
+    uint8 name[10];
 } _memory_stamp;
 
 /* TODO: Do we need this? This should probably get removed. */
@@ -84,9 +91,9 @@ const uint16 _memory_stamp_size = sizeof(_memory_stamp);
  *  Output: _memory_stamp ptr
  *  On Error: Return NULL _memory_stamp ptr
  */
-static _memory_stamp *__obtain_memory_stamp(enum memory_stamp_type mem_stamp_type) {
+static _memory_stamp *__obtain_memory_stamp(uint8 *addr, enum memory_stamp_type mem_stamp_type) {
     /* Start from speculated end of second-stage according to linker. */
-    uint8 *addr = (uint8 *) &second_stage_end;
+    //uint8 *addr = (uint8 *) &second_stage_end;
 
     /* How many bytes of the memory stamps "magic number" have we found? */
     uint8 total = 0;
@@ -143,5 +150,9 @@ static _memory_stamp *__obtain_memory_stamp(enum memory_stamp_type mem_stamp_typ
 
     return mem_stamp;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

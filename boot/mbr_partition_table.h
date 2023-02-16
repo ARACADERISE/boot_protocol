@@ -69,4 +69,6 @@ typedef struct MBR_partition_table_entry
     uint8       pad;
 } __attribute__((packed)) _MBR_partition_table_entry;
 
+extern void test_read();
+
 #endif

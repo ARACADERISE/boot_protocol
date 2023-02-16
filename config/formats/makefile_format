@@ -21,8 +21,9 @@ build: mbr_partition_table
 	@nasm boot/boot.s -f bin -o ../bin/OS.image
 
 mbr_partition_table:
+	@nasm boot/partition_util.s -f elf32 -o bin/partition_util.o
 	@gcc ${FLAGS} -o bin/mbr_partition_table.o -c boot/mbr_partition_table.c
-	@ld -m elf_i386 -Tboot/mbr_partition_table.ld -nostdlib --nmagic -o bin/mbr_partition_table.out bin/mbr_partition_table.o
+	@ld -m elf_i386 -Tboot/mbr_partition_table.ld -nostdlib --nmagic -o bin/mbr_partition_table.out bin/mbr_partition_table.o bin/partition_util.o
 	@objcopy -O binary bin/mbr_partition_table.out bin/mbr_partition_table.bin
 	@./bin/format.o bin/mbr_partition_table.bin --jpad
 

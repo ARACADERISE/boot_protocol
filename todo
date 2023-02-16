@@ -157,3 +157,40 @@
     - TODO: Actually read in the required amount of memory for second stage bootloader, kernel and filesystem. For now, I have "dummy values" just so the overall protocol works.. for the time being
     - TODO: line 86 in `boot_format`:
         - Is `sector_addr` needed?
+    - TODO: Make it to where, at a specific point in the MBR, the MBR describes what type of FS the user wants
+        - `mbr_partition_table.c` will then check this specific point in the binary and 
+
+2/12/2023
+    - 1:
+        - TODO: Add support for vesa
+        - TODO: Add `vesa_api.h`
+
+2/14/2023
+    - 1:
+        - TODO: Remove memory stamps
+            - Nevermind, we are not going to be removing memory stamps
+            - They are still useful and can still be used although we have a FS
+            - Memory stamps will only be for programs that are not stored in the protocol-only FS(for critical code/data only) or the overall FS for the OS. They will be considered "stand alone" programs.
+            - So, memory stamps will enable the protocol to know a bit of information about the given code(program)/data(program data)
+            - However, the programs will simply never reside inside any sort of FS. They will always be stand alone. Once there memory is freed(either by the user or by the protocol) the protocol will, then, open access to there memory spaces in the memory map(so we can store more file data).
+        - TODO: Create program that formats a disk image with a FS mounted on it
+        - TODO: Do we still need to make sure the binary files are multiple of 512 bytes?
+        - TODO: We do need to make sure the second-stage bootloader binary file and the kernel binary file are multiple of 512 bytes for the MBR partition entries that describe them
+        - TODO: Read in the needed memory for the second stage bootloader and kernel using the data from the entries in the program `mbr_partition_table.c`
+        - TODO: Add ATA PIO support!!
+            - IMPORTANT
+    - TODO: Add support for users to use a pre existing bootloader binary file
+        - Will need to add a program such as `check_mbr.c` or something
+        - `check_mbr.c` will do checks on the given binary file that the user wants to use as there MBR
+        - The most major check is making sure the signature `55 AA` is at the 511th and 512th byte
+    - TODO: Add a tool that users can use to add some sort of structure to the end of a kernel binary file they want to use rather than writing there own kernel
+        - We will have to add a field in `boot.yaml` where users can tell the protocol whether or not it is using an "external" kernel binary file, and if they are below the field they will specify the "external" kernel binary file
+        - We will need a program to check if the structure is at the end of the kernel binary.
+        - A requirement would be: the kernel binary cannot be a multiple of 512 bytes. It has to be an odd number(or a number that, when divided by 512, equals a decimal).
+        - The tool that adds the structure at the end will do primarily the same as what we currently do when we stick the memory stamp at the end of the second stage bootloader and user-written kernel
+        - Perhaps, with the "external" kernel binary the tool will just place a memory stamp describing its memory, and then the check will be just making sure the memory stamp is there
+        - Then, the protocol will find the kernels memory stamp, and just treat the kernel as though the user had written it using its API
+    - TODO: Add support for the user writing there own MBR in assembly or C
+        - Write an API for C
+        - Have some way to support an API for assembly
+        - Make certain data required(such as FS, reading in sectors for the program `mbr_partition_table.bin`, making sure the bootloader includes the binary files for the second-stage bootloader and kernel)

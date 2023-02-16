@@ -1,6 +1,10 @@
 #ifndef protocol_print
 #define protocol_print
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Move cursor depending on x/y values. */
 extern void __move_cursor(uint8, uint8);
 
@@ -61,6 +65,14 @@ static void print(uint8 *str)
             /* Check if the dereferenced value of `str` is another newline. If so, repeat the functionality. */
             if(*str == '\n') goto newline;
         }
+        if(*str == '\t')
+        {
+            while(*str == '\t')
+            {
+                str++;
+                __asm__("mov ah, 0x0E\nmov al, ' '\nint 0x10\n");
+            }
+        }
         if(*str == '\0') break;
 
         __asm__("mov ah, 0x0e\nmov al, %0\nint 0x10" : : "dN"(*str));
@@ -70,5 +82,9 @@ static void print(uint8 *str)
     /* Restore the stack. */
     __asm__("popa");
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

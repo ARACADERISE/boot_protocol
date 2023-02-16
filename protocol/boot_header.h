@@ -1,6 +1,10 @@
 #ifndef protocol_boot_header
 #define protocol_boot_header
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef protocol_types
 #include "types.h"
 #endif
@@ -79,5 +83,9 @@ void __outp(uint16 port, uint8 data) {
  * TODO: Might delete this comment. Memory addresses critical to the protocol will be defined within the given
  *       header file that works with the given feature where the address is critical.
  */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,6 +1,10 @@
 #ifndef protocol_gdt_api
 #define protocol_gdt_api
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* GDT api. Home to functionality that makes the users code less messy :) */
 
 #ifndef protocol_types
@@ -33,5 +37,9 @@ static inline void load_kernel()
     __setup_gdt_and_gdt_desc();
     __load_32bit();
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

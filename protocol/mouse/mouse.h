@@ -1,6 +1,10 @@
 #ifndef protocol_mouse
 #define protocol_mouse
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* mouseX/mouseY memory address. */
 #define MOUSE_X_ADDR(uint16 * ) 0xC00A
 #define MOUSE_Y_ADDR(uint16 * ) 0xC00C
@@ -64,5 +68,9 @@ static void init_mouse_data() {
     cursor_data.mouseY = 0;
     cursor_data.mouse_status = 0x8;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

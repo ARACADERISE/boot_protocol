@@ -2,8 +2,7 @@
 
 void __attribute__((section("__start"))) main()
 {
-    /* Reserve all registers. */
-    __asm__("pusha");
+    test_read();
 
     /* Obtain MBR partition table entries. */
     _MBR_partition_table_entry *entry = (_MBR_partition_table_entry *) (MBR_address + MBR_partition_table_entries_offset);
@@ -13,6 +12,7 @@ void __attribute__((section("__start"))) main()
 
     if(second_stage_end == 0x9100)
         __asm__("mov ah, 0x0E\nmov al, 'A'\nint 0x10");
+    
     while(1);
 
     /*__asm__(

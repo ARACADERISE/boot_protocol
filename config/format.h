@@ -75,6 +75,9 @@ typedef struct memory_stamp {
 
     /* Ending address. */
     uint16 ending_address;
+
+    /* Name. */
+    uint8  name[20];
 } _memory_stamp;
 
 static const size_t memory_stamp_size = sizeof(_memory_stamp);

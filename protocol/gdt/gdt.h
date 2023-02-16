@@ -1,6 +1,10 @@
 #ifndef protocol_gdt
 #define protocol_gdt
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* What is the status of GDT?
  * 0 - GDT/GDT Descriptor needs to be loaded to memory.
  * 1 - There is an already-working GDT/GDT Descriptor loaded in memory. 
@@ -249,5 +253,9 @@ static inline void __setup_gdt_and_gdt_desc()
     }
 #endif
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

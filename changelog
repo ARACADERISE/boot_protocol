@@ -179,3 +179,32 @@
             - With this, the FS which got assigned this ID will only store critical data/code that the kernel and or protocol want to keep out of users reach
             - This type of FS is simply to keep critical ideals safe so it doesn't be obstructed by the user or a possible kernel process
     - Reserved all registers in `mbr_partition_table.c`(`__asm__("pusha")`)
+
+2/12/2023
+    - Added `b8000_api.h` - A header file that houses functionality for manipulating the video memory address 0xB8000
+    - The kernel header file will check if `using_vesa` is defined or if `using_b8000`/`using_default` is defined.
+        - 1: see `todo` for more info
+    - Made overall protocol compatible with C++
+
+2/13/2023
+    - Fixed bug in `format.c`
+        - Binary files were not being formatted correctly(they were not multiple of 512 bytes)
+        - 1
+            - See `todo` for more info
+
+2/15/2023
+    - Fixed `print` function in `b8000_api.h`
+        - The function now allows users to color-code there text
+        - This is done via `@[color]`, where color can be:
+            - `b`: Blue
+            - `B`: Black
+            - `br`: Brown
+            - `w`: White
+            - `r`: Red
+            - `c`: Cyan
+            - `m`: Magenta
+            - `g`: green
+            - `re`: Reset(color = white)
+            - Example: `@rHello,@re World`
+        - `print` now uses the struct `struct cursor_info` to know where to print
+            - `cursor_info` stores the x and y position of the cursor

@@ -1,6 +1,10 @@
 #ifndef protocol_util
 #define protocol_util
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef protocol_types
 #include "types.h"
 #endif
@@ -70,7 +74,7 @@ size strlen(uint8 *string)
 {
     size string_size = 0;
 
-    while(*(string++) != '\0') string_size++;
+    while(*(string++) != '\0' && *(string++)) string_size++;
     return string_size;
 }
 
@@ -125,5 +129,9 @@ void memsetd(uint32 *array, uint32 value, size count)
 }
 
 // **********END OF COMMON FUNCTIONALITY**********
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
