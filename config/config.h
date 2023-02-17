@@ -1,6 +1,9 @@
 #ifndef config
 #define config
-#include "../YamlParser/parser.h" 
+#include "../YamlParser/parser.h"
+
+/* Starting sector to start reading in sectors from. */
+#define sector_after_mbr		(uint8)0x02
 
 int32 main(int args, char *argv[]);
 

@@ -28,6 +28,13 @@ extern uint16 kernel_end;
 /* For user-convenience. */
 #define starting_point __attribute__((section("__start")))
 
+/* Memory address that are, without a doubt, able to be released to memory map ASAP. */
+const uint8 *instant_free_addresses[] = {
+    (const uint8 *)0x0500, 
+    (const uint8 *)0x9000,
+    (const uint8 *)0xA000 // Kernel would of been relocated by the program in `0x9000`
+};
+
 #ifdef __cplusplus
 }
 #endif

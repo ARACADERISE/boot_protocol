@@ -28,9 +28,9 @@ struc mbr_partition_table_entry
 	; How many sectors does the program obtain?
 	; This amount * 512 will be added to `bprogram_address` to calculate the ending address
 	; of the program
-	.sector_amnt:									resd 0x01
+	.sector_amnt:									resb 0x01
 	; Pad 1 byte
-	.pad:											resb 0x01
+	.pad:											resd 0x01
 endstruc
 
 %%macro CreateEntry	7
@@ -41,8 +41,8 @@ mbr_partition_entry%%+%%1:	istruc mbr_partition_table_entry
 	at mbr_partition_table_entry.auto_read_program,				db %%5
 	at mbr_partition_table_entry.last_sector_and_cylinder,		dw %%6
 	at mbr_partition_table_entry.relative_sector,				dd 0x0
-	at mbr_partition_table_entry.sector_amnt,					dd %%7
-	at mbr_partition_table_entry.pad,							db 0x0
+	at mbr_partition_table_entry.sector_amnt,					db %%7
+	at mbr_partition_table_entry.pad,							dd 0x0
 iend
 %%endmacro
 
@@ -65,7 +65,7 @@ start:
 	mov bx, 0x0500
 
 	mov ah, 0x02
-	mov al, 0x01
+	mov al, 0x%LX
 	mov ch, 0x00
 	mov cl, 0x02
 	mov dh, 0x00
@@ -95,7 +95,7 @@ failed:
 TIMES 0x01BE - $ + $$ db 0
 
 ; Second stage bootloader(0x0E = second-stage bootloader)
-CreateEntry 1, 0x80, 0x03, 0x0E, 1, 0x%LX, 0x%LX
+CreateEntry 1, 0x80, 0x%LX, 0x0E, 1, 0x%LX, 0x%LX
 
 ; Kernel(0x0D = kernel)
 CreateEntry	2, 0x00, 0x%LX, 0x0D, 1, 0x%LX, 0x%LX
@@ -111,6 +111,9 @@ mbr_partition_table_program_end:
 
 second_stage: incbin "%s"
 second_stageE:
+
+higher_half_kernel_program: incbin "bin/higher_half_kernel.bin"
+higher_half_kernel_programE:
 
 kernel: incbin "%s"
 kernelE:

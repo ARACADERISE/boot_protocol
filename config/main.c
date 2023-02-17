@@ -43,14 +43,32 @@ int32 main(int args, char *argv[])
 		/* Write MBR. */
 		format = realloc(format, (strlen(format) + 60) * sizeof(*format));
 
-		uint8 format2[strlen(format)];
+		/* Open `mbr_partition_table.bin` to see how many sectors it is then add that to `sector_after_mbr`. */
+		FILE* mbr_part_table_bin = fopen("../bin/mbr_partition_table.bin", "rb");
+
+		if(!(mbr_part_table_bin))
+		{
+			fclose(mbr_part_table_bin);
+			exit(1);
+		}
+
+		fseek(mbr_part_table_bin, 0, SEEK_END);
+		size_t bin_size = ftell(mbr_part_table_bin);
+		fseek(mbr_part_table_bin, 0, SEEK_SET);
+
+		fclose(mbr_part_table_bin);
+
+		uint8 format2[strlen(format)+120];
+		uint8 sector = sector_after_mbr + (bin_size / 512);
 		sprintf(format2, format,
-			0x03 + (yod.ss_filename_bin_size / 512),
+			bin_size/512,
+			sector,
+			sector + (yod.ss_filename_bin_size / 512),
 			yod.ss_filename_bin_size / 512,
-			0x03 + (yod.ss_filename_bin_size / 512),
-			0x03 + ((yod.ss_filename_bin_size / 512) + (yod.kern_filename_bin_size / 512)),
+			sector + (yod.ss_filename_bin_size / 512),
+			sector + ((yod.ss_filename_bin_size / 512) + (yod.kern_filename_bin_size / 512)),
 			yod.kern_filename_bin_size / 512,
-			0x03 + ((yod.ss_filename_bin_size / 512) + (yod.kern_filename_bin_size / 512)),
+			sector + ((yod.ss_filename_bin_size / 512) + (yod.kern_filename_bin_size / 512)),
 			0x15, 0x15,
 			strcat(ss_bin_file, yod.ss_filename_bin_name), 	// second_stage: incbin second stage binary
 			strcat(kern_bin_file, yod.kern_filename_bin_name));	// kernel: incbin kernel binary

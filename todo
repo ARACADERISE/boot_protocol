@@ -194,3 +194,21 @@
         - Write an API for C
         - Have some way to support an API for assembly
         - Make certain data required(such as FS, reading in sectors for the program `mbr_partition_table.bin`, making sure the bootloader includes the binary files for the second-stage bootloader and kernel)
+
+2/16/2023
+    -1:
+        - TODO: Currently we are reading sectors using int 13H. We are aiming on replacing this(refer to 2/15/2023)
+        - TODO: Get the assembly code to work so we can pass arguments and do it accordingly when we eventually support ATA PIO
+    -2:
+        - TODO: Add a way for the protocol to fix a mistake, if one occurrs.
+            - It seems useless to error upon an entry ID being wrong. Perhaps it's the right decision, but the protocol should be more than capable enough to manipulate the data
+            - This will require some checks with the entry, but we should be able to change the entry ID if the ID of the entry being checked does not match. This is set-and-stone. Another words, whatever ID I pass to the function HAS TO BE the ID of the entry. If it is not, the MBR was tweaked/manipulated by the user
+        - TODO: Add checks on MBR before booting to make sure the user did not mess with it?
+            - This will tie into the eventual feature of users being able to use there own MBR binary image
+    - TODO: The kernel will take up only so much memory. Should we make the memory after the kernel up to 0xFFFFFFF(after the kernel gets mapped to a higher address) and make it a FS for the kernel?
+        - The fourth MBR partition table will, more than likely, describe this FS
+        - If we want a FS to be located that high in memory, the program that makes the kernel reside there will have to make sure the FS gets copied from whatever lower physical address it got loaded to to the higher address a byte after the kernels ending address.
+        - It is either:
+            - We locate the FS in higher-half memory, after the kernel or
+            - We locate the FS after all the critical memory address(residing from 0x0500 - 0x7C00)
+                - This will give the "critical" FS 57 sectors(29 thousand bytes)

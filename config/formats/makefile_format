@@ -3,12 +3,13 @@
 .PHONY: build
 .PHONY: bootloader
 .PHONY: mbr_partition_table
+.PHONY: higher_half_kernel_program
 
 FLAGS = -masm=intel -O1 -Wno-error -c -nostdinc -nostdlib -fno-builtin -fno-stack-protector -ffreestanding -m32
 run: build
 	@qemu-system-i386 -drive format=raw,file=../bin/OS.image
 
-build: mbr_partition_table
+build: mbr_partition_table higher_half_kernel_program
 	@nasm protocol/protocol_util.s -f elf32 -o bin/protocol_util.o
 	@gcc ${FLAGS} -o %s ../%s
 	@gcc ${FLAGS} -o %s ../%s
@@ -26,6 +27,12 @@ mbr_partition_table:
 	@ld -m elf_i386 -Tboot/mbr_partition_table.ld -nostdlib --nmagic -o bin/mbr_partition_table.out bin/mbr_partition_table.o bin/partition_util.o
 	@objcopy -O binary bin/mbr_partition_table.out bin/mbr_partition_table.bin
 	@./bin/format.o bin/mbr_partition_table.bin --jpad
+
+higher_half_kernel_program:
+	@gcc ${FLAGS} -o bin/higher_half_kernel.o -c boot/higher_half_kernel.c
+	@ld -m elf_i386 -Tboot/higher_half_kernel.ld -nostdlib --nmagic -o bin/higher_half_kernel.out bin/higher_half_kernel.o
+	@objcopy -O binary bin/higher_half_kernel.out bin/higher_half_kernel.bin
+	@./bin/format.o bin/higher_half_kernel.bin --jpad
 
 clean:
 	@./config/scripts/clean

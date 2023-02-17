@@ -208,3 +208,25 @@
             - Example: `@rHello,@re World`
         - `print` now uses the struct `struct cursor_info` to know where to print
             - `cursor_info` stores the x and y position of the cursor
+
+2/16/2023
+    - `mbr_partition_table.c` now reads in sectors depending on information from the entries
+        - Added `read_in_memory` which takes the address, the starting sector and the sector amount
+            - 1:
+                - See `todo` for more info
+        - Added `check_not_extended_part_id` which checks to make sure the current entry was not messed with making it reference an extended partition table
+            - Extended partition table has been ruled out of the protocol, for now
+            - `check_not_extended_part_id` takes in the entry data and then the ID we expect
+            - If the function finds either that the entry ID is representing an extended partition table or is not the ID we passed, it will error and halt.
+                - 2:
+                    - See `todo` for more info
+        - Changed `sector_amnt` in the struct `_MBR_partition_table` to be 1 byte, not 4
+            - The padding is, now, 4 bytes.
+        - Added `load_program_for_higher_half_kernel`
+            - This assembly stub reads in 1 sector for a program that resides between the second stage bootloader and kernel
+            - This program takes the kernels address, takes all the data and copies it to a higher address and then performs a jump to the given address
+        - Added `higher_half_kernel.c`
+            - This program enables the kernel to be located in the "higher-half" of memory
+            - With this, the header file `MBR_data.h` was added
+            - The file `MBR_data.h` just holds common functionality over data that we need to work with the MBR partition table and its 4 entries
+            - The file is included in `MBR_partition_table.h` and in `higher_half_kernel.c`

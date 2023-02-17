@@ -7,7 +7,7 @@ SECTIONS {
 
     /* Second stage starts at 0x7E00. */
     . = 0xA000;
-    kernel_start = .;
+    kernel_start = 0x800000;
 
     .text : AT(0xA000)
     {
@@ -24,5 +24,5 @@ SECTIONS {
     }
 
 
-    kernel_end = .;
+    kernel_end = . + kernel_start;
 }
