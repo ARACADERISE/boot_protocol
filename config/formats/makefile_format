@@ -1,34 +1,34 @@
-.PHONY: run
-.PHONY: clean
-.PHONY: build
-.PHONY: bootloader
-.PHONY: mbr_partition_table
-.PHONY: higher_half_kernel_program
+.PHONY: run, clean, build
 
 FLAGS = -masm=intel -O1 -Wno-error -c -nostdinc -nostdlib -fno-builtin -fno-stack-protector -ffreestanding -m32
 run: build
-	@qemu-system-i386 -drive format=raw,file=../bin/OS.image
+	@qemu-system-i386 -m 4G -drive format=raw,file=../bin/OS.image
 
-build: mbr_partition_table higher_half_kernel_program
-	@nasm protocol/protocol_util.s -f elf32 -o bin/protocol_util.o
-	@gcc ${FLAGS} -o %s ../%s
-	@gcc ${FLAGS} -o %s ../%s
+%s:
+	@gcc ${FLAGS} -o ../%s ../%s
 	@ld -m elf_i386 -Tlinker/linker.ld -nostdlib --nmagic -o ../bin/boot.out ../%s bin/protocol_util.o
-	@ld -m elf_i386 -Tlinker/kernel.ld -nostdlib --nmagic -o ../bin/kernel.out ../%s bin/protocol_util.o
 	@objcopy -O binary ../bin/boot.out %s
-	@objcopy -O binary ../bin/kernel.out %s
 	@./bin/format.o %s --second_stage
-	@./bin/format.o %s --kernel
-	@nasm boot/boot.s -f bin -o ../bin/OS.image
 
-mbr_partition_table:
+%s:
+	@gcc ${FLAGS} -o ../%s ../%s
+	@ld -m elf_i386 -Tlinker/kernel.ld -nostdlib --nmagic -o ../bin/kernel.out ../%s bin/protocol_util.o
+	@objcopy -O binary ../bin/kernel.out %s
+	@./bin/format.o %s --kernel
+
+build: bin/mbr_partition_table.o ../%s ../%s bin/higher_half_kernel.o
+	@nasm protocol/protocol_util.s -f elf32 -o bin/protocol_util.o
+	@nasm boot/boot.s -f bin -o ../bin/OS.image
+	@chmod +x config/scripts/*
+	
+bin/mbr_partition_table.o:
 	@nasm boot/partition_util.s -f elf32 -o bin/partition_util.o
 	@gcc ${FLAGS} -o bin/mbr_partition_table.o -c boot/mbr_partition_table.c
 	@ld -m elf_i386 -Tboot/mbr_partition_table.ld -nostdlib --nmagic -o bin/mbr_partition_table.out bin/mbr_partition_table.o bin/partition_util.o
 	@objcopy -O binary bin/mbr_partition_table.out bin/mbr_partition_table.bin
 	@./bin/format.o bin/mbr_partition_table.bin --jpad
 
-higher_half_kernel_program:
+bin/higher_half_kernel.o:
 	@gcc ${FLAGS} -o bin/higher_half_kernel.o -c boot/higher_half_kernel.c
 	@ld -m elf_i386 -Tboot/higher_half_kernel.ld -nostdlib --nmagic -o bin/higher_half_kernel.out bin/higher_half_kernel.o
 	@objcopy -O binary bin/higher_half_kernel.out bin/higher_half_kernel.bin

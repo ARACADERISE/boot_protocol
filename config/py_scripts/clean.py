@@ -36,14 +36,14 @@ FLAGS = -masm=intel -O1 -Wno-error -c -nostdinc -nostdlib -fno-builtin -fno-stac
 build: mbr_partition_table higher_half_kernel_program
 	@chmod +x config/scripts/*
 	@nasm protocol/protocol_util.s -f elf32 -o ../bin/protocol_util.o
-	@gcc ${flags} -o ../bin/second_stage.o ../main.c
-	@gcc ${flags} -o ../bin/kernel.o ../kernel.c
-	@ld -m elf_i386 -Tlinker/linker.ld -nostdlib --nmagic -o ../bin/boot.out ../bin/second_stage.o ../bin/protocol_util.o
-	@ld -m elf_i386 -Tlinker/kernel.ld -nostdlib --nmagic -o ../bin/kernel.out ../bin/kernel.o ../bin/protocol_util.o
-	@objcopy -O binary ../bin/boot.out ../bin/second_stage.bin
-	@objcopy -O binary ../bin/kernel.out ../bin/kernel.bin
-	@./bin/format.o ../bin/second_stage.bin --second_stage
-	@./bin/format.o ../bin/kernel.bin --kernel
+	@gcc ${flags} -o ../{yaml_data["second_stage_bin_o_filename"]} ../{yaml_data["second_stage_source_code_file"]}
+	@gcc ${flags} -o ../{yaml_data["kernel_o_binary"]} ../{yaml_data["kernel_source_code_file"]}
+	@ld -m elf_i386 -Tlinker/linker.ld -nostdlib --nmagic -o ../bin/boot.out ../{yaml_data["second_stage_bin_o_filename"]} ../bin/protocol_util.o
+	@ld -m elf_i386 -Tlinker/kernel.ld -nostdlib --nmagic -o ../bin/kernel.out ../{yaml_data["kernel_o_binary"]} ../bin/protocol_util.o
+	@objcopy -O binary ../bin/boot.out ../{yaml_data["kernel_bin_filename"]}
+	@objcopy -O binary ../bin/kernel.out ../{yaml_data["second_stage_bin_filename"]}
+	@./bin/format.o ../{yaml_data["second_stage_bin_filename"]} --second_stage
+	@./bin/format.o ../{yaml_data["kernel_bin_filename"]} --kernel
 	@cd config && make build
 	
 mbr_partition_table:

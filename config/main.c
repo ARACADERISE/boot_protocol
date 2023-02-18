@@ -108,18 +108,24 @@ int32 main(int args, char *argv[])
 		format = read_format((const uint8 *)"formats/makefile_format", "r");
 
 		/* Create static memory. Allow for additional 120 characters. */
-		uint8 mformat1[strlen(format)+120];
+		uint8 mformat1[strlen(format)+180];
 
 		/* Apply values and write. */
 		sprintf(mformat1, format, 
 			strcat(ss_o_filename, yod.ss_filename_bin_o_name),
-			yod.ss_filename,
-			strcat(kernel_o_filename, yod.kern_filename_bin_o_name),
-			yod.kern_filename,
 			yod.ss_filename_bin_o_name,
+			yod.ss_filename,
+			yod.ss_filename_bin_o_name,
+			ss_bin_file,
+			ss_bin_file,
+			strcat(kernel_o_filename, yod.kern_filename_bin_o_name),
 			yod.kern_filename_bin_o_name,
-			ss_bin_file, kern_bin_file,
-			ss_bin_file, kern_bin_file);
+			yod.kern_filename,
+			yod.kern_filename_bin_o_name,
+			kern_bin_file,
+			kern_bin_file,
+			yod.ss_filename_bin_o_name,
+			yod.kern_filename_bin_o_name);
 		
 		fwrite(mformat1, strlen(mformat1), sizeof(*mformat1), makefile);
 

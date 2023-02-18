@@ -6,7 +6,7 @@
 static uint8 *kernel_start_address            = (uint8 *)0xA000;
 
 /* Kernels "higher-half" address. */
-static uint8 *kernel_higher_half_addr         = (uint8 *)0x800000;
+static uint8 *kernel_higher_half_addr         = (uint8 *)0x80000000;
 
 void __attribute__((section("__start"))) main()
 {
@@ -22,6 +22,6 @@ void __attribute__((section("__start"))) main()
         kernel_higher_half_addr++;
         kernel_start_address++;
     }
-    __asm__("jmp 0x8:0x800000");
+    __asm__("jmp 0x8:0x80000000");
     while(1);
 }

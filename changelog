@@ -230,3 +230,9 @@
             - With this, the header file `MBR_data.h` was added
             - The file `MBR_data.h` just holds common functionality over data that we need to work with the MBR partition table and its 4 entries
             - The file is included in `MBR_partition_table.h` and in `higher_half_kernel.c`
+
+2/18/2023
+    - Added more targets for Makefile
+    - `clean.py` now writes the needed values back to the makefile
+        - Before, we were manually telling it what binary files/source code files to put in the makefile
+    - The kernel can now be located in the higher half

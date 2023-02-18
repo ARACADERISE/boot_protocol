@@ -212,3 +212,10 @@
             - We locate the FS in higher-half memory, after the kernel or
             - We locate the FS after all the critical memory address(residing from 0x0500 - 0x7C00)
                 - This will give the "critical" FS 57 sectors(29 thousand bytes)
+
+2/18/2023
+    - TODO: Add data in MBR that enables protocol to see type of FS the user wants to use, OS version, OS name and other data that is useful
+    - TODO: Make it to where the protocol uses the `bin_folder` value in `boot.yaml` instead of making users specify the bin folder before the binary files
+    - TODO: Make it to where the data storing info over the OS stores the type of OS the user wants(32-bit, 64-bit)
+        - Depending on this, the program `higher_half_kernel.c` will either relocate the kernel or the protocol will offer functionality in-kernel for mapping the kernel to a higher-half virtual address
+        - `higher_half_kernel.c` is a program just for relocating 32-bit kernel in higher-half
