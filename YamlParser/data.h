@@ -19,16 +19,14 @@ typedef struct yaml_os_data
 
 	bool			has_second_stage;
 
-	// Description of second stage bootloader
-	uint8			*ss_entry_point;		// entry point of second-stage code
-	uint16			ss_size;				// second stage source code file size
-	uint8			*ss_filename;			// second stage source code file name
-	uint16			ss_filename_bin_o_size;	// second stage binary file name size
-	uint8			*ss_filename_bin_o_name;	// second stage binary file name
-	size			ss_filename_bin_size;
-	uint8			*ss_filename_bin_name;
-	size			ss_bin_size;			// size(in bytes) of binary file
-	
+	/* General OS information. */
+	uint8			*OS_name;
+	uint8			*OS_version;
+	uint8			FS_type;
+
+	/* Binary folder. */
+	uint8			*bin_folder;
+
 	// Description of kernel
 	uint8			*kern_entry_point;
 	size			kern_addr;
@@ -46,24 +44,23 @@ static const char * const needed_names[] = {
 	// Type of os. 32bit or 64bit
 	"os_type",
 
+	// Name of OS
+	"os_name",
+
+	// OS version
+	"os_vers",
+
+	// Preferred FS type(supported: FAT32, ext2, FAMPs custom FS)
+	"pref_FS",
+
 	// Binary folder where all binaries will be kept
 	"bin_folder",
-
-	// Second stage information
-	"has_second_stage",
 
 	// Kernel information
 	"kernel_o_binary",
 	"kernel_bin_binary",
 	//"kernel_addr",
 	"kernel_source_code_file"
-};
-
-/* If there is a second stage, these are the needed names. */
-static const char * const ss_needed_names[] = {
-	"second_stage_bin_o_filename",
-	"second_stage_bin_filename",
-	"second_stage_source_code_file"
 };
 
 /* Types of data. */

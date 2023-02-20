@@ -55,17 +55,3 @@ Info:
 	.kernel_size		dw ((kernelE - kernel) / 512)
 	.kernel_addr		dw 0x0%lx
 	.kernel_loc			dw 0x%lx
-
-OS_info:
-	; With this, the protocol will put some sort of data structure describing the type of FS
-	; the user is using at a specific location.
-	; The data at the specified memory address will be referred to by the protocol so it knows
-	; what functionality/structures to use when working with files/directories.
-	; If the user formats a disk image and mounts a FS other than what they specify they are using,
-	; the protocol will catch it by seeing the FS header in the disk image. If the protocol finds that
-	; the user specified a FS that the FS header at the beginning of the disk image does not describe,
-	; it will prompt to the user to change the preferred FS in `boot.yaml`, and halt.
-	.fs_type:			db 0x0 ; 0x1 - custom FS, 0x2 - FAT32, 0x3 - ext2
-	.os_name:			db "SomeCool OS     "
-	.os_version:		dw 0x0
-	.os_type:			db 0x0 ; 0x1 - 32 bit OS, 0x2 - 64 bit OS

@@ -236,3 +236,19 @@
     - `clean.py` now writes the needed values back to the makefile
         - Before, we were manually telling it what binary files/source code files to put in the makefile
     - The kernel can now be located in the higher half
+
+2/19/2023
+    - Added more targets to Makefile
+    - Fixed a few bugs that had to do with `clean.py`
+    - Updated `config/main.c` to format the correct data since `makefile_format` got updated
+    - Second stage bootloader C code is now in `boot_protocol/boot`
+        - Support for users writing there own second-stage bootloader has been removed
+        - The protocol will handle the second stage bootloader
+        - There might be additional information being added/required in `boot.yaml` since the second stage bootloader support has been ripped
+        - With this, `init_bootloader` will initialize a clean GDT slate by default. The second stage bootloader will define the macros `bit32_bit16_GDT` and `default_gdt`
+        - The file `gdt/gdt.h` will be getting updated to only support the 32-bit/16-bit GDT data structure
+    - `boot.yaml` now requires more info over the OS
+        - `os_name`: name of your OS
+        - `os_vers`: version of your OS
+        - `pref_FS`: preferred filesystem. If you mention a FS that is not supported the configuration defaults to FAMPs custom FS
+    - The os information from `boot.yaml` is used in the data structure `OS_info` in `boot/boot.s`

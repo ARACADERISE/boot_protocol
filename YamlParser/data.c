@@ -114,39 +114,22 @@ _yaml_os_data get_yaml_os_info()
 	if(strcmp((uint8*)yaml_file_data->val_data, "32bit") == 0) os_data.type = 0x02;
 	else if(strcmp((uint8*)yaml_file_data->val_data, "64bit") == 0) os_data.type = 0x03;
 	else os_data.type = 0x02;
-
-	_next
 	_next
 
-	/* Do we have a second stage? */
-	if(strcmp((uint8 *)yaml_file_data->val_data, "yes")==0)
-	{
-		os_data.has_second_stage = true;
-		_next
-
-
-		/* Second stage binary object file info. */
-		os_data.ss_filename_bin_o_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
-		os_data.ss_filename_bin_o_name = (uint8 *)yaml_file_data->val_data;
-		_next
-
-		/* Get size of second-stage binary. */
-		uint8 ss_bin_name[50] = "../../";
-		FILE* ss_bin = fopen((const uint8 *)strcat(ss_bin_name, (uint8 *)yaml_file_data->val_data), "rb");
-		yaml_assert(ss_bin, "Error opening second-stage binary file `%s`.\n", ss_bin_name)
-
-		fseek(ss_bin, 0, SEEK_END);
-		os_data.ss_filename_bin_size = ftell(ss_bin);
-		fseek(ss_bin, 0, SEEK_SET);
-
-		fclose(ss_bin);
-		os_data.ss_filename_bin_name = (uint8 *)yaml_file_data->val_data;
-		_next
-
-		/* Second stage source code file info. */
-		os_data.ss_size = (uint16)strlen((const uint8 *)yaml_file_data->val_data);
-		os_data.ss_filename = (uint8 *)yaml_file_data->val_data;
-	}
+	os_data.OS_name = (uint8 *)yaml_file_data->val_data;
+	_next
+	
+	os_data.OS_version = (uint8 *)yaml_file_data->val_data;
+	_next
+	
+	/* Check all instances. If none of the three `if`s are true, default to custom FS. */
+	if(strcmp((uint8 *)yaml_file_data->val_data, "custom") == 0) os_data.FS_type = 1;
+	else if(strcmp((uint8 *)yaml_file_data->val_data, "FAT32") == 0) os_data.FS_type = 2;
+	else if(strcmp((uint8 *)yaml_file_data->val_data, "ext2") == 0) os_data.FS_type = 3;
+	else os_data.FS_type = 1;
+	_next // TODO: Use the `bin_folder` value. For now, just assign the value
+	
+	os_data.bin_folder = (uint8 *)yaml_file_data->val_data;
 	_next
 
 	/* Kernel binary file info. */

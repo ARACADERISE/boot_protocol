@@ -6,13 +6,13 @@ FLAGS = -masm=intel -O1 -Wno-error -c -nostdinc -nostdlib -fno-builtin -fno-stac
 build: mbr_partition_table higher_half_kernel_program
 	@chmod +x config/scripts/*
 	@nasm protocol/protocol_util.s -f elf32 -o ../bin/protocol_util.o
-	@gcc ${FLAGS} -o ../bin/second_stage.o ../main.c
+	@gcc ${FLAGS} -o bin/second_stage.o boot/second_stage.c
 	@gcc ${FLAGS} -o ../bin/kernel.o ../kernel.c
-	@ld -m elf_i386 -Tlinker/linker.ld -nostdlib --nmagic -o ../bin/boot.out ../bin/second_stage.o ../bin/protocol_util.o
+	@ld -m elf_i386 -Tlinker/linker.ld -nostdlib --nmagic -o bin/boot.out bin/second_stage.o ../bin/protocol_util.o
 	@ld -m elf_i386 -Tlinker/kernel.ld -nostdlib --nmagic -o ../bin/kernel.out ../bin/kernel.o ../bin/protocol_util.o
-	@objcopy -O binary ../bin/boot.out ../bin/kernel.bin
-	@objcopy -O binary ../bin/kernel.out ../bin/second_stage.bin
-	@./bin/format.o ../bin/second_stage.bin --second_stage
+	@objcopy -O binary bin/boot.out bin/second_stage.bin
+	@objcopy -O binary ../bin/kernel.out ../bin/kernel.bin
+	@./bin/format.o bin/second_stage.bin --second_stage
 	@./bin/format.o ../bin/kernel.bin --kernel
 	@cd config && make build
 	

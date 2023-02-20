@@ -35,7 +35,7 @@ int32 main(int args, char *argv[])
 	FILE* boot_file = fopen("../boot/boot.s", "w");
 	FILE* makefile = fopen("../Makefile", "w");
 
-	if(yod.has_second_stage == true)
+	/* Write MBR. */
 	{
 		/* Open MBR format. */
 		format = read_format((const uint8 *)"formats/boot_format", "rb");
@@ -58,37 +58,38 @@ int32 main(int args, char *argv[])
 
 		fclose(mbr_part_table_bin);
 
+		FILE* second_stage_bin = fopen("../bin/second_stage.bin", "rb");
+
+		if(!(second_stage_bin))
+		{
+			fclose(second_stage_bin);
+			exit(1);
+		}
+
+		fseek(second_stage_bin, 0, SEEK_END);
+		size_t ssb_size = ftell(second_stage_bin);
+		fseek(second_stage_bin, 0, SEEK_SET);
+
+		fclose(second_stage_bin);
+
 		uint8 format2[strlen(format)+120];
 		uint8 sector = sector_after_mbr + (bin_size / 512);
 		sprintf(format2, format,
 			bin_size/512,
+			yod.FS_type,
+			yod.OS_name,
+			yod.OS_version,
+			yod.type,
 			sector,
-			sector + (yod.ss_filename_bin_size / 512),
-			yod.ss_filename_bin_size / 512,
-			sector + (yod.ss_filename_bin_size / 512),
-			sector + ((yod.ss_filename_bin_size / 512) + (yod.kern_filename_bin_size / 512)),
+			sector + (ssb_size / 512),
+			ssb_size / 512,
+			sector + (ssb_size / 512),
+			sector + ((ssb_size / 512) + (yod.kern_filename_bin_size / 512)),
 			yod.kern_filename_bin_size / 512,
-			sector + ((yod.ss_filename_bin_size / 512) + (yod.kern_filename_bin_size / 512)),
+			sector + ((ssb_size / 512) + (yod.kern_filename_bin_size / 512)),
 			0x15, 0x15,
-			strcat(ss_bin_file, yod.ss_filename_bin_name), 	// second_stage: incbin second stage binary
+			"bin/second_stage.bin",//strcat(ss_bin_file, yod.ss_filename_bin_name), 	// second_stage: incbin second stage binary
 			strcat(kern_bin_file, yod.kern_filename_bin_name));	// kernel: incbin kernel binary
-		fwrite(format2, sizeof(uint8), strlen(format2), boot_file);
-
-		fclose(boot_file);
-	} else
-	{
-		format = read_format((const uint8 *)"formats/boot_format2", "rb");
-
-		/* Write MBR. */
-		format = realloc(format, (strlen(format) + 60) * sizeof(*format));
-
-		uint8 format2[strlen(format)];
-		sprintf(format2, format,
-			yod.kern_addr*16,							// jmp 0x8:kernel_address
-			yod.kern_addr, 								// .kernel_addr dw addr
-			yod.kern_addr*16, 							// .kernel_loc dw addr
-			strdel(yod.kern_filename_bin_name, 0, 3)	// kernel: incbin kernel binary
-		);
 		fwrite(format2, sizeof(uint8), strlen(format2), boot_file);
 
 		fclose(boot_file);
@@ -102,8 +103,8 @@ int32 main(int args, char *argv[])
 	 * the kernel/second-stage binary files HAVE to exist for this file(`main.c`,`main.o`) to run, however, this file NEEDS to run(if its configuring `gdt_ideals.s`)
 	 * before the according binary files are generated. So, currently, we're in a stalemate.
 	 */
-
-	if(yod.has_second_stage == true)
+	
+	/* Write Makefile. */
 	{
 		format = read_format((const uint8 *)"formats/makefile_format", "r");
 
@@ -112,52 +113,31 @@ int32 main(int args, char *argv[])
 
 		/* Apply values and write. */
 		sprintf(mformat1, format, 
-			strcat(ss_o_filename, yod.ss_filename_bin_o_name),
-			yod.ss_filename_bin_o_name,
-			yod.ss_filename,
-			yod.ss_filename_bin_o_name,
-			ss_bin_file,
-			ss_bin_file,
 			strcat(kernel_o_filename, yod.kern_filename_bin_o_name),
 			yod.kern_filename_bin_o_name,
 			yod.kern_filename,
 			yod.kern_filename_bin_o_name,
 			kern_bin_file,
 			kern_bin_file,
-			yod.ss_filename_bin_o_name,
 			yod.kern_filename_bin_o_name);
 		
 		fwrite(mformat1, strlen(mformat1), sizeof(*mformat1), makefile);
 
 		fclose(makefile);
-	} else
-	{
-		format = read_format("formats/makefile_format2", "r");
-
-		/* Create static memory. Allow for additional 120 characters. */
-		uint8 mformat2[strlen(format)+120];
-
-		/* Apply values and write. */
-		sprintf(mformat2, format, 
-			strcat(kernel_o_filename, yod.kern_filename_bin_o_name),
-			yod.kern_filename,
-			yod.kern_filename_bin_o_name);
-		
-		fwrite(mformat2, strlen(mformat2)-1, sizeof(*mformat2), makefile);
-
-		fclose(makefile);
 	}
 
-	/* Write the users Makefile. */
-	FILE *user_makefile = fopen("../../Makefile", "w");
+	/* Write users Makefile. */
+	{
+		/* Write the users Makefile. */
+		FILE *user_makefile = fopen("../../Makefile", "w");
 
-	config_assert(user_makefile, "Error creating users-makefile.\n")
-	format = read_format((const uint8 *)"formats/user_makefile_format", "rb");
+		config_assert(user_makefile, "Error creating users-makefile.\n")
+		format = read_format((const uint8 *)"formats/user_makefile_format", "rb");
 
-	/* Write. */
-	fwrite(format, strlen(format), sizeof(*format), user_makefile);
-	fclose(user_makefile);
-
+		/* Write. */
+		fwrite(format, strlen(format), sizeof(*format), user_makefile);
+		fclose(user_makefile);
+	}
 	free(format);
 
 	return 0;

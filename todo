@@ -219,3 +219,15 @@
     - TODO: Make it to where the data storing info over the OS stores the type of OS the user wants(32-bit, 64-bit)
         - Depending on this, the program `higher_half_kernel.c` will either relocate the kernel or the protocol will offer functionality in-kernel for mapping the kernel to a higher-half virtual address
         - `higher_half_kernel.c` is a program just for relocating 32-bit kernel in higher-half
+
+2/19/2023
+    - TODO: Rip out support for second stage bootloader.
+        - Make the protocol do all bootloader work.
+        - We want to aim on getting the right into kernel
+        - With this, we will use the pre-existing API code available for the protocols second stage bootloader
+        - The file `boot_format2` will be deleted and we will add a program called `FAMP_second_stage_boot.c` in the directory `boot_protocol/boot`
+        - We will only support a 32-bit/16-bit GDT. So, the program `FAMP_second_stage_boot.c` will define `bit32_bit16_GDT` and `default_gdt`
+        - The assembly stub `init_bootlaoder` will no longer take in an argument and default to `DEFAULT_ALL`
+    - TODO: Rename `boot.s` to `FAMP_init_boot.s`
+    - TODO: Make it to where the protocol can check what type of OS(32-bit or 64-bit) the developers is making. If there os is 32-bit, then the program `higher_half_kernel.c` will run; if 64-bit, the program will not run
+    - TODO: Add limit to how long the OS name can be
