@@ -1,0 +1,54 @@
+__asm__("xor ax, ax\nmov ax, %0" : : "dN"((uint16)mem_stamp));
+    print_word_hex();
+    __asm__("xor ax, ax\nmov ax, %0" : : "dN"((uint16)mem_stamp->memory_id));
+    print_word_hex();
+    halt*/
+    //print("Found It: Yes");
+    //__asm__("mov ax, %0" : : "dN"((uint16)mem_stamp->memory_stamp_magic_number));
+    //print_word_hex();
+    uint16 amount = 0;
+    while(1)
+    {
+        byte = *addr;
+        addr++;
+        amount++;
+
+        if(byte == 0x0B)
+        {
+            amount--;
+            __asm__("mov ax, %0" : : "dN"((uint16)amount));
+            print_word_hex();
+            __asm__("mov ax, %0" : : "dN"((uint16)byte));
+            print_word_hex();
+            byte = *addr;
+            __asm__("mov ax, %0" : : "dN"((uint16)byte));
+            print_word_hex();
+            addr+=2;
+            byte = *addr;
+            __asm__("mov ax, %0" : : "dN"((uint16)byte));
+            print_word_hex();
+            __asm__("mov ax, %0" : : "dN"((uint16)addr));
+            print_word_hex();
+
+            addr = (uint8 *) second_stage_end;
+            addr += 0x0189;
+            byte = *addr;
+            __asm__("mov ax, %0" : : "dN"((uint16)byte));
+            print_word_hex();
+            halt
+        }
+    }
+
+    //__asm__("mov ah, %0" : : "dN"(mem_stamp->memory_id));
+    //print_word_hex();
+    /*__asm__("mov ax, %0" : : "dN"((uint16)second_stage_start));
+    print_word_hex();
+    __asm__("mov ax, %0" : : "dN"((uint16)second_stage_end));
+    print_word_hex();
+    halt*/
+    /*uint8 *ptr = (uint8 *)0x7C00;
+    ptr += 480;
+    ptr+=2;
+    if(*ptr == 20) print("Yes");
+
+    halt

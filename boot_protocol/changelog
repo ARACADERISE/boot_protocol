@@ -1,0 +1,254 @@
+1/12/2023
+    - Added linker directory to `boot_protocol`
+    - Added `linker.ld` and `kernel.ld` to `linker` directory
+    - 1
+        - See `todo` for more info
+    - `boot.yaml` is now located in the parent directory of the OS code, not the inside the `boot_protocol` directory
+    - 3
+        - See `todo` for more info
+
+1/13/2023
+    - Added `quick_edit.py`, a Python script that quickly fills out/writes the formats for the linker script 
+      and fills out the format for `gdt_ideals.s`
+    - Binary files are now created before the configuration of the MBR, user-makefile, protocol makefile and whatever else
+      gets configured via `main.c`
+    - Added `ss_linker_format` - A linker-script format for the second-stage bootloader
+        - Furthermore, we implied the requirement of second-stage bootloader being loaded in at physical address 0x7E00, regardless
+    - Added `kern_linker_format` - A linker-script format for the kernel
+        - 1
+            - See `todo` for more info
+    - If there is a second-stage bootloader(`has_second_stage` has the value "yes"), the protocol now makes sure the according information
+      is given
+        - 2
+            - See `todo` for more info
+
+1/14/2023
+    - Linker scripts no longer manually put a byte after the last byte of the sector
+        - With this, `format.c` pads out all binary files to 512 byte blocks(sectors)
+    - Fixed `clean.py`. It wasn't deleting all .bin, .o and .out files within the binary folder
+    - Programmers now have to tell the protocol the folder of where the binary files are located. This is done via `bin_folder`
+        - 1
+            - See `todo` for more info
+    - Linker scripts are as-is. The protocol does not tweak with the linker scripts.
+        - As of current, the protocol loads kernel at 0x9000.
+        - This will change when the protocol is mature enough to do paging(for higher-half kernel)
+    - `quick_edit.py` now only writes to `boot_protocol/gdt/gdt_ideals.s`, as well as checks if all the required data exists
+
+1/16/2023
+    - `clean.py` now uses data from `boot.yaml` to write clean formats to files with the according data
+    - `quick_edit.py` is now no longer used(as of current). `boot_protocol/protocol/gdt/gdt_ideals.s` no longer needs to be formatted.
+      The temporary kernel address is 0x9000, so we hard-coded the jump from real-mode to 32-bit mode
+        - With this, `kernel_addr` is no longer needed in `boot.yaml`
+    - Started to add "memory stamp" feature.
+        - 1
+            - See `todo` for more info
+
+1/17/2023
+    - `print_word_hex` in `print.s` now puts a newline at the end of the stub
+    - `format.c` is now comptabile with formatting separate binary files
+        - With this, we did away with the TODO over creating separate c programs, one strictly for the second stage bootloader binary and one strictly for kernel binary
+    - The protocol now writes a "memory stamp" in the last X amount of bytes of the last sector of the binary
+    - Added critical addresses to `linker.ld`
+        - This includes `g_gdt_address`, `g_gdt_desc_address` and `g_gdt_status_address
+    - The second-stage bootloader is now located at `0x7F00`
+        - The memory region from 0x7E00 to 0x7F00 is used for critial memory addresses that the protocol needs
+    - Added `second_stage_start` and `second_stage_end` symbols
+    - Made it to where the protocol obtains the memory stamp at the end of the binary files
+        - Added in `find_memory_stamp_offset_address`, which returns a char pointer to the start of the memory map(we reference the memory stamp 1 byte at a time to find)
+    - Tweaked with `print.h`
+        - The function `print` now no longer uses the assembly stub `print_char`
+            - This fixes the issue of whatever tf what happening with the function. It caused the assembly stub that
+              loads 32-bit mode not to work, or it forced the overall emulator to halt.. which is weird. But it works not
+            - 1
+                - See `todo` for more info
+        - The function now manually puts a newline, manually puts tabs etc
+
+1/19/2023
+    - In `gdt/gdt.h`, the variable `gdt` and `gdtDesc` were set to addresses that were not being used for the intended functionality.
+      We now use `g_gdt_address` and `g_gdt_desc_address` in place of the former `gdt` and `gdtDesc`
+        - With this, the `null` descriptor of a "clean" GDT will have a value of `1`.
+            - This is so the protocal can dereference the pointer of `g_gdt_address` and check if the value is 1, or zero
+    - The function `setup_gdt_and_gdt_desc` no longer errors if `default_gdt` is not defined and the gdt status is zero
+        - This is something that the function `load_32bit` is now entitled to do
+    - Added `memory_stamp_magic_id_not_found`, a macro constant that is assigned to the `memory_stamp_magic_number` field of the struct `memory_stamp`
+      if the `memory_stamp_magic_number_id` was not found anywhere in the binary file
+    - The "magic number" the references the start of the memory stamp is now no longer a 32-bit integer
+        - Instead, the "magic number" referencing the start of the memory stamp is made up of 5 separate bytes
+        - [0x2B, 0xFF, 0x2F, 0xDF, 0x88]
+    - Protocol fills out the memory stamp with default values if it doesn't find the designated bytes for the "magic number" id
+        - The value `memory_stamp_magic_number` gets assigned the values
+        - [0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+        - Everything else gets assigned the value zero
+    - `format.c` now is able to take a new argument `--jpad`
+        - `--jpad` tells the code that we just want to pad out the binary with zeros
+        - This will be used mainly on binary object(.o) files before linking so the linker generates a more
+          accurate ending address.
+    - With the change of the "magic number", the function `find_memory_stamp_offset_address` has been changed as well
+        - It now keeps a increment on the total amount of bytes its found
+        - Once it has found all the bytes, it continues
+        - If it finds that the address of `addr` is up to, or pass, the address of the kernel, it'll break the loop, assign default values
+          to the memory stamp and return. 
+    - Began to add the feature where we grab the return value from a specific register
+        - Functions such as `grab_return_value_from` and `grab_return_val_in_eax`
+    - Added `__test_address`
+        - This takes in a starting address, the offset(in bytes) from this address, and a conditional address
+        - `__test_address` adds the offset(in bytes) to the starting address and thus checks if it is greater than the conditional address
+    - Started to add more descriptive comments in all files
+    - Started to make all "back-end" function begin with two underscored
+
+1/21/2023
+    - `find_memory_stamp_offset_address` now works
+        - 1
+            - See `todo` for more info
+        - The function now takes in a "setting". The "setting" tells the function what memory id to look for
+        - If the function obtains a memory stamp where the memory id does not match, it will return `NULL`
+    - `memory_stamp_magic_number_id` now has the values
+        - [0x2B, 0x87, 0x87, 0x87, 0x87]
+    - Figured out why protocol would error randomly
+        - It's due to the fact I wasn't preserving the stack
+        - Now, in assembly stubs where this is critical, we `pusha` at the beginning and `popa` at the end
+
+1/22/2023
+    - Changed `find_memory_stamp_offset_address` to `__obtain_memory_stamp`
+        - `memory_stamp_magic_number_id` now has the values
+            - [0x2B, 0x84, 0x83, 0x82, 0x81]
+    - Added `__print_char_color` which prints a colored character via BIOS teletyping
+        - 1
+            - See `todo` for more info
+
+1/27/2023:
+    - Cleaned up some code
+    - Started to add in MBR partition table
+    - Fixed a few erros
+
+1/28/2023:
+    - Implemented `mbr_partition_table.c` and `mbr_partition_table.h`
+        - These files will be the first ever program the protocol runs(besides the MBR)
+        - This program reads the MBR partition table and checks for a bootable device(system ID = 0x80) or a description of an extended partition table(system ID = 0x0F, 0x05)
+        - With this, `boot.s` has also changed quite a bit
+    - Critical addresses for the protocol now dwell in the memory region 0x900-0x7C00
+        - The above program resides in the memory region 0x500-0x900
+
+2/6/2023
+    - Added `_MBR_partition_table_entry`
+        - A C struct that stores all data that a MBR partition table entry has
+    - Added:
+        - `MBR_partition_table_entries_offset`: Offset from beginning of MBR where partition table entries will be located
+        - `second_MBR_partition_table_entry`: Offset where the second MBR partition table entry begins
+        - `third_MBR_partition_table_entry`: Offset where the third MBR partition table entry begins
+        - `fourth_MBR_partition_table_entry`: Offset where the fourth MBR partition table entry begins
+        - `extended_partition_table_id_1`/`extended_partition_table_id_2`: IDs for extended partition table
+        - `partition_entry_unused`: Indication(zero-value) of a unused entry(protocol does nothing with the data in the entry. If a entry is unused, there should be no data assigned)
+            - 1
+                - See `todo` for more info
+        - `MBR_address`: Beginning address of the MBR(0x7C00)
+
+2/10/2023
+    - Took away `Info` block in `boot.s`
+        - The first two entries of the MBR partition table now describe the second stage bootloader and kernel
+        - With this, the program `mbr_partition_table.c` will parse the entries, read in the according amount of sectors and depending on whether or not the entries field `.auto_read_program` is set to 1 or not it will then add it to a qeueu that the program will check after parsing all entries and run the programs in order that they were added
+        - `main.c` got updated and the default makefile format got updated as well
+            - The initial makefile to initiate everything now formats all flat binary files to multiple of 512 bytes
+            - This enables the YAML program to obtain the right size(in bytes) and enables `format.c` and `main.c` to use the actual right size instead of an estimate with it NOT formatted to multiples of 512 bytes
+        - The bootloader now does not read in sectors for second stage or kernel
+    - The macro `CreateEntry` now only needs 7 arguments:
+        - Is it bootable?
+        - Starting sector
+        - Entry type
+        - Is the protocol required to auto read the program and add it to qeueu?
+        - Last sector
+        - Sector amount
+    - `relative_sector` is, by default, zero. This value has been ruled out to NOT be touched.
+    - Updated values of:
+        - `second_MBR_partition_table_entry`
+            - `(0x1BE + 0) + 16`
+        - `third_MBR_partition_table_entry`
+            - `(0x1BE + 16) + 16`
+        - `fourth_MBR_partition_table_entry`
+            - `(0x1BE + 32) + 16`
+    - Added in the following IDs for `entry_type`:
+        - `partition_entry_ssb_id`
+            - ID referencing second stage bootloader
+            - `ssb` = (s)econd (s)tage (b)ootloader
+        - `partition_entry_kern_id`
+            - ID referencing kernel
+        - `partition_entry_FS_id`
+            - ID referencing the FS
+        - `partition_entry_critical_FS_id`
+            - ID referencing a FS that is for the protocol/kernel only
+            - With this, the FS which got assigned this ID will only store critical data/code that the kernel and or protocol want to keep out of users reach
+            - This type of FS is simply to keep critical ideals safe so it doesn't be obstructed by the user or a possible kernel process
+    - Reserved all registers in `mbr_partition_table.c`(`__asm__("pusha")`)
+
+2/12/2023
+    - Added `b8000_api.h` - A header file that houses functionality for manipulating the video memory address 0xB8000
+    - The kernel header file will check if `using_vesa` is defined or if `using_b8000`/`using_default` is defined.
+        - 1: see `todo` for more info
+    - Made overall protocol compatible with C++
+
+2/13/2023
+    - Fixed bug in `format.c`
+        - Binary files were not being formatted correctly(they were not multiple of 512 bytes)
+        - 1
+            - See `todo` for more info
+
+2/15/2023
+    - Fixed `print` function in `b8000_api.h`
+        - The function now allows users to color-code there text
+        - This is done via `@[color]`, where color can be:
+            - `b`: Blue
+            - `B`: Black
+            - `br`: Brown
+            - `w`: White
+            - `r`: Red
+            - `c`: Cyan
+            - `m`: Magenta
+            - `g`: green
+            - `re`: Reset(color = white)
+            - Example: `@rHello,@re World`
+        - `print` now uses the struct `struct cursor_info` to know where to print
+            - `cursor_info` stores the x and y position of the cursor
+
+2/16/2023
+    - `mbr_partition_table.c` now reads in sectors depending on information from the entries
+        - Added `read_in_memory` which takes the address, the starting sector and the sector amount
+            - 1:
+                - See `todo` for more info
+        - Added `check_not_extended_part_id` which checks to make sure the current entry was not messed with making it reference an extended partition table
+            - Extended partition table has been ruled out of the protocol, for now
+            - `check_not_extended_part_id` takes in the entry data and then the ID we expect
+            - If the function finds either that the entry ID is representing an extended partition table or is not the ID we passed, it will error and halt.
+                - 2:
+                    - See `todo` for more info
+        - Changed `sector_amnt` in the struct `_MBR_partition_table` to be 1 byte, not 4
+            - The padding is, now, 4 bytes.
+        - Added `load_program_for_higher_half_kernel`
+            - This assembly stub reads in 1 sector for a program that resides between the second stage bootloader and kernel
+            - This program takes the kernels address, takes all the data and copies it to a higher address and then performs a jump to the given address
+        - Added `higher_half_kernel.c`
+            - This program enables the kernel to be located in the "higher-half" of memory
+            - With this, the header file `MBR_data.h` was added
+            - The file `MBR_data.h` just holds common functionality over data that we need to work with the MBR partition table and its 4 entries
+            - The file is included in `MBR_partition_table.h` and in `higher_half_kernel.c`
+
+2/18/2023
+    - Added more targets for Makefile
+    - `clean.py` now writes the needed values back to the makefile
+        - Before, we were manually telling it what binary files/source code files to put in the makefile
+    - The kernel can now be located in the higher half
+
+2/19/2023
+    - Added more targets to Makefile
+    - Fixed a few bugs that had to do with `clean.py`
+    - Updated `config/main.c` to format the correct data since `makefile_format` got updated
+    - Second stage bootloader C code is now in `boot_protocol/boot`
+        - Support for users writing there own second-stage bootloader has been removed
+        - The protocol will handle the second stage bootloader
+        - There might be additional information being added/required in `boot.yaml` since the second stage bootloader support has been ripped
+        - With this, `init_bootloader` will initialize a clean GDT slate by default. The second stage bootloader will define the macros `bit32_bit16_GDT` and `default_gdt`
+        - The file `gdt/gdt.h` will be getting updated to only support the 32-bit/16-bit GDT data structure
+    - `boot.yaml` now requires more info over the OS
+        - `os_name`: name of your OS
+        - `os_vers`: version of your OS
+        - `pref_FS`: preferred filesystem. If you mention a FS that is not supported the configuration defaults to FAMPs custom FS
+    - The os information from `boot.yaml` is used in the data structure `OS_info` in `boot/boot.s`

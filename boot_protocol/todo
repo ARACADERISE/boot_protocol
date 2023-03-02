@@ -1,0 +1,233 @@
+1/12/2023
+    1:
+        - TODO: Make it to where users pass entry points of second-stage/kernel, then format the linker scripts accordingly
+            - Status: Done
+        - TODO: Locate second-stage at 0x7E00, locate kernel at higher-half
+            - Status: Done
+    3:
+        - TODO: Make it to where `boot.yaml` requires the user to tell the protocol where binary files are stored, example
+            - bin_dir: "bin"
+            - Status: Work-in-progress
+        - TODO: Make the protocol create the bin directory for the user
+            - Status: Done
+
+1/13/2023
+    1:
+        - TODO: Make it to where `linker/kernel.ld` maps kernel into higher-half
+    2:
+        - TODO: The Python script `quick_edit.py` does all the checking for us. Checkings include
+            - Making sure all data exists in `boot.yaml`
+            - More precisely, making sure all the data exists IN ORDEr in `boot.yaml`
+            - I want this to be done in C. I hate using Python for the littlest automated scenes of the protocol
+        - TODO: Multi-step configuration? For exampl
+            - `config1.c` configures the linker scripts and `boot_protocol/gdt/gdt_ideals.s`
+            - `config2.c` configures the MBR, possible second-stage bootloader(if the programmer didn't write one themselves),
+              user-makefile, protocol makefile and the according binary
+            - With this, `config1.c` will most likely not be shipped natively with the protocol, rather, its binary object file
+            - Meanwhile, with `config2.c`, it will most likely be shipped natively with the protocol
+            - `config2.c` will be the current `main.c` inside `boot_protocol/config`
+            - `config2.c` will continue to use the `Makefile` inside `boot_protocol/config`, meanwhile, `config1.c` will just have
+              its binary object file shipped with the protocol
+    extra:    
+        - TODO: Implement a better printing api for bootloader
+            - `FAMP_log_info` - Log general information
+                - This will, generally, be used more as a way to "store" information over what's happening
+                - With this, I can add a function like `show_all_log_info` and it will print, in a "fancy" way, all the logs
+                - This might be helpful with just keeping up on what the protocol has done so far
+            - `FAMP_log` - Directly print stuff in the emulator window. Normally used if there was a general error
+            - `FAMP_log_error` - "Fancy" printing for error. This will directly print stuff to the emulator window
+        - TODO: Make all "backend" code have `__` before there names
+        - TODO: Clean up ALL code
+        - TODO: Color print errors?
+        - TODO: Add in macros that users(and myself) can use to easily run assembly commands
+        - TODO: Implement a small dissassembler for FAMP
+        - TODO: Make it to where FAMP complies only with a custom binary format?
+
+1/14/2023
+    - 1
+        - TODO: Make the protocol use the `bin_folder` variable available via `boot.yaml`
+            - With this, the user won't need to put the folder where a binary file is to be located.
+              `bin_folder` will be used throughout the protocol to make sure binaries get placed accoringly
+    - TODO: Create C program strictly for second stage and kernel binary files
+            - The C program that works with the second stage binary will append data to the binary over the second-stage bootloaders
+              memory. This data includes type of memory, the amount of memory, what access the programmer has to the memory, and the "activity"
+              of the memory, or, another words, if the memory is meant to be used later on or not.
+            - The C program that works with the kernel binary will do the same as the C program that works with the second stage bootloader
+              binary. It'll append data to the end of the binary file that explains things about the kernels memory.
+        - TODO: Make it to where the protocols configuration places a "memory stamp" at the end of the binary files that it formats
+            - The protocol formats binary files to be padded out to multiples of 512 byte blocks(sectors)
+            - The protocol puts a section of data describing the binaries memory at the end of the binary
+            - TODO: Make it to where the protocol checks for the "memory stamp" at the end of all the according binary addresses
+                - The "memory stamp" at the end of the binary file is required
+                - The "memory stamp" at the end of the binary file helps gives critical information over the memory
+        - TODO: Add "FAMP Tools".
+            - "FAMP Tools" is a group of tools that can be used to make the programmers experience using FAMP better.
+            - The collection of tools includes, but won't be limited to:
+                - `famp-init $new_dir_name` - init a new directory with all needed tools to get you started
+                    - `famp-init` not only creates a new directory for you, sets up all needed tools and makes sure FAMP is installed locally,
+                      it also generates example templates.
+                - `famp-reset` - resets the entire code-base of the directory.
+                    - Regardless what you had, as soon as you run this, it deletes everything and invokes `famp-init`
+                - `famp-config` - configures the binaries needed to create the finale OS image
+                    - This is automatically ran via `famp-run`. `famp-config` generates the binary files for the second-stage C bootloader(if there is one)
+                      and for the kernel. `famp-run` invokes `famp-config`, then proceeds to generate the MBR binary and after it generates the MBR
+                      binary, it combines all the binary files into one image
+                - `famp-mema-save $mem_address $for` - Implement a feature where the protocol reserves 512 bytes of memory for memory addresses
+                    - The user will use `famp-mema-save` to save a memory address within the 512 bytes
+                    - `for` takes `second-stage` or `kernel`
+                    - Example: `famp-mema-save 0x8D00 second-stage`
+                - `famp-check $file` - checks a binary file for the "memory stamp" the protocols configuration
+                  puts at the end of the binary file
+        - TODO: Make `init_bootloader` check for memory map
+            - Store the result in a memory address that will be checked/returned by the protocol when the user calls `check_memory_map_availability`
+        - TODO: Make `init_bootloader` default to default video mode(`0xB8000`) if VESA video mode is not supported
+        - TODO: With the protocol reserving 512 bytes(1 sector) for the user to save memory addresses, we need a function that obtains this information
+            - Protocol will need two different arrays, or structs(either or). One for kernel memory addresses and one for second-stage bootloader memory addresses
+            - I would say add a feature where the programmer can specify what can be done with the memory address, however, that would take up more memory than need-be.
+              Also, odds are, the memory addresses they are saving will be used for both reading and writing purposes.
+
+1/16/2023
+    - 1
+        - TODO: with the famp tool `famp-mema-save`, the protocol will have to place a "memory stamp" at the end of the binary
+            - The binary file where data over memory addresses needs the "memory stamp"
+        - TODO: If the user tells the protocol to load anything else into memory, the protocol has to make sure to put a "memory stamp"
+                at the end of the binary.
+            - With this, there will be a new FAMP tool - `famp-create-binary $source_code_file`
+                - `famp-create-binary` takes in a source code file, and will generate a binary file that pads out to multiples of 512 byte blocks(sectors)
+                - The tool also puts a "memory stamp" in the last 40 or so bytes of the binary
+                - FAMP tools will become a huge part in the protocols flexibility
+                - With `famp-create-binary`, another tool arises - `famp-create-image`
+                    - `famp-create-image` takes all the binary files from `boot.yaml`, as well as all the binary files passed via `famp-create-binary`
+                       and combines them all into one image.
+                    - There will have to be some sort of json file or something where we keep information over binary files etc
+
+1/17/2023
+    - 1
+        - TODO: Should we delete the assembly stub `print_char`?
+            - We are, now, manually printing out a char via AH=0EH,INT=10H using C's inline assembly
+            - For some reason, the `print` function, with using `print_char`, not manually printing the char itself,
+              caused the assembly stub `save_gdt_and_load` to not work.. at all. With doing it manually, that problem was fixed.
+            - No idea why `print_char` caused the protocol to break, and manually doing it works but.. `print_char` is quite useless
+
+1/21/2023
+    - 1
+        - TODO: Change the name `find_memory_stamp_offset_address` to `obtain_memory_stamp`
+
+1/22/2023
+    - 1
+        - TODO: Make the function `__print_char_color` take in a `color_attr`
+            - So, the function will take in
+                - `__print_char_color(uint8 character, uint8 page, enum color_attr color)`
+    - TODO: Implement a file system
+        - TODO: Figure out what type of filesystem(try and find one that is easy to implement)
+            - Possibly https://wiki.osdev.org/ISO_9660
+                - Ruled out
+            - The "memory stamp" feature might be able to be used with the filesystem
+            - If it comes to it, I can make my own sort of "filesystem" depending on how other filesystem work
+
+2/6/2023
+    - 1
+        - TODO: Make it to where the protocol makes sure there is no data in a unused entry
+            - If there is, the protocol should clear all the data so there isn't any sort of complications later on
+    - TODO: Read the first MBR partition table entry
+    - TODO: Read in the correct amount of memory for the extended partition table
+        - TODO: Add functionality for reading sectors(and possibly writing sectors?)
+        - TODO: Surpport reading/writing sectors in 32-bit(ATA support)
+            - TODO: Research how to read/write sectors in 32-bit mode
+    - TODO: Read the first entry of the extended partition table
+    - TODO: Run the second-stage bootloader(if there is any)
+        - TODO: Make it to where the protocols own second-stage bootloader resides in the extended partition table
+        - TODO: Make it to where the protocols own second-stage bootloader has the custom FS
+    - TODO: Read the second entry of the extended partition table(the kernel)
+    - TODO: Run the kernel
+    - TODO: Create C program the configures the extended partition table
+        - TODO: Figure out what data we want a extended partition header to obtain
+        - TODO: Figure out what data we want to describe a file
+
+2/10/2023
+    - TODO: Make it to where the configuration programs initiaite the MBR with only the format `boot_format`
+    - TODO: Get rid of `boot_format2` and add a format just for the protocols second stage bootloader(if the user does not have one)
+    - TODO: Make it to where the program `mbr_partition_table.c` configures the starting address of the kernel depending on the ending address of the given second stage bootloader
+    - TODO: Create program to format a disk image and mount the FS onto it
+    - TODO: Create FAMPs custom FS structures, as well as add support for other filesystems
+        - With this, add `fs_type` in `boot.yaml`
+        - `fs_type` will be optional
+        - If `fs_type` is not found in `boot.yaml` the protocol will default to using its custom FS
+        - If `fs_type` is found and the preferred FS is not yet supported the protocol will default to its custom FS
+    - TODO: Actually read in the required amount of memory for second stage bootloader, kernel and filesystem. For now, I have "dummy values" just so the overall protocol works.. for the time being
+    - TODO: line 86 in `boot_format`:
+        - Is `sector_addr` needed?
+    - TODO: Make it to where, at a specific point in the MBR, the MBR describes what type of FS the user wants
+        - `mbr_partition_table.c` will then check this specific point in the binary and 
+
+2/12/2023
+    - 1:
+        - TODO: Add support for vesa
+        - TODO: Add `vesa_api.h`
+
+2/14/2023
+    - 1:
+        - TODO: Remove memory stamps
+            - Nevermind, we are not going to be removing memory stamps
+            - They are still useful and can still be used although we have a FS
+            - Memory stamps will only be for programs that are not stored in the protocol-only FS(for critical code/data only) or the overall FS for the OS. They will be considered "stand alone" programs.
+            - So, memory stamps will enable the protocol to know a bit of information about the given code(program)/data(program data)
+            - However, the programs will simply never reside inside any sort of FS. They will always be stand alone. Once there memory is freed(either by the user or by the protocol) the protocol will, then, open access to there memory spaces in the memory map(so we can store more file data).
+        - TODO: Create program that formats a disk image with a FS mounted on it
+        - TODO: Do we still need to make sure the binary files are multiple of 512 bytes?
+        - TODO: We do need to make sure the second-stage bootloader binary file and the kernel binary file are multiple of 512 bytes for the MBR partition entries that describe them
+        - TODO: Read in the needed memory for the second stage bootloader and kernel using the data from the entries in the program `mbr_partition_table.c`
+        - TODO: Add ATA PIO support!!
+            - IMPORTANT
+    - TODO: Add support for users to use a pre existing bootloader binary file
+        - Will need to add a program such as `check_mbr.c` or something
+        - `check_mbr.c` will do checks on the given binary file that the user wants to use as there MBR
+        - The most major check is making sure the signature `55 AA` is at the 511th and 512th byte
+    - TODO: Add a tool that users can use to add some sort of structure to the end of a kernel binary file they want to use rather than writing there own kernel
+        - We will have to add a field in `boot.yaml` where users can tell the protocol whether or not it is using an "external" kernel binary file, and if they are below the field they will specify the "external" kernel binary file
+        - We will need a program to check if the structure is at the end of the kernel binary.
+        - A requirement would be: the kernel binary cannot be a multiple of 512 bytes. It has to be an odd number(or a number that, when divided by 512, equals a decimal).
+        - The tool that adds the structure at the end will do primarily the same as what we currently do when we stick the memory stamp at the end of the second stage bootloader and user-written kernel
+        - Perhaps, with the "external" kernel binary the tool will just place a memory stamp describing its memory, and then the check will be just making sure the memory stamp is there
+        - Then, the protocol will find the kernels memory stamp, and just treat the kernel as though the user had written it using its API
+    - TODO: Add support for the user writing there own MBR in assembly or C
+        - Write an API for C
+        - Have some way to support an API for assembly
+        - Make certain data required(such as FS, reading in sectors for the program `mbr_partition_table.bin`, making sure the bootloader includes the binary files for the second-stage bootloader and kernel)
+
+2/16/2023
+    -1:
+        - TODO: Currently we are reading sectors using int 13H. We are aiming on replacing this(refer to 2/15/2023)
+        - TODO: Get the assembly code to work so we can pass arguments and do it accordingly when we eventually support ATA PIO
+    -2:
+        - TODO: Add a way for the protocol to fix a mistake, if one occurrs.
+            - It seems useless to error upon an entry ID being wrong. Perhaps it's the right decision, but the protocol should be more than capable enough to manipulate the data
+            - This will require some checks with the entry, but we should be able to change the entry ID if the ID of the entry being checked does not match. This is set-and-stone. Another words, whatever ID I pass to the function HAS TO BE the ID of the entry. If it is not, the MBR was tweaked/manipulated by the user
+        - TODO: Add checks on MBR before booting to make sure the user did not mess with it?
+            - This will tie into the eventual feature of users being able to use there own MBR binary image
+    - TODO: The kernel will take up only so much memory. Should we make the memory after the kernel up to 0xFFFFFFF(after the kernel gets mapped to a higher address) and make it a FS for the kernel?
+        - The fourth MBR partition table will, more than likely, describe this FS
+        - If we want a FS to be located that high in memory, the program that makes the kernel reside there will have to make sure the FS gets copied from whatever lower physical address it got loaded to to the higher address a byte after the kernels ending address.
+        - It is either:
+            - We locate the FS in higher-half memory, after the kernel or
+            - We locate the FS after all the critical memory address(residing from 0x0500 - 0x7C00)
+                - This will give the "critical" FS 57 sectors(29 thousand bytes)
+
+2/18/2023
+    - TODO: Add data in MBR that enables protocol to see type of FS the user wants to use, OS version, OS name and other data that is useful
+    - TODO: Make it to where the protocol uses the `bin_folder` value in `boot.yaml` instead of making users specify the bin folder before the binary files
+    - TODO: Make it to where the data storing info over the OS stores the type of OS the user wants(32-bit, 64-bit)
+        - Depending on this, the program `higher_half_kernel.c` will either relocate the kernel or the protocol will offer functionality in-kernel for mapping the kernel to a higher-half virtual address
+        - `higher_half_kernel.c` is a program just for relocating 32-bit kernel in higher-half
+
+2/19/2023
+    - TODO: Rip out support for second stage bootloader.
+        - Make the protocol do all bootloader work.
+        - We want to aim on getting the right into kernel
+        - With this, we will use the pre-existing API code available for the protocols second stage bootloader
+        - The file `boot_format2` will be deleted and we will add a program called `FAMP_second_stage_boot.c` in the directory `boot_protocol/boot`
+        - We will only support a 32-bit/16-bit GDT. So, the program `FAMP_second_stage_boot.c` will define `bit32_bit16_GDT` and `default_gdt`
+        - The assembly stub `init_bootlaoder` will no longer take in an argument and default to `DEFAULT_ALL`
+    - TODO: Rename `boot.s` to `FAMP_init_boot.s`
+    - TODO: Make it to where the protocol can check what type of OS(32-bit or 64-bit) the developers is making. If there os is 32-bit, then the program `higher_half_kernel.c` will run; if 64-bit, the program will not run
+    - TODO: Add limit to how long the OS name can be
