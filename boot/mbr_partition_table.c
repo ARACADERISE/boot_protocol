@@ -46,7 +46,7 @@ void __attribute__((section("__start"))) main()
     /* Load the program that allows us to have a higher half kernel(32-bit program. First program to run before kernel).
      * This program is located right after the kernel and only needs 1 sector to do its job.
      */
-    read_in_memory((second_stage_bootloader_addr + (entry->sector_amnt * 512)) / 16, entry->last_sector_and_cylinder, 1);
+    read_in_memory(0x0900, entry->last_sector_and_cylinder, 1);
 
     /* This can just be `entry++`, but I like being extra. */
     entry = (_MBR_partition_table_entry *) (MBR_address + second_MBR_partition_table_entry);

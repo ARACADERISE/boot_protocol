@@ -12,7 +12,6 @@ build:
 	@gcc ${FLAGS} -o %s %s
 	@ld -m elf_i386 -T../kernel.ld -nostdlib --nmagic -o bin/kernel.out %s bin/protocol_util.o
 	@objcopy -O binary bin/kernel.out bin/kernel.bin
-	@./config/format.o bin/kernel.bin
 	@nasm boot/boot.s -f bin -o bin/bootloader.bin
 	@cat bin/bootloader.bin bin/kernel.bin > bin/OS.image
 

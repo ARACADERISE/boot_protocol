@@ -110,6 +110,15 @@ void memsetw(uint16 *array, uint16 value, size count)
     }
 }
 
+/* Same as `memsetw`, just a different name. */
+uint16 *memset(uint16 *dest, uint16 val, lsize count){
+	uint16* dstPtr = (uint16 *)dest;
+
+    for (; count != 0; count--) *dstPtr++ = val;
+	
+	return dest;
+}
+
 /* The variable passed to `array` has to be declared as:
  * uint32 array[size]
  * */
@@ -126,6 +135,45 @@ void memsetd(uint32 *array, uint32 value, size count)
         array[++i] = value;
         count--; 
     }
+}
+
+/*
+ *  __inp: back-end function
+ *
+ *  Read-in a value from a port
+ *
+ *  Input: uint16 port
+ *  Output: uint8 rv(return-value from the port)
+ *  On Error: This function does not error
+ */
+uint8 __inp(uint16 port) {
+    uint8 rv;
+    
+    __asm__ __volatile__("in %0, %1": "=a"(rv): "dN"(port));
+    return rv;
+}
+/*
+ *  __outp: back-end function
+ *
+ *  Write a value to a port
+ *
+ *  Input: uint16 port, uint8 data
+ *  Output: None
+ *  On Error: This function does not error
+ */
+void __outp(uint16 port, uint8 data) {
+    __asm__ __volatile__("outb %0, %1":: "dN"(port), "a"(data));
+}
+
+/* Get the byte value for the foreground color/background color of the text. */
+uint16 get_text_attribute(uint8 foreground, uint8 background)
+{
+    return (foreground << 4) | (background & 0x0F);
+}
+
+/* Get the overall value of text. First byte will represent the character, second byte will represent fg/bg. */
+uint16 get_text_value(uint8 character, uint8 foreground, uint8 background){
+	return character | (get_text_attribute(foreground, background) << 8);
 }
 
 // **********END OF COMMON FUNCTIONALITY**********

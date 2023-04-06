@@ -9,7 +9,7 @@ SECTIONS {
     . = 0xA000;
     
     /* The program `higher_half_kernel.c` changes this, however. */
-    kernel_start = 0x800000;
+    kernel_start = 0x80000000;
 
     .text : AT(0xA000)
     {

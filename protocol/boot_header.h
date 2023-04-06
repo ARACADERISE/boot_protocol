@@ -48,34 +48,6 @@ extern void __test_address(uint16);
 #include "gdt.h"
 #endif
 
-/*
- *  __inp: back-end function
- *
- *  Read-in a value from a port
- *
- *  Input: uint16 port
- *  Output: uint8 rv(return-value from the port)
- *  On Error: This function does not error
- */
-uint8 __inp(uint16 port) {
-    uint8 rv;
-    
-    __asm__ __volatile__("in %0, %1": "=a"(rv): "dN"(port));
-    return rv;
-}
-/*
- *  __outp: back-end function
- *
- *  Write a value to a port
- *
- *  Input: uint16 port, uint8 data
- *  Output: None
- *  On Error: This function does not error
- */
-void __outp(uint16 port, uint8 data) {
-    __asm__ __volatile__("outb %0, %1":: "dN"(port), "a"(data));
-}
-
 /* For user-convenience. */
 #define starting_point __attribute__((section("__start")))
 

@@ -252,3 +252,33 @@
         - `os_vers`: version of your OS
         - `pref_FS`: preferred filesystem. If you mention a FS that is not supported the configuration defaults to FAMPs custom FS
     - The os information from `boot.yaml` is used in the data structure `OS_info` in `boot/boot.s`
+
+3/3/2023
+    - Added license for overall protocol code
+        - Licensed under the APACHE licence
+    - Changed licensing years for both the outtermost license(licence over overall protocol) and for the actual protocol code(API)
+    - Added keyboard support
+        - Users can now type, and what they type displays
+    - The cursor position can now be changed/updated
+        - When users type on the keyboard, the cursor will move
+        - If the user hits backspace, the cursor goes back
+
+3/9/2023
+    - Added support for shift key
+        - Made it to where all letters are capatalized as long as shift is pressed
+        - As soon as pressed is released, characters go back to lowercase
+    - Added support for pressing shift and space
+        - Before, if shift was pressed and the space was pressed, the space wouldn't show, rather, a NULL character value for when the space bar was released
+    - Added `check_key` function
+        - This function checks for a key released scancode, and upon recieving a key released scancode returns zero
+        - 1
+            - See `todo` for more info
+
+3/11/2023
+    - Removed a bunch of if statements in `get_key` function
+        - Replaced the if statements with a switch statement
+    - Shift + backspace now works
+        - Before, if shift was pressed and the user pressed back space it would print a weird character
+        - This was mainly an error with `0x8E`. When backspace was released with shift being pressed it would put a weird character. `get_key` now returns zero upon `0x8E` being encountered as a scancode.
+        - 1
+            - See `todo` for more info

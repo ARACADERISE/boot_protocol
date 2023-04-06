@@ -231,3 +231,20 @@
     - TODO: Rename `boot.s` to `FAMP_init_boot.s`
     - TODO: Make it to where the protocol can check what type of OS(32-bit or 64-bit) the developers is making. If there os is 32-bit, then the program `higher_half_kernel.c` will run; if 64-bit, the program will not run
     - TODO: Add limit to how long the OS name can be
+
+3/9/2023
+    - 1
+        - TODO: Make it to where the function `check_key` checks for all and any sort of key released scancode
+            - Currently, we check if a release scancode between `0x90` and `0xE0` ocurrs
+            - We need to add in a switch statement to check other release scancodes if none within that range are detected. There are more release codes than just those that reside from `0x90` and `0xE0`
+    - TODO: Put all keyboard driver code in its own file
+        - The file `b8000_api.h` will include the header file for the keyboard driver
+    - TODO: Create a folder for all drivers. Within this folder, each driver will reside in its own folder
+    - TODO: Try and make `b8000_api.h` an "including" point for the entire API for working with the video memory address `0xB8000`
+        - Make a folder for printing. This folder will house header files for text colors, helper functions for printing and an header for actually printing
+
+3/11/2023
+    - 1
+        - TODO: Make it to where if shift + backspace is pressed, shift gets turned off
+    - TODO: Store all release scancodes in an array and loop through all the release codes in the function `get_key`. 
+        - Do this so we know if we have to return zero instead of doing a bunch of cases in a switch statement.
