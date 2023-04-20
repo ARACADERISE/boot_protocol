@@ -34,19 +34,19 @@ int32 main(int args, char *argv[])
 	_yaml_os_data yod = open_and_parse_yaml("../../boot.yaml");
 
 	/* Local variables. */
-	uint8 *format_ = NULL;
-	uint8 kernel_o_file[50] = "../";
-	uint8 kernel_bin_file[50] = "../../";
+	uint8 *format_			= NULL;
+	uint8 kernel_o_file[50] 	= "../";
+	uint8 kernel_bin_file[50] 	= "../../";
 
 	/* Actual paths of binary files when not dealing with them from a different directory. */
 	const uint8 *second_stage_binary_file_path		= (const uint8 *)initiate_path(yod.bin_folder, "/second_stage.bin");
 	const uint8 *mbr_part_table_bin_file_path		= (const uint8 *)initiate_path(FAMP_bin_folder, "/mbr_partition_table.bin");
-	const uint8 *higher_half_kernel_bin_file_path	= (const uint8 *)initiate_path(FAMP_bin_folder, "/higher_half_kernel.bin");
-	const uint8 *kernel_bin_file_path				= (const uint8 *)initiate_path(yod.bin_folder, "/kernel.bin");
-	const uint8 *temp_disk_image_path				= (const uint8 *)initiate_path("../bin/", "temp.fimg");
+	const uint8 *higher_half_kernel_bin_file_path		= (const uint8 *)initiate_path(FAMP_bin_folder, "/higher_half_kernel.bin");
+	const uint8 *kernel_bin_file_path			= (const uint8 *)initiate_path(yod.bin_folder, "/kernel.bin");
+	const uint8 *temp_disk_image_path			= (const uint8 *)initiate_path("../bin/", "temp.fimg");
 
 	/* Get the entire path to the disk image. */
-	const uint8 *FAMP_disk_image_path 				= (const uint8 *)initiate_path(FAMP_disk_image_folder, yod.disk_name);
+	const uint8 *FAMP_disk_image_path 			= (const uint8 *)initiate_path(FAMP_disk_image_folder, yod.disk_name);
 
 	/* The overall disk image. Allocate with initial 512 bytes for MBR. */
 	disk_image = calloc(MBR_size, sizeof(*disk_image));
@@ -210,7 +210,7 @@ int32 main(int args, char *argv[])
 	/* Write Makefile. */
 	{
 		/* This "scope" is just to write data to the `Makefile`. */
-		FILE* makefile				= fopen("../Makefile", "w");
+		FILE* makefile = fopen("../Makefile", "w");
 
 		config_assert(makefile, 
 			"Error editing(or opening) the protocols Makefile. This normally occurrs when files have been tweaked by the user.\n", true, makefile)
