@@ -41,7 +41,7 @@ int32 main(int args, char *argv[])
 	/* Actual paths of binary files when not dealing with them from a different directory. */
 	const uint8 *second_stage_binary_file_path		= (const uint8 *)initiate_path(yod.bin_folder, "/second_stage.bin");
 	const uint8 *mbr_part_table_bin_file_path		= (const uint8 *)initiate_path(FAMP_bin_folder, "/mbr_partition_table.bin");
-	const uint8 *higher_half_kernel_bin_file_path		= (const uint8 *)initiate_path(FAMP_bin_folder, "/higher_half_kernel.bin");
+	const uint8 *higher_half_kernel_bin_file_path	= (const uint8 *)initiate_path(FAMP_bin_folder, "/higher_half_kernel.bin");
 	const uint8 *kernel_bin_file_path			= (const uint8 *)initiate_path(yod.bin_folder, "/kernel.bin");
 	const uint8 *temp_disk_image_path			= (const uint8 *)initiate_path("../bin/", "temp.fimg");
 
