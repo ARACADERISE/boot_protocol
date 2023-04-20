@@ -2,7 +2,7 @@
 
 FLAGS = -masm=intel -O1 -Wno-error -c -nostdinc -nostdlib -fno-builtin -fno-stack-protector -ffreestanding -m32
 run: build
-	@qemu-system-i386 -m 4G -drive format=raw,file=../bin/OS.image
+	@qemu-system-i386 -m 4G -drive format=raw,file=%s
 
 bin/second_stage.o:
 	@gcc ${FLAGS} -o bin/second_stage.o ../boot/second_stage.c
@@ -20,7 +20,8 @@ utils:
 	@nasm protocol/protocol_util.s -f elf32 -o bin/protocol_util.o
 
 build: utils bin/second_stage.o ../%s bin/mbr_partition_table.o bin/higher_half_kernel.o
-	@nasm boot/boot.s -f bin -o ../bin/OS.image
+	@nasm boot/boot.s -f bin -o ../bin/boot.bin
+	@cd config && make eve
 	@chmod +x config/scripts/*
 
 bin/mbr_partition_table.o:
@@ -38,3 +39,6 @@ bin/higher_half_kernel.o:
 
 clean:
 	@./config/scripts/clean
+
+pclean:
+	@./config/scripts/clean purge

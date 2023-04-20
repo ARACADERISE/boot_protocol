@@ -11,7 +11,7 @@ SECTIONS {
     /* The program `higher_half_kernel.c` changes this, however. */
     kernel_start = 0x80000000;
 
-    .text : AT(0xA000)
+    .text : AT(kernel_start)
     {
         *(__start*);
         *(.text*);

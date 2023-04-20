@@ -15,7 +15,19 @@ build: mbr_partition_table higher_half_kernel_program
 	@./bin/format.o bin/second_stage.bin --second_stage
 	@./bin/format.o ../bin/kernel.bin --kernel
 	@cd config && make build
+	@nasm boot/boot.s -f bin -o ../bin/boot.bin
+	@cd config && make eve
 	
+tools:
+	@gcc config/format_disk_image.c -o tools_bin/format_disk_image.o
+	@python3 config/py_scripts/move.py
+
+remove_tools:
+	@python3 config/py_scripts/remove.py
+
+purge_tools:
+	@python3 config/py_scripts/remove.py --purge
+
 mbr_partition_table:
 	@gcc config/format.c -o bin/format.o
 	@nasm boot/partition_util.s -f elf32 -o bin/partition_util.o

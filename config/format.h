@@ -1,11 +1,23 @@
 #ifndef format
 #define format
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
 
-#define bytes_per_sector 512
+#ifndef _STDIO_H_
+#include <stdio.h>
+#endif
+#ifndef _STDLIB_H_
+#include <stdlib.h>
+#endif
+#ifndef _STRING_H_
+#include <string.h>
+#endif
+#ifndef _STDBOOL_H_
+#include <stdbool.h>
+#endif
+#ifndef	_UNISTD_H
+#include <unistd.h>
+#endif
+
+#define bytes_per_sector (uint16)512
 typedef unsigned char uint8;
 typedef unsigned short uint16;
 typedef unsigned int uint32;

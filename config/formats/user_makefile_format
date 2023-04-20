@@ -5,3 +5,5 @@ run:
 	@cd boot_protocol && make
 clean:
 	@cd boot_protocol && make clean
+purge_clean:
+	@cd boot_protocol && make pclean

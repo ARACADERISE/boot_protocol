@@ -121,15 +121,3 @@ CreateEntry	3, 0x00, 0x%LX, 0x0C, 1, 0x%LX, 0x%LX
 CreateEntry	4, 0, 0, 0, 0, 0, 0
 
 dw 0xAA55
-
-mbr_partition_table_program: incbin "bin/mbr_partition_table.bin"
-mbr_partition_table_program_end:
-
-second_stage: incbin "%s"
-second_stageE:
-
-higher_half_kernel_program: incbin "bin/higher_half_kernel.bin"
-higher_half_kernel_programE:
-
-kernel: incbin "%s"
-kernelE:

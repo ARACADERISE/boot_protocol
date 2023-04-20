@@ -129,6 +129,12 @@ _yaml_os_data get_yaml_os_info()
 	else os_data.FS_type = 1;
 	_next // TODO: Use the `bin_folder` value. For now, just assign the value
 	
+	os_data.disk_name = (uint8 *)yaml_file_data->val_data;
+	_next
+
+	os_data.auto_format = (uint8 *)yaml_file_data->val_data;
+	_next
+
 	os_data.bin_folder = (uint8 *)yaml_file_data->val_data;
 	_next
 

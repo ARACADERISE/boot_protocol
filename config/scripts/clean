@@ -1,1 +1,1 @@
-python3 config/py_scripts/clean.py
+python3 config/py_scripts/clean.py $*

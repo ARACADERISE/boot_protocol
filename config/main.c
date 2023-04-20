@@ -1,22 +1,31 @@
-#include "config.h"
+#include "config_util.h"
+#include <sys/stat.h>
 
-uint8* strdel(uint8* text, uint32 deleteStartPosition, uint32 deleteLength) {
-  // Get end position
-  uint32 deleteEndPosition = deleteStartPosition + deleteLength;
-  
-  if(deleteEndPosition > strlen(text))
-  {
-      fprintf(stderr, "End position surpasses length of text.\n");
-      exit(EXIT_FAILURE);
-  }
+// Dumb little function to shorten the amount of code
+uint8 *initiate_path(uint8 data1[], uint8 data2[])
+{
+	/* `data1`, at least, has to be valid and not NULL. */
+	config_assert(data1, "Cannot initiate the path. No data given to configure the path.\n", false, NULL)
 
-  // Copy the remaining text to the start of the deleted fragment
-  // text + deleteStartPosition = destination
-  // text + deleteEndPosition = src
-  strcpy(text + deleteStartPosition, text + deleteEndPosition);
+	/* Initiate `array` and concat `data1` to it. */
+	uint8 *array = calloc(strlen(data1), sizeof(*array));
+	
+	/* Copy over contents of `data1`. */
+	strcat(array, data1);
 
-  // Return the modified text
-  return text;
+	/* If `data2` is not NULL, go ahead and perform the same action as above. */
+	if(data2 != NULL)
+	{
+		array = realloc(array, ((strlen(data1) + 1) + strlen(data2)) * sizeof(*array));
+		
+		/* Make sure the lenghts of `data1` and `data2` do not surpass 50. */
+		config_assert(strlen(data1) + strlen(data2) <= 50, 
+			"Path is too large: %s.\nFAMP only allows up to 50 characters for a path.\n", false, NULL, strcat(array, data2))
+		
+		strcat(array, data2);
+	}
+
+	return array;
 }
 
 int32 main(int args, char *argv[])
@@ -25,57 +34,81 @@ int32 main(int args, char *argv[])
 	_yaml_os_data yod = open_and_parse_yaml("../../boot.yaml");
 
 	/* Local variables. */
-	uint8 *format = NULL;
-	uint8 ss_o_filename[50] = "../";
-	uint8 kernel_o_filename[50] = "../";
-	uint8 ss_bin_file[50] = "../";
-	uint8 kern_bin_file[50] = "../";
+	uint8 *format_ = NULL;
+	uint8 kernel_o_file[50] = "../";
+	uint8 kernel_bin_file[50] = "../../";
 
-	/* Files. */
-	FILE* boot_file = fopen("../boot/boot.s", "w");
-	FILE* makefile = fopen("../Makefile", "w");
+	/* Actual paths of binary files when not dealing with them from a different directory. */
+	const uint8 *second_stage_binary_file_path		= (const uint8 *)initiate_path(yod.bin_folder, "/second_stage.bin");
+	const uint8 *mbr_part_table_bin_file_path		= (const uint8 *)initiate_path(FAMP_bin_folder, "/mbr_partition_table.bin");
+	const uint8 *higher_half_kernel_bin_file_path	= (const uint8 *)initiate_path(FAMP_bin_folder, "/higher_half_kernel.bin");
+	const uint8 *kernel_bin_file_path				= (const uint8 *)initiate_path(yod.bin_folder, "/kernel.bin");
+	const uint8 *temp_disk_image_path				= (const uint8 *)initiate_path("../bin/", "temp.fimg");
+
+	/* Get the entire path to the disk image. */
+	const uint8 *FAMP_disk_image_path 				= (const uint8 *)initiate_path(FAMP_disk_image_folder, yod.disk_name);
+
+	/* The overall disk image. Allocate with initial 512 bytes for MBR. */
+	disk_image = calloc(MBR_size, sizeof(*disk_image));
+
+	/* Keep track of the position we're at in `disk_image`. */
+	size_t disk_image_size	= 0;
+
+	/* Initialize first 512 bytes to zero. "Reserved" for when the bootloader assembly code gets assembled. */
+	memset(disk_image, 0, MBR_size);
+	disk_image_size += MBR_size;
+
+	/* Binary sizes. */
+	size_t mbr_tbl_bin_size = 0;
+	size_t ssb_size		= 0;
+
+	/* Files. 
+	 * In exact order for the disk image:
+	 *		`mbr_part_table_bin` -> `second_stage_bin` -> `higher_half_kern_bin` -> kernel binary.
+	 *
+	 * Open up binary file for second stage bootloader, check if the file is valid and get the size.
+	 * */
+	FILE *second_stage_bin 		= fopen("../bin/second_stage.bin", "rb");
+	config_assert(second_stage_bin, 
+		"Error finding binary file for second stage bootloader. Should be located at: %s.\n", true, second_stage_bin, second_stage_binary_file_path)
+	ssb_size = get_file_size(second_stage_bin, NULL);
+	disk_image_size += reallocate_disk_image_size(disk_image_size, ssb_size);
+
+	/* Open up binary file for the program that works with the MBR partition table, check if the file is valid and get the size. */
+	FILE *mbr_part_table_bin 	= fopen("../bin/mbr_partition_table.bin", "rb");
+	config_assert(mbr_part_table_bin, 
+		"Error finding program to parse the MBR partition table. Should be located at: %s.\n", false, NULL, mbr_part_table_bin_file_path)
+	mbr_tbl_bin_size = get_file_size(mbr_part_table_bin, NULL);
+	disk_image_size += reallocate_disk_image_size(disk_image_size, mbr_tbl_bin_size);
+	
+	/* Open up binary file for the program that relocates the kernel into higher half, check if the file is valid and get the size. */
+	FILE *higher_half_kern_bin	= fopen("../bin/higher_half_kernel.bin", "rb");
+	config_assert(higher_half_kern_bin,
+		"Error finding program that relocates the kernel into higher half. Should be located at: %s.\n", false, NULL, higher_half_kernel_bin_file_path)
+	disk_image_size += reallocate_disk_image_size(disk_image_size, get_file_size(higher_half_kern_bin, NULL));
+
+	// The get opened later on
+	FILE *kernel_bin			= NULL;
+	FILE *MBR_bin				= NULL;
+	FILE *dimg_bin				= NULL;
+
+	if(args > 1 && strcmp(argv[1], "eve") == 0) goto everything_else;
 
 	/* Write MBR. */
 	{
+		/* This "scope" is just to write information to the file `boot.s`. */
+		FILE* boot_file				= fopen("../boot/boot.s", "w");
+
 		/* Open MBR format. */
-		format = read_format((const uint8 *)"formats/boot_format", "rb");
+		format_ = read_format((const uint8 *)"formats/boot_format", "rb");
 
 		/* Write MBR. */
-		format = realloc(format, (strlen(format) + 60) * sizeof(*format));
+		format_ = realloc(format_, (strlen(format_) + 60) * sizeof(*format_));
 
-		/* Open `mbr_partition_table.bin` to see how many sectors it is then add that to `sector_after_mbr`. */
-		FILE* mbr_part_table_bin = fopen("../bin/mbr_partition_table.bin", "rb");
-
-		if(!(mbr_part_table_bin))
-		{
-			fclose(mbr_part_table_bin);
-			exit(1);
-		}
-
-		fseek(mbr_part_table_bin, 0, SEEK_END);
-		size_t bin_size = ftell(mbr_part_table_bin);
-		fseek(mbr_part_table_bin, 0, SEEK_SET);
-
-		fclose(mbr_part_table_bin);
-
-		FILE* second_stage_bin = fopen("../bin/second_stage.bin", "rb");
-
-		if(!(second_stage_bin))
-		{
-			fclose(second_stage_bin);
-			exit(1);
-		}
-
-		fseek(second_stage_bin, 0, SEEK_END);
-		size_t ssb_size = ftell(second_stage_bin);
-		fseek(second_stage_bin, 0, SEEK_SET);
-
-		fclose(second_stage_bin);
-
-		uint8 format2[strlen(format)+120];
-		uint8 sector = sector_after_mbr + (bin_size / 512);
-		sprintf(format2, format,
-			bin_size/512,
+		uint8 format2[strlen(format_)+120];
+		uint8 sector = sector_after_mbr + (mbr_tbl_bin_size / 512);
+		sprintf(format2, format_,
+			mbr_tbl_bin_size/512,
 			yod.FS_type,
 			yod.OS_name,
 			yod.OS_version,
@@ -87,43 +120,121 @@ int32 main(int args, char *argv[])
 			sector + ((ssb_size / 512) + (yod.kern_filename_bin_size / 512)),
 			yod.kern_filename_bin_size / 512,
 			sector + ((ssb_size / 512) + (yod.kern_filename_bin_size / 512)),
-			0x15, 0x15,
-			"bin/second_stage.bin",//strcat(ss_bin_file, yod.ss_filename_bin_name), 	// second_stage: incbin second stage binary
-			strcat(kern_bin_file, yod.kern_filename_bin_name));	// kernel: incbin kernel binary
+			0x15, 0x15);
+			//second_stage_binary_file_path,//"bin/second_stage.bin",//strcat(ss_bin_file, yod.ss_filename_bin_name), 	// second_stage: incbin second stage binary
+			//strcat(kernel_bin_file, yod.kern_filename_bin_name));	// kernel: incbin kernel binary
 		fwrite(format2, sizeof(uint8), strlen(format2), boot_file);
 
 		fclose(boot_file);
+		free(format_);
+
+		if(args > 1 && strcmp(argv[1], "mbr") == 0) return 0;
 	}
 
-	/* TODO: Figure out what we're doing here. Do we want to format `gdt_ideals.s` with C, or continue to do it via `quick_edit.py`?
-	 *
-	 * As of current, `quick_edit.py` deals with making sure the file `boot.yaml` has all the
-	 * required data as well as writing to the file `protocol/gdt/gdt_ideals.asm`.
-	 * I would like to make this happen in C, however, currently, there is a road block as
-	 * the kernel/second-stage binary files HAVE to exist for this file(`main.c`,`main.o`) to run, however, this file NEEDS to run(if its configuring `gdt_ideals.s`)
-	 * before the according binary files are generated. So, currently, we're in a stalemate.
-	 */
+	everything_else:
+
+	/* Open up MBR binary, and perform according checks. */
+	MBR_bin = fopen("../../bin/boot.bin", "rb");
+
+	config_assert(MBR_bin, 
+		"Error finding binary file for MBR.\n", true, MBR_bin)
 	
+	/* Make sure that `50` is enough memory for the path. */
+	config_assert(strlen(kernel_bin_file) + 3 <= 50, 
+		"File path is too large. Make sure the binary file for the kernel is not too long.\nPaths are allowed up to 50 characters.\n", false, NULL)
+
+	/* If the above assertion passes, concat `kernel_bin_file` to `absolute_kernel_binary_path` to get the correct path to the kernels binary file.
+	 * This program resides in `boot_protocol/config` whilst majority of binary files reside outside of the directory `boot_protocol`.
+	 */
+	strcat(kernel_bin_file, yod.kern_filename_bin_name);
+
+	/* Open the file, and make sure the file is valid. */
+	kernel_bin = fopen(kernel_bin_file, "rb");
+	config_assert(kernel_bin, 
+		"Error finding binary file for kernel. Should be located at: %s\n", true, kernel_bin, kernel_bin_file)
+
+	/* Make sure that `yod.kern_filename_bin_size` is the actual size. */
+	config_assert(get_file_size(kernel_bin, NULL) == yod.kern_filename_bin_size, 
+		"Size mismatch for kernel binary file located at %s.\n", false, NULL, kernel_bin_file_path)
+	disk_image_size += reallocate_disk_image_size(disk_image_size, get_file_size(kernel_bin, NULL));
+
+	/* See if the temporary disk image exists. */
+	if(access(temp_disk_image_path, F_OK) == 0)
+	{
+		dimg_bin = fopen(temp_disk_image_path, "rb");
+
+		/* Array of all the binary file sizes. */
+		size_t sizes[] = {MBR_size, mbr_tbl_bin_size, ssb_size, get_file_size(higher_half_kern_bin, NULL), yod.kern_filename_bin_size};
+		FILE *fs[] = {MBR_bin, mbr_part_table_bin, second_stage_bin, higher_half_kern_bin, kernel_bin};
+		
+		/* Set `disk_image_size` to zero so we have a variable to keep track of the position. */
+		disk_image_size = 0;
+
+		/* Read in the disk image to `disk_image`. */
+		fread(disk_image, get_file_size(dimg_bin, NULL), sizeof(*disk_image), dimg_bin);
+
+		/* Lets begin checking! */
+		while(ind < sizeof(sizes)/sizeof(sizes[0]))
+		{
+			dicd[ind] = check_disk_chunk(disk_image, fs[ind], sizes[ind], disk_image_size);
+
+			/* Update the position. */
+			disk_image_size += dicd[ind].bytes_checked;
+
+			/* Update the `disk_image` array. */
+			disk_image = dicd[ind].image;
+
+			/* Increment. */
+			ind++;
+		}
+
+		fclose(dimg_bin);
+		goto end;
+	}
+
+	/* Lets start to fill out the `disk_image`. */
+	size_t index = 0;
+	index = fill_disk_image(MBR_bin, MBR_size, index, disk_image_size);
+	index = fill_disk_image(mbr_part_table_bin, mbr_tbl_bin_size, index, disk_image_size);
+	index = fill_disk_image(second_stage_bin, ssb_size, index, disk_image_size);
+	index = fill_disk_image(higher_half_kern_bin, get_file_size(higher_half_kern_bin, NULL), index, disk_image_size);
+	index = fill_disk_image(kernel_bin, yod.kern_filename_bin_size, index, disk_image_size);
+
+	dimg_bin = fopen(temp_disk_image_path, "wb");
+	config_assert(dimg_bin, 
+		"Error opening up %s.\n", true, dimg_bin, FAMP_disk_image_path)
+	fwrite(disk_image, disk_image_size, sizeof(*disk_image), dimg_bin);
+	fclose(dimg_bin);
+	
+	end:
 	/* Write Makefile. */
 	{
-		format = read_format((const uint8 *)"formats/makefile_format", "r");
+		/* This "scope" is just to write data to the `Makefile`. */
+		FILE* makefile				= fopen("../Makefile", "w");
+
+		config_assert(makefile, 
+			"Error editing(or opening) the protocols Makefile. This normally occurrs when files have been tweaked by the user.\n", true, makefile)
+
+		format_ = read_format((const uint8 *)"formats/makefile_format", "r");
 
 		/* Create static memory. Allow for additional 120 characters. */
-		uint8 mformat1[strlen(format)+180];
+		uint8 mformat1[strlen(format_)+180];
 
 		/* Apply values and write. */
-		sprintf(mformat1, format, 
-			strcat(kernel_o_filename, yod.kern_filename_bin_o_name),
+		sprintf(mformat1, format_,
+			"../bin/OS.image",
+			strcat(kernel_o_file, yod.kern_filename_bin_o_name),
 			yod.kern_filename_bin_o_name,
 			yod.kern_filename,
 			yod.kern_filename_bin_o_name,
-			kern_bin_file,
-			kern_bin_file,
+			kernel_bin_file,
+			kernel_bin_file,
 			yod.kern_filename_bin_o_name);
 		
 		fwrite(mformat1, strlen(mformat1), sizeof(*mformat1), makefile);
 
 		fclose(makefile);
+		free(format_);
 	}
 
 	/* Write users Makefile. */
@@ -131,14 +242,23 @@ int32 main(int args, char *argv[])
 		/* Write the users Makefile. */
 		FILE *user_makefile = fopen("../../Makefile", "w");
 
-		config_assert(user_makefile, "Error creating users-makefile.\n")
-		format = read_format((const uint8 *)"formats/user_makefile_format", "rb");
+		/* Make sure the Makefile got opened(or created). */
+		config_assert(user_makefile, 
+			"Error creating users-makefile.\n", true, user_makefile)
+
+		format_ = read_format((const uint8 *)"formats/user_makefile_format", "rb");
 
 		/* Write. */
-		fwrite(format, strlen(format), sizeof(*format), user_makefile);
+		fwrite(format_, strlen(format_), sizeof(*format_), user_makefile);
 		fclose(user_makefile);
 	}
-	free(format);
+	free(format_);
+
+	/* Close files. */
+	fclose(second_stage_bin);
+	fclose(mbr_part_table_bin);
+	fclose(kernel_bin);
+	fclose(MBR_bin);
 
 	return 0;
 }
