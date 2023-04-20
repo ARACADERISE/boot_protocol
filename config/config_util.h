@@ -49,7 +49,7 @@ typedef struct disk_image_check_data
 	uint8							total;			 // How many "status reports" did we get? 0, 1, or 2?
 
 	uint8							*image;
-	FILE							*device_image;
+	FILE							*device_image; // TODO: change to disk_image, and change all references to "device image" accordingly
 
 	/* How many bytes were wrong? How many were able to be fixed? */
 	uint16							bad_bytes;
@@ -195,6 +195,9 @@ size_t fill_disk_image(FILE *binary_data, size_t buffer_size, size_t start_index
 enum disk_image_check_status approve(_disk_image_check_data *dicd);
 _disk_image_check_data *rework_chunk(_disk_image_check_data *dicd, uint8 *binary_file_content);
 
+/* Total amount of tries being made. Once this variable accumulates up to 3, the configuration will error. */
+static uint8 tries = 0;
+
 /*
  * check_disk_chunk - check a portion(chunk) of the disk image against the individual binary files that the overall disk image consists of
  *
@@ -259,14 +262,13 @@ _disk_image_check_data check_disk_chunk(uint8 *dimg_buffer, FILE* bin_file, size
 
 	if(tries > 0) tries = 0;
 	else {
-		dicd.status[0] = good;
-		dicd.status[1] = unstated;
+		temp_dicd.status[0] = good;
+		temp_dicd.status[1] = unstated;
 	}
 
 	return temp_dicd;
 }
 
-static uint8 tries = 0;
 enum disk_image_check_status approve(_disk_image_check_data *dicd)
 {
 	/* Status to return. */
@@ -319,7 +321,7 @@ enum disk_image_check_status approve(_disk_image_check_data *dicd)
 	}
 
 	/* If `check_disk_chunk` returns `good` then just return `good`. */
-	if(dicd->status[0] == good || dicd.status[1] == good)
+	if(dicd->status[0] == good || dicd->status[1] == good)
 	{
 		tries = 0;
 		
