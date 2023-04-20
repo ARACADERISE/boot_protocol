@@ -118,18 +118,18 @@ size_t get_file_size(FILE *f, uint8 *filename)
  *
  * */
 uint8* strdel(uint8* text, uint32 deleteStartPosition, uint32 deleteLength) {
-  // Get end position
-  uint32 deleteEndPosition = deleteStartPosition + deleteLength;
+	// Get end position
+	uint32 deleteEndPosition = deleteStartPosition + deleteLength;
 
-  config_assert(deleteEndPosition > strlen(text), "End position surpasses length of text.\n", false, NULL)
+	config_assert(deleteEndPosition > strlen(text), "End position surpasses length of text.\n", false, NULL)
 
-  // Copy the remaining text to the start of the deleted fragment
-  // text + deleteStartPosition = destination
-  // text + deleteEndPosition = src
-  strcpy(text + deleteStartPosition, text + deleteEndPosition);
+	// Copy the remaining text to the start of the deleted fragment
+	// text + deleteStartPosition = destination
+	// text + deleteEndPosition = src
+	strcpy(text + deleteStartPosition, text + deleteEndPosition);
 
-  // Return the modified text
-  return text;
+	// Return the modified text
+	return text;
 }
 
 /* 
