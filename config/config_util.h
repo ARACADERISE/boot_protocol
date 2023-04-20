@@ -5,7 +5,7 @@
 
 /* Starting sector to start reading in sectors from. */
 #define sector_after_mbr		(uint8)0x02
-#define MBR_size				(uint16)bytes_per_sector
+#define MBR_size			(uint16)bytes_per_sector
 
 /* Disk image for the protocol. */
 static uint8 *disk_image = NULL;
@@ -14,7 +14,7 @@ static uint8 *disk_image = NULL;
 #define FAMP_bin_folder			(uint8 *)"boot_protocol/bin"
 
 /* Disk image folder for FAMP, for UNIX(support for other operating systems will be coming soon). */
-#define FAMP_disk_image_folder	(uint8 *)"/usr/lib/FAMP_disk_images/"
+#define FAMP_disk_image_folder		(uint8 *)"/usr/lib/FAMP_disk_images/"
 
 #define config_assert(cond, err_msg, is_file, file, ...)  	\
     if(!(cond)) {                                   		\
