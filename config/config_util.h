@@ -31,6 +31,7 @@ enum disk_image_check_status
 	bad_memory_stamp,
 	bad_chunk, // this should(hopefully) never be used. however if it is, odds are the user tweaked with something
 	unknown_error,
+	fixed,
 	unstated
 };
 
@@ -235,6 +236,8 @@ _disk_image_check_data check_disk_chunk(uint8 *dimg_buffer, FILE* bin_file, size
 		{
 			temp_dicd.status[temp_dicd.total] = needs_rework;
 			temp_dicd.total++;
+
+			if(temp_dicd.total >= 2) goto rework;
 			temp_dicd.bad_bytes++;
 		}
 
@@ -244,13 +247,20 @@ _disk_image_check_data check_disk_chunk(uint8 *dimg_buffer, FILE* bin_file, size
 
 	if(temp_dicd.total != 0)
 	{
+		rework:
 		enum disk_image_check_status stat = approve(rework_chunk(&temp_dicd, temp_buffer));
 		config_assert(stat != bad_chunk && stat != unknown_error,
 			"A unknown error occurred, or there is a bad chunk residing in the disk image.\n", false, NULL)
 		
-		/* Check what status we got from `rework_chunk`. If it is not `unstated` then `approve` returned `good`. */
-		config_assert(temp_dicd.status[0] == good,
+		/* Check what status we got from `rework_chunk`. If it is not `unstated` then `approve` returned `fixed`. */
+		config_assert(temp_dicd.status[0] == fixed,
 			"There are some underlying problems with a specific chunk(located ~%ld bytes into the disk image).\n", false, NULL, pos)
+	}
+
+	if(tries > 0) tries = 0;
+	else {
+		dicd.status[0] = good;
+		dicd.status[1] = unstated;
 	}
 
 	return temp_dicd;
@@ -259,35 +269,73 @@ _disk_image_check_data check_disk_chunk(uint8 *dimg_buffer, FILE* bin_file, size
 static uint8 tries = 0;
 enum disk_image_check_status approve(_disk_image_check_data *dicd)
 {
+	/* Status to return. */
+	enum disk_image_check_status ret_status = unstated;
+
+	/* If, for some unknown reason, `dicd.image` is NULL return `unknown_error` for there should be no reason that would happen. */
+	if(dicd->image == NULL) { ret_status = unknown_error; goto end; }
+
+	recheck:
 	/* If we accumulate up to 3 tries, we will just error. There is obviously something wrong if it goes 3 times around and
 	 * still can't fix the chunk of data in the disk image.
 	 */
 	config_assert(tries < 4,
 		"Attempted to fix the disk image 3 times. Aborting.\n", false, NULL)
+	
+	/* If we corrected less bytes than were found, and we are on our last try, we will just go ahead and return `bad_chunk`.
+	 * If a chunk gets tested up to 3 times and FAMP still has no luck with fixing it, there is no point trying again.
+	 */
+	if(dicd->corrected_bytes < dicd->bad_bytes && tries + 1 == 4) { ret_status = bad_chunk; goto end; }
 
-	/* If, for some unknown reason, `dicd.image` is NULL return `unknown_error` for there should be no reason that would happen. */
-	if(dicd->image == NULL) return unknown_error;
-	if(dicd->corrected_bytes < dicd->bad_bytes) return bad_chunk;
+	/* If we corrected as many bad bytes as we found then that means the overall chunk is good to go.
+	 * Set the status to `fixed` and return `fixed` so `check_disk_chunk` can go ahead and return.
+	 */
 	if(dicd->corrected_bytes == dicd->bad_bytes)
 	{
-		dicd->status[0] = good;
-		tries = 0;
-		return good;
+		dicd->status[0] = fixed;
+		ret_status = fixed;
+		goto end;
 	}
 
+	/* Lets make sure that, upon checking the chunk from the disk, we check the same amount of bytes.
+	 * If `prev_bytes_checkes` does not match with `dicd->bytes_checked` the function will return `bad_chunk`.
+	 * We also want to know if `check_disk_chunk` found more bad bytes.. or less. If it found more we will continue to
+	 * rework the chunk until three tries have accumulated, then we will just throw an error and exit.
+	 */
 	size_t prev_bytes_checked = dicd->bytes_checked;
+	uint16 prev_bad_bytes = dicd->bad_bytes;
 	enum disk_image_check_status prev_status[2] = {dicd->status[0], dicd->status[1]};
 	*dicd = check_disk_chunk(dicd->image, dicd->device_image, dicd->bytes_checked, dicd->begin_pos);
 
 	/* Is `bad_chunk` the right thing to return, or should we return `unkown_error`, for what will truly cause a mixmatch of sizes on the same chunk? */
-	if(dicd->bytes_checked < prev_bytes_checked) return bad_chunk;
-	if(dicd->bad_bytes > 0) return bad_chunk;
+	if(dicd->bytes_checked < prev_bytes_checked) { ret_status = bad_chunk; goto end; }
+
+	/* If the status is the same, go ahead and call `rework_chunk` again. */
+	if((dicd->status[0] == prev_status[0] || dicd->status[1] == prev_status[1]) ||
+	   (dicd->bad_bytes >= prev_bad_bytes))
+	{
+		dicd = rework_chunk(dicd, dicd->image);
+		goto recheck;
+	}
+
+	/* If `check_disk_chunk` returns `good` then just return `good`. */
+	if(dicd->status[0] == good || dicd.status[1] == good)
+	{
+		tries = 0;
+		
+		/* Make sure we mark it as `fixed`, for it was not `good` before and had to get tested multiple times. */
+		dicd->status[0] = fixed;
+		dicd->status[1] = unstated;
+
+		ret_status = fixed;
+	}
 
 	/* If nothing above checks(which at least one of them should), we simply don't know the state of the chunk(whether it's corrrect or not).
 	 * Just return `unstated`, and reset `tries`.
 	 */
+	end:
 	tries = 0;
-	return unstated;
+	return ret_status;
 }
 
 _disk_image_check_data *rework_chunk(_disk_image_check_data *dicd, uint8 *binary_file_content)
