@@ -5,7 +5,7 @@
 
 /* Starting sector to start reading in sectors from. */
 #define sector_after_mbr		(uint8)0x02
-#define MBR_size			(uint16)bytes_per_sector
+#define MBR_size				(uint16)bytes_per_sector
 
 /* Disk image for the protocol. */
 static uint8 *disk_image = NULL;
@@ -14,7 +14,7 @@ static uint8 *disk_image = NULL;
 #define FAMP_bin_folder			(uint8 *)"boot_protocol/bin"
 
 /* Disk image folder for FAMP, for UNIX(support for other operating systems will be coming soon). */
-#define FAMP_disk_image_folder		(uint8 *)"/usr/lib/FAMP_disk_images/"
+#define FAMP_disk_image_folder	(uint8 *)"/usr/lib/FAMP_disk_images/"
 
 #define config_assert(cond, err_msg, is_file, file, ...)  	\
     if(!(cond)) {                                   		\
@@ -29,8 +29,9 @@ enum disk_image_check_status
 	needs_rework,
 	good,
 	bad_memory_stamp,
-	bad_chunk, // this should(hopefully) never be used. however if it is, odds are the user tweaked with something
-	unknown_error,
+	bad_chunk, 			// this should(hopefully) never be used. however, if it is, odds are the user tweaked with something
+	unknown_error,		// this should(hopefully) never be used. however, if it is, odds are the user tweaked with something
+	chunk_corrupted,	// this should(hopefully) never be used. however, if it is, odds are the user(or a program) manipulated the binary data in the file
 	fixed,
 	unstated
 };
@@ -45,11 +46,11 @@ typedef struct disk_image_check_data
 	 * `good` - nothing wrong with it
 	 * `bad_memory_stamp` - something went wrong when writing the memory stamp, this will be a tough fix
 	 */
-	enum disk_image_check_status	status[2]; // we can end up with `needs_rework` and `bad_memory_stamp`
-	uint8							total;			 // How many "status reports" did we get? 0, 1, or 2?
+	enum disk_image_check_status	status[2]; 		// we can end up with `needs_rework` and `bad_memory_stamp`
+	uint8							total;			// How many "status reports" did we get? 0, 1, or 2?
 
 	uint8							*image;
-	FILE							*device_image; // TODO: change to disk_image, and change all references to "device image" accordingly
+	FILE							*disk_image; 	// TODO: change to disk_image, and change all references to "device image" accordingly
 
 	/* How many bytes were wrong? How many were able to be fixed? */
 	uint16							bad_bytes;
@@ -215,7 +216,7 @@ _disk_image_check_data check_disk_chunk(uint8 *dimg_buffer, FILE* bin_file, size
 		.status = {unstated, unstated}, 
 		.total = 0, 
 		.image = dimg_buffer,
-		.device_image = bin_file,
+		.disk_image = bin_file,
 		.bad_bytes = 0,
 		.corrected_bytes = 0,
 		.begin_pos = pos
@@ -255,7 +256,13 @@ _disk_image_check_data check_disk_chunk(uint8 *dimg_buffer, FILE* bin_file, size
 		config_assert(stat != bad_chunk && stat != unknown_error,
 			"A unknown error occurred, or there is a bad chunk residing in the disk image.\n", false, NULL)
 		
-		/* Check what status we got from `rework_chunk`. If it is not `unstated` then `approve` returned `fixed`. */
+		/* If `temp_dicd.status[1]` is corrupted_chunk then there is a process that continues to manipulate the given binary file. */
+		config_assert(temp_dicd.status[1] != corrupted_chunk,
+			"The binary file is corrupted. There must be some sort of application or process that continues to change the data residing within the needed binary file.\n", false, NULL)
+		
+		/* Check what status we got from `rework_chunk`. If it is not `unstated` then `approve` returned `fixed`. 
+		 * If it is not `fixed`, error. Something went wrong.
+		 */
 		config_assert(temp_dicd.status[0] == fixed,
 			"There are some underlying problems with a specific chunk(located ~%ld bytes into the disk image).\n", false, NULL, pos)
 	}
@@ -304,21 +311,36 @@ enum disk_image_check_status approve(_disk_image_check_data *dicd)
 	 * We also want to know if `check_disk_chunk` found more bad bytes.. or less. If it found more we will continue to
 	 * rework the chunk until three tries have accumulated, then we will just throw an error and exit.
 	 */
+	retry_check:
 	size_t prev_bytes_checked = dicd->bytes_checked;
 	uint16 prev_bad_bytes = dicd->bad_bytes;
 	enum disk_image_check_status prev_status[2] = {dicd->status[0], dicd->status[1]};
-	*dicd = check_disk_chunk(dicd->image, dicd->device_image, dicd->bytes_checked, dicd->begin_pos);
+	*dicd = check_disk_chunk(dicd->image, dicd->disk_image, dicd->bytes_checked, dicd->begin_pos);
 
-	/* Is `bad_chunk` the right thing to return, or should we return `unkown_error`, for what will truly cause a mixmatch of sizes on the same chunk? */
-	if(dicd->bytes_checked < prev_bytes_checked) { ret_status = bad_chunk; goto end; }
+	/* This check occurrs just in case some sort of program manipulates the binary file and its data while this program is running.
+	 * If this happens, this check will tell us the sizes of the chunks do not match, and we will return `bad_chunk`.
+	 */
+	if(dicd->bytes_checked < prev_bytes_checked) 
+	{
+		/* Reread the binary data.
+		 * If `check_disk_chunk` gives us data that does not match what we previously had, lets retry.
+		 * Accumulate the total tries, read in the binary data again and reset the data.
+		 */
+		if(tries < 4) { tries++; fread(dicd->image, dicd->bytes_checks, sizeof(*dicd->image), dicd->disk_image); goto retry_check; }
+
+		/* If `tries` is greater than 3, then the chunk is simply corrupted and there is something wrong with it.
+		 * Or there is a background process running(or a application running) that continues to change the binaries size.
+		 */
+		dicd->status[0] = bad_chunk;
+		dicd->status[1] = chunk_corrupted;
+		ret_status = bad_chunk; 
+		goto end; 
+	}
 
 	/* If the status is the same, go ahead and call `rework_chunk` again. */
 	if((dicd->status[0] == prev_status[0] || dicd->status[1] == prev_status[1]) ||
-	   (dicd->bad_bytes >= prev_bad_bytes))
-	{
-		dicd = rework_chunk(dicd, dicd->image);
-		goto recheck;
-	}
+	   (dicd->status[0] == prev_status[1] || dics->status[1] == prev_status[0]) ||
+	   (dicd->bad_bytes >= prev_bad_bytes)) { dicd = rework_chunk(dicd, dicd->image); goto recheck; }
 
 	/* If `check_disk_chunk` returns `good` then just return `good`. */
 	if(dicd->status[0] == good || dicd->status[1] == good)
@@ -353,10 +375,10 @@ _disk_image_check_data *rework_chunk(_disk_image_check_data *dicd, uint8 *binary
 		i++;
 	}
 
-	/* Refill the chunk from the disk image accordingly(if for some reason we didn't correct any bytes from above). */
+	/* Refill the chunk from the disk image accordingly(if for some reason we didn't correct all the bad bytes above). */
 	if(dicd->corrected_bytes < dicd->bad_bytes)
 	{
-		size_t bytes_filled = fill_disk_image(dicd->device_image, dicd->bytes_checked, dicd->begin_pos, strlen(dicd->image));
+		size_t bytes_filled = fill_disk_image(dicd->disk_image, dicd->bytes_checked, dicd->begin_pos, strlen(dicd->image));
 
 		config_assert(bytes_filled == dicd->bytes_checked,
 			"There was a random mismatch of chunk sizes when fixing a chunk of data from the disk image.\n", false, NULL)
