@@ -50,6 +50,7 @@ typedef struct disk_image_check_data
 	uint8							total;			// How many "status reports" did we get? 0, 1, or 2?
 
 	uint8							*image;
+	uint8							*disk_image_filename;
 	FILE							*disk_image; 	// TODO: change to disk_image, and change all references to "device image" accordingly
 
 	/* How many bytes were wrong? How many were able to be fixed? */
@@ -61,26 +62,6 @@ typedef struct disk_image_check_data
 } _disk_image_check_data;
 static _disk_image_check_data dicd[5];
 static uint8 ind = 0;
-
-uint8 *read_format(const uint8 *filename, uint8 access[2])
-{
-	FILE* format_ = fopen(filename, access);
-	uint8 *raw_format = NULL;
-
-	config_assert(format_, "Error openeing ../boot/boot_format.\n\tWas it deleted?\n", false, NULL)
-
-	fseek(format_, 0, SEEK_END);
-	size_t format_size = ftell(format_);
-	fseek(format_, 0, SEEK_SET);
-
-	config_assert(format_size > 0, "Error with size of ../boot/bformat2.\n\tWas all the content removed?\n", false, NULL)
-
-	raw_format = calloc(format_size, sizeof(*format_));
-	fread(raw_format, sizeof(uint8), format_size, format_);
-	fclose(format_);
-
-	return raw_format;
-}
 
 /*
  * get_file_size - helper function that will return the size of a file(in bytes)
@@ -106,6 +87,24 @@ size_t get_file_size(FILE *f, uint8 *filename)
 	fseek(f, 0, SEEK_SET);
 
 	return fsize;
+}
+
+uint8 *read_format(const uint8 *filename, uint8 access[2])
+{
+	FILE* format_ = fopen(filename, access);
+	uint8 *raw_format = NULL;
+
+	config_assert(format_, "Error openeing ../boot/boot_format.\n\tWas it deleted?\n", false, NULL)
+
+	size_t format_size = get_file_size(format_, NULL);
+
+	config_assert(format_size > 0, "Error with size of ../boot/bformat2.\n\tWas all the content removed?\n", false, NULL)
+
+	raw_format = calloc(format_size, sizeof(*format_));
+	fread(raw_format, format_size, sizeof(*raw_format), format_);
+	fclose(format_);
+
+	return raw_format;
 }
 
 /*
@@ -170,7 +169,12 @@ size_t reallocate_disk_image_size(size_t pos, size_t new_size)
 size_t fill_disk_image(FILE *binary_data, size_t buffer_size, size_t start_index, size_t max_size)
 {
 	/* Make sure `disk_image` is valid. */
-	config_assert(disk_image, "Something went wrong while filling out the disk image.\nCannot fill disk image: no memory allocated.\n", false, NULL)
+	config_assert(disk_image, 
+		"Something went wrong while filling out the disk image.\nCannot fill disk image: no memory allocated.\n", false, NULL)
+
+	/* Make sure `binary_data` is valid. */
+	config_assert(binary_data,
+		"The binary file passed to `fill_disk_image` must be closed, or does not exist.\n", false, NULL)
 
 	/* Make sure `start_index` plus `data_length` does not surpass the overall size of `disk_image`. */
 	/* If `start_index` plus `data_length` is larger than `max_size`, go ahead and allocate new memory so everything will fit.
@@ -209,13 +213,22 @@ static uint8 tries = 0;
  * On Error: This function does not error
  *
  * */
-_disk_image_check_data check_disk_chunk(uint8 *dimg_buffer, FILE* bin_file, size_t bytes, size_t pos)
+_disk_image_check_data check_disk_chunk(uint8 *dimg_buffer, FILE* bin_file, uint8 *filename, size_t bytes, size_t pos)
 {
+	/* Make sure `filename` is not NULL. */
+	config_assert(filename != NULL,
+		"An argument passed to `check_disk_chunk` resulted in being NULL. This is an invalid argument.\n", true, bin_file)
+
+	/* If `bin_file` is NULL then we will reopen the binary file. */
+	if(!(bin_file)) bin_file = fopen(filename, "rb");
+	
+	/* All data over the current check. */
 	_disk_image_check_data temp_dicd = {
 		.bytes_checked = 0, 
 		.status = {unstated, unstated}, 
 		.total = 0, 
 		.image = dimg_buffer,
+		.disk_image_filename = filename,
 		.disk_image = bin_file,
 		.bad_bytes = 0,
 		.corrected_bytes = 0,
@@ -230,6 +243,11 @@ _disk_image_check_data check_disk_chunk(uint8 *dimg_buffer, FILE* bin_file, size
 		"There was an error checking portions of the given binary file.\n", true, bin_file)
 	
 	fread(temp_buffer, bytes, sizeof(uint8), bin_file);
+	
+	/* Make sure the file is closed just in case another program does manipulate its data. 
+	 * We will be able to tell if the chunk is corrupted efficiently then.
+	 */
+	fclose(bin_file);
 	temp_buffer[0] = 'A';
 
 	/* Perform the check. */
@@ -256,8 +274,8 @@ _disk_image_check_data check_disk_chunk(uint8 *dimg_buffer, FILE* bin_file, size
 		config_assert(stat != bad_chunk && stat != unknown_error,
 			"A unknown error occurred, or there is a bad chunk residing in the disk image.\n", false, NULL)
 		
-		/* If `temp_dicd.status[1]` is corrupted_chunk then there is a process that continues to manipulate the given binary file. */
-		config_assert(temp_dicd.status[1] != corrupted_chunk,
+		/* If `temp_dicd.status[1]` is `chunk_corrupted` then there is a process that continues to manipulate the given binary file. */
+		config_assert(temp_dicd.status[1] != chunk_corrupted,
 			"The binary file is corrupted. There must be some sort of application or process that continues to change the data residing within the needed binary file.\n", false, NULL)
 		
 		/* Check what status we got from `rework_chunk`. If it is not `unstated` then `approve` returned `fixed`. 
@@ -315,7 +333,7 @@ enum disk_image_check_status approve(_disk_image_check_data *dicd)
 	size_t prev_bytes_checked = dicd->bytes_checked;
 	uint16 prev_bad_bytes = dicd->bad_bytes;
 	enum disk_image_check_status prev_status[2] = {dicd->status[0], dicd->status[1]};
-	*dicd = check_disk_chunk(dicd->image, dicd->disk_image, dicd->bytes_checked, dicd->begin_pos);
+	*dicd = check_disk_chunk(dicd->image, dicd->disk_image, dicd->disk_image_filename, dicd->bytes_checked, dicd->begin_pos);
 
 	/* This check occurrs just in case some sort of program manipulates the binary file and its data while this program is running.
 	 * If this happens, this check will tell us the sizes of the chunks do not match, and we will return `bad_chunk`.
@@ -326,7 +344,7 @@ enum disk_image_check_status approve(_disk_image_check_data *dicd)
 		 * If `check_disk_chunk` gives us data that does not match what we previously had, lets retry.
 		 * Accumulate the total tries, read in the binary data again and reset the data.
 		 */
-		if(tries < 4) { tries++; fread(dicd->image, dicd->bytes_checks, sizeof(*dicd->image), dicd->disk_image); goto retry_check; }
+		if(tries < 4) { tries++; goto retry_check; }
 
 		/* If `tries` is greater than 3, then the chunk is simply corrupted and there is something wrong with it.
 		 * Or there is a background process running(or a application running) that continues to change the binaries size.
@@ -339,7 +357,7 @@ enum disk_image_check_status approve(_disk_image_check_data *dicd)
 
 	/* If the status is the same, go ahead and call `rework_chunk` again. */
 	if((dicd->status[0] == prev_status[0] || dicd->status[1] == prev_status[1]) ||
-	   (dicd->status[0] == prev_status[1] || dics->status[1] == prev_status[0]) ||
+	   (dicd->status[0] == prev_status[1] || dicd->status[1] == prev_status[0]) ||
 	   (dicd->bad_bytes >= prev_bad_bytes)) { dicd = rework_chunk(dicd, dicd->image); goto recheck; }
 
 	/* If `check_disk_chunk` returns `good` then just return `good`. */
@@ -378,6 +396,12 @@ _disk_image_check_data *rework_chunk(_disk_image_check_data *dicd, uint8 *binary
 	/* Refill the chunk from the disk image accordingly(if for some reason we didn't correct all the bad bytes above). */
 	if(dicd->corrected_bytes < dicd->bad_bytes)
 	{
+		/* Make sure the binary file is opened. */
+		if(!(dicd->disk_image)) dicd->disk_image = fopen(dicd->disk_image_filename, "rb");
+
+		/* Fill out the chunk of data in `disk_image`.
+		 * `dicd->disk_image` is the file, `disk_image`, the variable, is the actual array representing the disk image
+		 */
 		size_t bytes_filled = fill_disk_image(dicd->disk_image, dicd->bytes_checked, dicd->begin_pos, strlen(dicd->image));
 
 		config_assert(bytes_filled == dicd->bytes_checked,
