@@ -6,6 +6,10 @@ os_name: "FAMP_test"
 os_vers: "1.0.1"
 pref_FS: "custom"
 
+# Disk image name
+disk_name: "test_disk"
+auto_format: "no"
+
 # Bin folder
 bin_folder: "bin"
 
