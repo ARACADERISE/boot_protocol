@@ -2,6 +2,7 @@
 #define config_util
 #include "../YamlParser/parser.h"
 #include "format.h"
+#include "format_disk_image.h"
 
 /* Starting sector to start reading in sectors from. */
 #define sector_after_mbr		(uint8)0x02
@@ -29,6 +30,7 @@ enum disk_image_check_status
 	needs_rework,
 	good,
 	bad_memory_stamp,
+	good_memory_stamp,
 	bad_chunk, 			// this should(hopefully) never be used. however, if it is, odds are the user tweaked with something
 	unknown_error,		// this should(hopefully) never be used. however, if it is, odds are the user tweaked with something
 	chunk_corrupted,	// this should(hopefully) never be used. however, if it is, odds are the user(or a program) manipulated the binary data in the file
@@ -67,6 +69,30 @@ typedef struct disk_image_check_data
 static _disk_image_check_data dicd[5];
 static uint8 ind = 0;
 
+// Dumb little function to shorten the amount of code
+uint8 *initiate_path(uint8 data1[], uint8 data2[])
+{
+	/* `data1`, at least, has to be valid and not NULL. */
+	config_assert(data1, "Cannot initiate the path. No data given to configure the path.\n", false, NULL)
+
+	/* Initiate `array` and concat `data1` to it. */
+	uint8 *array = calloc(strlen(data1), sizeof(*array));
+	strcat(array, data1);
+
+	/* If `data2` is not NULL, go ahead and perform the same action as above. */
+	if(data2 != NULL)
+	{
+		array = realloc(array, ((strlen(data1) + 1) + strlen(data2)) * sizeof(*array));
+		
+		config_assert(strlen(data1) + strlen(data2) <= 80, 
+			"Path is too large: %s.\nFAMP only allows up to 50 characters for a path.\n", false, NULL, strcat(array, data2))
+		
+		strcat(array, data2);
+	}
+
+	return array;
+}
+
 /*
  * get_file_size - helper function that will return the size of a file(in bytes)
  *
@@ -91,6 +117,32 @@ size_t get_file_size(FILE *f, uint8 *filename)
 	fseek(f, 0, SEEK_SET);
 
 	return fsize;
+}
+
+FILE *open_and_assert(const uint8 *filename, uint8 perm[2])
+{
+	config_assert(strcmp(perm, "wb") == 0 || strcmp(perm, "w") == 0 || strcmp(perm, "r") == 0 || strcmp(perm, "rb") == 0,
+		"The permission for opening the file %s must be `wb` or `rb`.\n", false, NULL, filename)
+	
+	FILE *f = fopen(filename, perm);
+	config_assert(f,
+		strcmp(perm, "rb") == 0 ? "Error opening file %s.\n" : "Error creating file %s.\n", true, f, filename)
+	
+	return f;
+}
+
+void write_file(const uint8 *filename, uint8 *buffer, size_t buffer_size)
+{
+	config_assert(buffer != NULL,
+		"There was no buffer to write to the file %s.\n", false, NULL, filename)
+	
+	FILE *temp_file = open_and_assert(filename, "w");
+
+	size_t bytes_written = fwrite(buffer, sizeof(*buffer), buffer_size, temp_file);
+	config_assert(bytes_written == buffer_size,
+		"Not all of the buffer was written to the file %s.\n", true, temp_file, filename)
+
+	fclose(temp_file);
 }
 
 uint8 *read_format(const uint8 *filename, uint8 access[2])
@@ -414,10 +466,10 @@ _disk_image_check_data *rework_chunk(_disk_image_check_data *dicd, uint8 *binary
 	return dicd;
 }
 
-bool is_memory_stamp_good(_disk_image_check_data dicd, uint8 expected_memory_id)
+enum disk_image_check_status is_memory_stamp_good(_disk_image_check_data dicd, uint8 expected_memory_id)
 {
-	if(dicd.chunks_memory_stamp->memory_id == expected_memory_id && dicd.chunks_memory_stamp->estimate_size_in_bytes == dicd.bytes_checked) return true;
-	return false;
+	if(dicd.chunks_memory_stamp->memory_id == expected_memory_id && dicd.chunks_memory_stamp->estimate_size_in_bytes == dicd.bytes_checked) return good_memory_stamp;
+	return bad_memory_stamp;
 }
 
 #endif
