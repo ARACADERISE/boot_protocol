@@ -1,30 +1,6 @@
 #ifndef protocol_disk_image
 #define protocol_disk_image
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-/* My own types. */
-typedef unsigned char       uint8;
-typedef signed char         int8;
-typedef unsigned short      uint16;
-typedef signed short        int16;
-typedef unsigned int        uint32;
-typedef signed int          int32;
-typedef unsigned long       size;
-typedef unsigned long long  lsize;
-
-/* Booleans. */
-#define true            1
-#define false           0
-#define FAMP_assert(cond, err_msg, ...)         \
-    if(!(cond))     {                           \
-        fprintf(stderr, err_msg, ##__VA_ARGS__);\
-        exit(EXIT_FAILURE);                     \
-    }
-
-/* Binary file where the user wants the disk image to be located. */
-static FILE *disk_image = NULL;
+#include "config_util.h"
 
 /* Partition types.
  * The FS dwells in a partition; rather, the FS is a partition in and of itself.
@@ -54,10 +30,45 @@ enum FS_types {
 static const uint8 part_header_start[6]     = {'P', 'A', 'R', 'T', 'S', '\0'};
 static const uint8 part_header_end[6]       = {'P', 'A', 'R', 'T', 'E', '\0'};
 
-/* Default partition ID. This is supported just in case FAMP ends up supporting an extended partition table.
- * If it does, it will resemble each partition with a different partition ID(if the partition stores something important such as a FS).
- * Partition IDs will more than likely only be required(when and if extended partition table is introduced) for partitions that store a FS/separate disk image.
- */
-static const uint8 default_partition_id[] = "DEFAULT_PART_ID";
+/* 44-byte wide partition header describing the partition. */
+typedef struct PartitionHeader
+{
+    /* Signify the start of partition header. */
+    uint8            header_start[6]; // "PARTS  ", in binary: "P A R T S 00"
+
+    /* Partition type(available to user, not available to user/available 
+     * to user AND the kernel etc). 
+     */
+    uint8            partition_type;
+
+    /* LBA values where partition starts/ends. */
+    uint32           starting_LBA;
+    uint32           ending_LBA;
+
+    /* Address of partition(really, address of FS). */
+    uint16           partition_address;
+
+    /* What type of FS does the user want? FAMPs custom FS, or a pre-existing one? */
+    uint8            FS_type;
+
+    /* If `FS_type` is `FS_FAMP_custom` then what revision of FAMPs custom FS is currently being used? 
+     * Set to zero if we are using a FS other than FAMPs custom FS. 
+     */
+    uint32           FAMP_custom_FS_revision;
+
+    /* CHS(Cylinder, Head, Sector). Just in case we ever do need it.
+     * A later revision of `struct PartitionHeader` will, more than likely, remove support for CHS.
+     */
+    uint16           cylinder;
+    uint8            head;
+    uint32           sector;
+
+    /* 9 of the 15 bytes will be padded out with zero, 
+     * the last 6 bytes will represent `PARTE  `, in binary: `P A R T E 00`(indicating the end of the partition header). 
+     */
+    uint8            header_end[15];
+} __attribute__((packed)) _PartitionHeader;
+
+uint8 no_fs[] = "NO_FS_MOUNTED";
 
 #endif
