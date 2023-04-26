@@ -282,3 +282,55 @@
         - This was mainly an error with `0x8E`. When backspace was released with shift being pressed it would put a weird character. `get_key` now returns zero upon `0x8E` being encountered as a scancode.
         - 1
             - See `todo` for more info
+
+4/25/2023
+    - PREVIOUS:
+        - Added keyboard driver(`boot_protocol/protocol/keyboard_driver/keyboard.h`)
+        - Added cursor support(`boot_protocol/protocol/keyboard_driver/cursor.h`)
+        - Added printing with B8000 mode(`protocol/keyboard_driver/printing.h`)
+            - 1
+                - See `todo` for more info
+        - Added `kernel_header.h`
+            - This is a header file for all kernel-related functionality/API code
+        - Added `remove.py` and `move.py`(located in `boot_protocol/config/py_scripts`)
+            - These python scripts are "helper" scripts for FAMP tools, as well as working with disk images
+            - `remove.py` is in charge of removing entire directories are binary files in particular
+            - `move.py` is in charge of creating directories/moving binary files
+                - Directories created with `move.py` reside in `/usr/lib` on UNIX systems
+                - Binary files moved with `move.py` are moved to `/usr/bin`
+        - Added `pclean` to FAMP makefile and `purge_clean` to user makefile
+            - `purge_clean` is a command that the user can run that invokes the command `pclean` in FAMPs makefile
+            - `pclean`(`purge_clean`) simply just deletes all tools in `/usr/bin`, and deletes all directories that FAMP has residing in `/usr/lib`
+    - RECENT:
+        - The MBR(bootloader) format has changed
+            - The MBR now no longer includes the binary files of all of the other parts of the OS
+            - With this, the configuration of FAMP handles piecing together the disk image
+                - Added `config_util.h`(located in `boot_protocol/config`)
+                    - `config_util.h` holds functions for reallocating memory for the disk image, filling out the disk image and checking the disk image
+                    - The overall configuration works in two parts:
+                        - The first run through of `main.c` creates the MBR
+                        - After the first run through the file `boot.s` located in `boot_protocol/boot` gets assembled
+                        - After the MBR gets assembled the file `main.c` is ran again with the argument `eve`, standing for Everything Else
+                        - With `eve`, the configuration will either format the disk image accordingly, write a temporary `.fimg` file in `boot_protocol/bin` or it will
+                          perform checks on the preexisting `.fimg` disk image file in `boot_protocol/bin` and if all goes well `move.py` will be ran with `move_disk_image` as
+                          an argument and the `.fimg` file located in `boot_protocol/bin` will be moved to `/usr/lib/FAMP_disk_images`
+        - Began adding `FAMP_fdi`(FAMP Format Disk Image(fdi))
+            - This is a tool that will format a disk image with a FS. With this, the tool will simply just manipulate the binary data in the binary file a bit and
+              append the FS partition header, as well as the entirety of the FS, at the end of the `.fimg` file
+            - All tools are located in `/usr/bin` on UNIX systems
+            - With this, the Makefile for FAMP has changed
+                - Added `make tools`. Users of FAMP, for the time being, will have to manually enter the directory `boot_protocol` and run `make tools`
+            - With FAMP tools, all temporary binary files for the tools will be located in `tools_bin`. `move.py` will then locate all of the tools binary files in
+              `boot_protocol/tools_bin` and move them accordingly
+            - Added `FAMP_fdi_format`
+                - With `FAMP_fdi` there is the script `FAMP_fdi` that is located in `boot_protocol/config/scripts`. Upon `move.py` being ran it will move `FAMP_fdi`
+                  to `/usr/bin` and move all binary files located in `tools_bin` to `/usr/lib/FAMP_tools_bin`. So, if `make tools` is ran again it will need to
+                  recreate the file `FAMP_fdi` in `boot_protocol/config/scripts` so it can run efficiently without errors
+        - `boot.yaml` got some updated!
+            - The user now has to specify the disk image file. The user just has to specify the name, not the file extension. FAMPs configuration will take care of that
+                - FAMP only supports `.fimg` file extensions for its disk images
+                - The user specifies the name of the disk image via `disk_name`
+            - The user now has to specify whether or not they want FAMPs configuration to automatically format the disk image or not. If not, the user will have to format the
+              disk image with `FAMP_fdi` if they want FS support
+                - 2
+                    - See `todo` for more info
