@@ -42,3 +42,4 @@ clean:
 
 pclean:
 	@./config/scripts/clean purge
+	@python3 config/py_scripts/remove.py --purge

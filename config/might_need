@@ -55,3 +55,11 @@ Info:
 	.kernel_size		dw ((kernelE - kernel) / 512)
 	.kernel_addr		dw 0x0%lx
 	.kernel_loc			dw 0x%lx
+
+		for(char i = 0; i < 5; i++)
+		{
+			printf("\n\n\tBytes Checked: %ld\n\tStatus: %s\n\tBad Bytes Found: %d\n\tBad Bytes Fixed: %d\n\t",
+				dicd[i].bytes_checked, 
+				(dicd[i].status[0] == good || dicd[i].status[1] == good) || (dicd[i].status[0] == fixed || dicd[i].status[1] == fixed) ? "good/fixed" : "bad :c",
+				dicd[i].bad_bytes, dicd[i].corrected_bytes);
+		}
