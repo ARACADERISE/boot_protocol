@@ -242,6 +242,13 @@ int32 main(int args, char *argv[])
 		sprintf(format2, format_, initiate_path(FAMP_disk_image_folder, initiate_path(yod.disk_name, ".fimg")));
 		write_file("scripts/FAMP_fdi", format2, strlen(format2));
 	}
+	
+	free((uint8 *)MBR_binary_file_path);
+	free((uint8 *)second_stage_binary_file_path);
+	free((uint8 *)mbr_part_table_bin_file_path);
+	free((uint8 *)higher_half_kernel_bin_file_path);
+	free((uint8 *)kernel_bin_file_path);
+	free((uint8 *)temp_disk_image_path);
 
 	return 0;
 }
