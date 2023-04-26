@@ -248,3 +248,17 @@
         - TODO: Make it to where if shift + backspace is pressed, shift gets turned off
     - TODO: Store all release scancodes in an array and loop through all the release codes in the function `get_key`. 
         - Do this so we know if we have to return zero instead of doing a bunch of cases in a switch statement.
+
+4/25/2023
+    - 1
+        - TODO: Need to add support for scrolling. When the top row goes "off the screen" we need to somehow save the lines contents and move each line below it up one.
+            - With this, when the user backspaces to the previous line the line that went "off the screen" needs to be put back at the top
+    - 2
+        - TODO: Even if the user tells FAMPs configuration not to automatically format the disk image with a FS, we need to append, at least, 1 sector of binary data
+                at the end of the disk image and assign values accordingly for the MBR partition table entry that represents the FS
+            - With this, we should probably put some sort of data within the 512 bytes of memory, if the user does not want FAMPs configuration automatically 
+              formatting the disk image, that the program `mbr_partition_table.c` can use. This data will simply tell the program that there is was not
+              FS formatted on the disk image and it'll perform actions accordingly.
+    - TODO: Add support for Windows/MacOS systems
+    - TODO: Remove `boot_protocol/config/formats/boot_format2`. This format is no longer needed
+    - TODO: Get the FS going!!
