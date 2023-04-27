@@ -8,6 +8,7 @@ int32 main(int args, char *argv[])
 
 	/* Format that gets read from the file. */
 	uint8 *format_ = NULL;
+	uint8 *temp_binary_data = NULL;
 
 	/* Format that gets written to the destination file. */
 	uint8 format2[bytes_per_sector * 8];
@@ -71,19 +72,43 @@ int32 main(int args, char *argv[])
 	 */
 	FILE *FS_bin				= NULL;
 
-	if(strcmp(yod.auto_format, "no") == 0)
+	/* Sector count(LBA #). */
+	uint8 sector = sector_after_mbr + (mbr_tbl_bin_size / 512);
+
+	/* FS size, this will be passed to `write_MBR` so we know if the FS size is 1 * 512 or 5 * 512. */
+	size_t FS_size = 0;
+
+	if(yod.auto_format == false)
 	{
+		FS_size = 1 * bytes_per_sector;
 		/* Make sure `disk_image` will have enough memory for the FS. */
-		disk_image_size += reallocate_disk_image_size(disk_image_size, 1 * bytes_per_sector);
+		disk_image_size += reallocate_disk_image_size(disk_image_size, FS_size);
 
 		/* Make sure the protocol will be able to tell there is no FS mounted to the disk image. */
 		FS_bin = open_and_assert(initiate_path("../", "tools_bin/temp_FS_part_header.bin"), "wb");
 
-		uint8 *temp_binary_data = calloc(1 * bytes_per_sector, sizeof(*temp_binary_data));
+		temp_binary_data = calloc(FS_size, sizeof(*temp_binary_data));
 		for(uint8 i = 0; i < sizeof(no_fs)/sizeof(no_fs[0]); i++) memset(&temp_binary_data[i], no_fs[i], 1);
-		fwrite(temp_binary_data, sizeof(*temp_binary_data), 1 * bytes_per_sector, FS_bin);
+		fwrite(temp_binary_data, sizeof(*temp_binary_data), FS_size, FS_bin);
 		
 		free(temp_binary_data);
+		fclose(FS_bin);
+	} else
+	{
+		FS_size = 5 * bytes_per_sector;
+		disk_image_size += reallocate_disk_image_size(disk_image_size, FS_size);
+		FS_bin = open_and_assert(initiate_path("../", "tools_bin/temp_FS_part_header.bin"), "wb");
+		
+		temp_binary_data = calloc((FS_size) - sizeof(_PartitionHeader), sizeof(*temp_binary_data));
+
+		/* Get the partition header assigned. */
+		_PartitionHeader *part_header = calloc(1, sizeof(*part_header));
+		init_FS_type_and_part_type(part_header, true, &yod, NULL, NULL);
+		set_start_and_end_LBA(part_header, (((sector - 1) * bytes_per_sector) + ssb_size + get_file_size(higher_half_kern_bin, NULL) + yod.kern_filename_bin_size) / 512, FS_size);
+
+		fwrite(part_header, sizeof(*part_header), 1, FS_bin);
+		fwrite(temp_binary_data, sizeof(*temp_binary_data), (FS_size) - sizeof(_PartitionHeader), FS_bin);
+
 		fclose(FS_bin);
 	}
 
@@ -91,33 +116,7 @@ int32 main(int args, char *argv[])
 
 	/* Write MBR. This "scope" is just to write information to the file `boot.s`. */
 	{
-		/* Obtain the MBR format. */
-		format_ = read_format((const uint8 *)"formats/boot_format", "rb");
-		format_ = realloc(format_, (strlen(format_) + 60) * sizeof(*format_));
-
-		uint8 sector = sector_after_mbr + (mbr_tbl_bin_size / 512);
-
-		sprintf(format2, format_,
-			mbr_tbl_bin_size/512,
-			yod.FS_type,
-			yod.OS_name,
-			yod.OS_version,
-			yod.type,
-			sector,
-			sector + (ssb_size / 512),
-			ssb_size / 512,
-			sector + (ssb_size / 512),
-			sector + ((ssb_size / 512) + (yod.kern_filename_bin_size / 512)),
-			yod.kern_filename_bin_size / 512,
-			sector + ((ssb_size / 512) + (yod.kern_filename_bin_size / 512)),
-			sector + ((ssb_size / 512) + (yod.kern_filename_bin_size / 512)) + 1,
-			1);
-		
-		write_file("../boot/boot.s", format2, strlen(format2));
-
-		/* Free the read-in format, and set all the good-to-write data(`format2`) to zero. */
-		free(format_);
-		memset(format2, 0, bytes_per_sector * 8);
+		write_MBR(&yod, sector, ssb_size, FS_size, NULL, NULL, 0, NULL, 0, 0);
 
 		fclose(second_stage_bin);
 		fclose(mbr_part_table_bin);
@@ -242,7 +241,7 @@ int32 main(int args, char *argv[])
 		sprintf(format2, format_, initiate_path(FAMP_disk_image_folder, initiate_path(yod.disk_name, ".fimg")));
 		write_file("scripts/FAMP_fdi", format2, strlen(format2));
 	}
-	
+
 	free((uint8 *)MBR_binary_file_path);
 	free((uint8 *)second_stage_binary_file_path);
 	free((uint8 *)mbr_part_table_bin_file_path);

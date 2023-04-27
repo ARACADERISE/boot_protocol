@@ -2,6 +2,8 @@
 #define protocol_disk_image
 #include "config_util.h"
 
+#define FS_address      (uint16)0xF000
+
 /* Partition types.
  * The FS dwells in a partition; rather, the FS is a partition in and of itself.
  * FAMP would like to know how to handle the partition. To the protocol, a partition is a set of memory that has a description for it.
@@ -28,7 +30,7 @@ enum FS_types {
 
 /* Partition header beginning/endinng "tags". */
 static const uint8 part_header_start[6]     = {'P', 'A', 'R', 'T', 'S', '\0'};
-static const uint8 part_header_end[6]       = {'P', 'A', 'R', 'T', 'E', '\0'};
+static const uint8 part_header_end[15]       = {'P', 'A', 'R', 'T', 'E', '\0'};
 
 /* 44-byte wide partition header describing the partition. */
 typedef struct PartitionHeader
@@ -70,5 +72,61 @@ typedef struct PartitionHeader
 } __attribute__((packed)) _PartitionHeader;
 
 uint8 no_fs[] = "NO_FS_MOUNTED";
+
+void init_FS_type_and_part_type(_PartitionHeader *pheader, bool use_yaml_data, _yaml_os_data *odata, uint8 *FS_type, uint8 *part_type)
+{
+    config_assert((use_yaml_data && odata != NULL) || (!use_yaml_data && FS_type != NULL) || (!use_yaml_data && part_type != NULL),
+        "Cannot initiate FS type and size.\nThere is no data to use to configure, or there is some wrong data passed to `init_FS_type_and_size`. Aborting.\n", false, NULL);
+    
+    memcpy(pheader->header_start, part_header_start, 6);
+    memcpy(pheader->header_end, part_header_end, 15);
+
+    if(use_yaml_data)
+    {
+        switch(odata->FS_type)
+        {
+            case 1: pheader->FS_type = (uint8)FS_FAMP_custom;pheader->FAMP_custom_FS_revision = 1;break;
+            case 2: pheader->FS_type = (uint8)FS_fat32;break;
+            case 3: pheader->FS_type = (uint8)FS_ext2;break;
+            case 4: pheader->FS_type = (uint8)FS_ISO9660;break;
+            default: pheader->FS_type =(uint8) FS_FAMP_custom;break;
+        }
+
+        /* If we are using the yaml data, by default the FS will be UKA(User & Kernel Access).
+         * TODO: Make it to where `boot.yaml` supports a way for the user to tell FAMP what the type of partition is. For now, this is okay.
+         */
+        pheader->partition_type = part_type_1;
+
+        goto end;
+    }
+
+    if(strcmp(FS_type, "FAMP_CFS") == 0) 
+    {
+        default_fs:
+        pheader->FS_type = FS_FAMP_custom;
+        pheader->FAMP_custom_FS_revision = 1;
+
+        goto out;
+    }
+    else goto default_fs;
+
+    out:
+    /* Check partition type. */
+    if(strcmp(part_type, "UKA") == 0)     { pheader->partition_type = part_type_1; goto end; } // User & Kernel Access
+    if(strcmp(part_type, "KOA") == 0)     { pheader->partition_type = part_type_2; goto end; } // Kernel Access Only
+    if(strcmp(part_type, "CDKOA") == 0)   { pheader->partition_type = part_type_3; goto end; } // Critical Data, Kernel Access Only
+    if(strcmp(part_type, "CDUKA") == 0)   { pheader->partition_type = part_type_4; goto end; } // Critical Data, User & Kernel Access
+    if(strcmp(part_type, "E") == 0)       { pheader->partition_type = part_type_5; goto end; } // Extra. This partition can resemble a FS without any regulations, or it can just resemble a random program.
+
+    end:
+    pheader->partition_address = FS_address;
+    return;
+}
+
+void set_start_and_end_LBA(_PartitionHeader *pheader, size_t start_LBA, size_t FS_size)
+{
+    pheader->starting_LBA = start_LBA;
+    pheader->ending_LBA = start_LBA + (FS_size / 512);
+}
 
 #endif

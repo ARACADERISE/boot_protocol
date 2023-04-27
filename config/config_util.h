@@ -2,7 +2,6 @@
 #define config_util
 #include "../YamlParser/parser.h"
 #include "format.h"
-#include "format_disk_image.h"
 
 /* Starting sector to start reading in sectors from. */
 #define sector_after_mbr		(uint8)0x02
@@ -23,6 +22,8 @@ static uint8 *disk_image = NULL;
 		if(is_file == true && !(file == NULL)) fclose(file);\
         exit(EXIT_FAILURE);                         		\
     }
+
+#include "format_disk_image.h"
 
 /* Status over checking portions of the disk image. */
 enum disk_image_check_status
@@ -93,6 +94,18 @@ uint8 *initiate_path(uint8 data1[], uint8 data2[])
 	return array;
 }
 
+FILE *open_and_assert(const uint8 *filename, uint8 perm[2])
+{
+	config_assert(strcmp(perm, "wb") == 0 || strcmp(perm, "w") == 0 || strcmp(perm, "r") == 0 || strcmp(perm, "rb") == 0,
+		"The permission for opening the file %s must be `wb` or `rb`.\n", false, NULL, filename)
+	
+	FILE *f = fopen(filename, perm);
+	config_assert(f,
+		strcmp(perm, "rb") == 0 ? "Error opening file %s.\n" : "Error creating file %s.\n", true, f, filename)
+	
+	return f;
+}
+
 /*
  * get_file_size - helper function that will return the size of a file(in bytes)
  *
@@ -108,8 +121,7 @@ size_t get_file_size(FILE *f, uint8 *filename)
 		config_assert(filename, "Cannot finish `get_file_size`: No valid arguments given.\n", false, NULL)
 		
 		/* Open the file, according to `filename`, and check if it's valid. */
-		f = fopen(filename, "rb");
-		config_assert(f, "Error opening the given file: %s.\n", true, f, filename)
+		f = open_and_assert(filename, "rb");
 	}
 
 	fseek(f, 0, SEEK_END);
@@ -117,18 +129,6 @@ size_t get_file_size(FILE *f, uint8 *filename)
 	fseek(f, 0, SEEK_SET);
 
 	return fsize;
-}
-
-FILE *open_and_assert(const uint8 *filename, uint8 perm[2])
-{
-	config_assert(strcmp(perm, "wb") == 0 || strcmp(perm, "w") == 0 || strcmp(perm, "r") == 0 || strcmp(perm, "rb") == 0,
-		"The permission for opening the file %s must be `wb` or `rb`.\n", false, NULL, filename)
-	
-	FILE *f = fopen(filename, perm);
-	config_assert(f,
-		strcmp(perm, "rb") == 0 ? "Error opening file %s.\n" : "Error creating file %s.\n", true, f, filename)
-	
-	return f;
 }
 
 void write_file(const uint8 *filename, uint8 *buffer, size_t buffer_size)
@@ -161,6 +161,63 @@ uint8 *read_format(const uint8 *filename, uint8 access[2])
 	fclose(format_);
 
 	return raw_format;
+}
+
+void write_MBR(_yaml_os_data *odata, uint16 first_sector, uint16 ssb_size, size_t fs_size, uint8 *base_path, uint8 *OS_name, uint8 FS_type, uint8 *OS_version, uint8 OS_type, size_t kernel_size)
+{
+	uint8 *fo = NULL;
+	if(base_path != NULL) fo = read_format((const uint8 *)initiate_path(base_path, "boot_protocol/config/formats/boot_format"), "rb");
+	else fo = read_format((const uint8 *)"formats/boot_format", "rb");
+	uint8 format2[bytes_per_sector * 9];
+
+	if(base_path != NULL)
+	{
+		sprintf(format2, fo,
+			FS_type,
+			OS_name,
+			OS_version,
+			OS_type,
+			first_sector,
+			first_sector + (ssb_size / 512),
+			ssb_size / 512,
+			first_sector + (ssb_size / 512),
+			first_sector + ((ssb_size / 512) + (kernel_size / 512)),
+			kernel_size / 512,
+			first_sector + ((ssb_size / 512) + (kernel_size / 512)),
+			first_sector + ((ssb_size / 512) + (kernel_size / 512)) + (fs_size / 512),
+			fs_size / 512);
+
+			write_file(initiate_path(base_path, "boot_protocol/boot/boot.s"), format2, strlen(format2));
+			free(fo);
+			return;
+	}
+
+	if(strlen(odata->OS_name) < 15)
+	{
+		
+		uint8 pad[15 - strlen(odata->OS_name)];
+		memset(pad, ' ', 15 - strlen(odata->OS_name));
+		strcat(odata->OS_name, pad);
+	}
+	
+	sprintf(format2, fo,
+			odata->FS_type,
+			odata->OS_name,
+			odata->OS_version,
+			odata->type,
+			first_sector,
+			first_sector + (ssb_size / 512),
+			ssb_size / 512,
+			first_sector + (ssb_size / 512),
+			first_sector + ((ssb_size / 512) + (odata->kern_filename_bin_size / 512)),
+			odata->kern_filename_bin_size/ 512,
+			first_sector + ((ssb_size / 512) + (odata->kern_filename_bin_size / 512)),
+			first_sector + ((ssb_size / 512) + (odata->kern_filename_bin_size / 512)) + (fs_size / 512),
+			fs_size / 512);
+	
+	write_file("../boot/boot.s", format2, strlen(format2));
+
+	free(fo);
 }
 
 /*

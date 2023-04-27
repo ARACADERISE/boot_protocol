@@ -13,7 +13,7 @@ with open('../boot.yaml', 'r') as file:
 
 # Delete all binaries
 if len(sys.argv) > 1:
-	if sys.argv[1] == 'purge': subprocess.run('rm -rf bin/*.fimg', shell=True, cwd=os.getcwd())
+	if sys.argv[1] == 'purge': subprocess.run('rm -rf bin/*.fimg && rm -rf tools_bin/format_done', shell=True, cwd=os.getcwd())
 
 subprocess.run(f'rm -rf ../{yaml_data["bin_folder"]}/*.bin', shell=True, cwd=os.getcwd())
 subprocess.run(f'rm -rf ../{yaml_data["bin_folder"]}/*.o', shell=True, cwd=os.getcwd())
