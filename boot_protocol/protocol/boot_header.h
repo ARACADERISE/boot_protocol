@@ -9,18 +9,29 @@ extern "C" {
 #include "types.h"
 #endif
 
-/* The C code has to be 16-bit for second-stage bootloader. */
-/* The boot sector program loads the second-stage bootloader
- * which, to the user, is the initial boot of the OS. The second-stage
+/* The C code has to be 16-bit for second stage bootloader. */
+/* The boot sector program loads the second stage bootloader
+ * which, to the user, is the initial boot of the OS. The second stage
  * bootloader is where the user can load in the memory map, setup a video mode,
  * and other bare minimum ideals that a OS bootloader needs. */
 asm(".code16gcc\n");
 
-/* Beginning address of second-stage bootloader(`main.c`). */
-extern uint16 second_stage_start;
-extern uint16 second_stage_end;
+/* Beginning address of second stage bootloader(`main.c`). */
+extern uint8 second_stage_start[];
+extern uint8 second_stage_end[];
 
-extern void init_bootloader(int8);
+/* Memory stamp address for second stage bootloader. */
+extern uint8 ss_mem_stamp_addr[];
+
+/* Kernel size/kernel address. */
+extern uint16 kernel_size;
+extern uint8 kernel_address[];
+
+/* Memory stamp address for kernel. */
+extern uint8 kernel_mem_stamp_addr[];
+
+// OLD: extern void init_bootloader(int8);
+extern void init_bootloader();
 extern void __test_address(uint16);
 
 /* Other ideals for the protocol*/
@@ -47,34 +58,6 @@ extern void __test_address(uint16);
 #ifndef protocol_gdt_api
 #include "gdt.h"
 #endif
-
-/*
- *  __inp: back-end function
- *
- *  Read-in a value from a port
- *
- *  Input: uint16 port
- *  Output: uint8 rv(return-value from the port)
- *  On Error: This function does not error
- */
-uint8 __inp(uint16 port) {
-    uint8 rv;
-    
-    __asm__ __volatile__("in %0, %1": "=a"(rv): "dN"(port));
-    return rv;
-}
-/*
- *  __outp: back-end function
- *
- *  Write a value to a port
- *
- *  Input: uint16 port, uint8 data
- *  Output: None
- *  On Error: This function does not error
- */
-void __outp(uint16 port, uint8 data) {
-    __asm__ __volatile__("outb %0, %1":: "dN"(port), "a"(data));
-}
 
 /* For user-convenience. */
 #define starting_point __attribute__((section("__start")))

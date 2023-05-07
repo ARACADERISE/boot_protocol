@@ -109,10 +109,10 @@ static _memory_stamp *__obtain_memory_stamp(uint8 *addr, enum memory_stamp_type 
         addr++;
     
     /* The byte right after `0x2B` should be `0x84` if its the "magic number" for the memory stamp. */
-    if(!(*(addr+1) == 0x84)) goto redo;
+    if(!(*(addr+1) == 0x84)) { addr++; goto redo; }
 
     /* And, after `0x84` it should be `0x83`. With this, we know that we have the correct place in memory. */
-    if(!(*(addr+2)) == 0x83) goto redo;
+    if(!(*(addr+2)) == 0x83) { addr++; goto redo; }
 
     /* If we reach here, `0x2B 0x84 0x83` was found. 
      * Assign `mem_stamp` to the according address(`addr`). 
