@@ -50,6 +50,9 @@ typedef struct PartitionHeader
     /* Address of partition(really, address of FS). */
     uint16           partition_address;
 
+    /* Virtual address of partition. */
+    uint32           virtual_address;
+
     /* What type of FS does the user want? FAMPs custom FS, or a pre-existing one? */
     uint8            FS_type;
 
@@ -73,7 +76,7 @@ typedef struct PartitionHeader
 
 uint8 no_fs[] = "NO_FS_MOUNTED";
 
-void init_FS_type_and_part_type(_PartitionHeader *pheader, bool use_yaml_data, _yaml_os_data *odata, uint8 *FS_type, uint8 *part_type)
+void init_FS_type_and_part_type(_PartitionHeader *pheader, bool use_yaml_data, _yaml_os_data *odata, uint8 *FS_type, uint8 *part_type, size_t kernel_size)
 {
     config_assert((use_yaml_data && odata != NULL) || (!use_yaml_data && FS_type != NULL) || (!use_yaml_data && part_type != NULL),
         "Cannot initiate FS type and size.\nThere is no data to use to configure, or there is some wrong data passed to `init_FS_type_and_size`. Aborting.\n", false, NULL);
@@ -120,6 +123,7 @@ void init_FS_type_and_part_type(_PartitionHeader *pheader, bool use_yaml_data, _
 
     end:
     pheader->partition_address = FS_address;
+    pheader->virtual_address = 0x80000000 + kernel_size;
     return;
 }
 

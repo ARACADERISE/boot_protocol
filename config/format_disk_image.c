@@ -46,8 +46,6 @@ int main(int args, char *argv[])
 
     /* Check the wanted FS size. If it is not, just give the FS size the bare minimum(5 sectors). */
     if(FS_size >= 15 * bytes_per_sector) FS_size = 5 * bytes_per_sector;
-
-    init_FS_type_and_part_type(part_header, false, NULL, argv[3], argv[4]);
     
     /* `argv[2]` should resemble the disk image, with the extension `.fimg`. */
     FILE *dimg_bin = open_and_assert(argv[2], "rb");
@@ -93,6 +91,8 @@ int main(int args, char *argv[])
     size_t mbr_part_table_bin_size = get_file_size(open_and_assert(initiate_path(argv[1], "boot_protocol/bin/mbr_partition_table.bin"), "rb"), NULL);
     size_t higher_half_kernel_bin_size = get_file_size(open_and_assert(initiate_path(argv[1], "boot_protocol/bin/higher_half_kernel.bin"), "rb"), NULL);
     size_t kernel_bin_size = get_file_size(open_and_assert(initiate_path(argv[1], "bin/kernel.bin"), "rb"), NULL);
+
+    init_FS_type_and_part_type(part_header, false, NULL, argv[3], argv[4], kernel_bin_size);
 
     write_MBR(NULL, 2 + (mbr_part_table_bin_size / 512), second_stage_bin_size, FS_size, argv[1], OS_name, FS_type, OS_version, OS_type, kernel_bin_size);
 

@@ -56,6 +56,7 @@ typedef struct disk_image_check_data
 	uint8							*disk_image_filename;
 	FILE							*disk_image; 	// TODO: change to disk_image, and change all references to "device image" accordingly
 	bool							check_mem_stamp;
+	bool							reopen_file_when_done;
 
 	/* How many bytes were wrong? How many were able to be fixed? */
 	uint16							bad_bytes;
@@ -320,7 +321,7 @@ static uint8 tries = 0;
  * On Error: This function does not error
  *
  * */
-_disk_image_check_data check_disk_chunk(uint8 *dimg_buffer, FILE* bin_file, uint8 *filename, size_t bytes, size_t pos, bool check_mem_stamp)
+_disk_image_check_data check_disk_chunk(uint8 *dimg_buffer, FILE* bin_file, uint8 *filename, size_t bytes, size_t pos, bool check_mem_stamp, bool open_file_when_done)
 {
 	config_assert(filename != NULL,
 		"An argument passed to `check_disk_chunk` resulted in being NULL. This is an invalid argument.\n", true, bin_file)
@@ -336,6 +337,7 @@ _disk_image_check_data check_disk_chunk(uint8 *dimg_buffer, FILE* bin_file, uint
 		.disk_image_filename = filename,
 		.disk_image = bin_file,
 		.check_mem_stamp = check_mem_stamp,
+		.reopen_file_when_done = open_file_when_done,
 		.bad_bytes = 0,
 		.corrected_bytes = 0,
 		.begin_pos = pos,
@@ -408,6 +410,10 @@ _disk_image_check_data check_disk_chunk(uint8 *dimg_buffer, FILE* bin_file, uint
 		temp_dicd.status[1] = unstated;
 	}
 
+	/* Reopen the file so the `main.c` program can still use it. */
+	if(open_file_when_done)
+		bin_file = open_and_assert(filename, "rb");
+
 	return temp_dicd;
 }
 
@@ -443,7 +449,7 @@ enum disk_image_check_status approve(_disk_image_check_data *dicd)
 	size_t prev_bytes_checked = dicd->bytes_checked;
 	uint16 prev_bad_bytes = dicd->bad_bytes;
 	enum disk_image_check_status prev_status[2] = {dicd->status[0], dicd->status[1]};
-	*dicd = check_disk_chunk(dicd->image, dicd->disk_image, dicd->disk_image_filename, dicd->bytes_checked, dicd->begin_pos, dicd->check_mem_stamp);
+	*dicd = check_disk_chunk(dicd->image, dicd->disk_image, dicd->disk_image_filename, dicd->bytes_checked, dicd->begin_pos, dicd->check_mem_stamp, dicd->reopen_file_when_done);
 
 	/* This check occurrs just in case some sort of program manipulates the binary file and its data while this program is running.
 	 * If this happens, this check will tell us the sizes of the chunks do not match, and we will return `bad_chunk`.

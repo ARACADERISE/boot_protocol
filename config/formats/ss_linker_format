@@ -1,8 +1,22 @@
-ENTRY({0})
-SECTIONS
-{
+ENTRY(main)
+SECTIONS {
+    /* Critical memory addresses for FAMP. */
+    g_gdt_address           = 0x0900;
+    g_gdt_desc_address      = 0x092A;
+    g_gdt_status_address    = 0x0938;
+
+    /* Memory stamp addresses for second stage bootloader and kernel. */
+    ss_mem_stamp_addr       = 0x%X;
+    kernel_mem_stamp_addr   = 0x%X;
+
+    /* Kernel address/kernel size for second stage bootloader. */
+    kernel_size             = %ld;
+    kernel_address          = 0x%X;
+
+    /* Second stage starts at 0x7E00. */
     . = 0x7E00;
-    begin_symbol = .;
+    second_stage_start = .;
+
     .text : AT(0x7E00)
     {
         *(__start*);
@@ -13,9 +27,10 @@ SECTIONS
     {
         *(.bss*);
         *(.data*);
+        *(.rodata*);
         *(COMMON*);
     }
-    end_symbol = .;
 
-    .sig : AT(0x{1}) {SHORT(0xFF);}
+
+    second_stage_end = .;
 }

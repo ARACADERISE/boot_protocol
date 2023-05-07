@@ -62,8 +62,24 @@ int32 main(int args, char *argv[])
 	FILE *higher_half_kern_bin	= open_and_assert("../bin/higher_half_kernel.bin", "rb");
 	disk_image_size += reallocate_disk_image_size(disk_image_size, get_file_size(higher_half_kern_bin, NULL));
 
-	// The get opened later on
-	FILE *kernel_bin			= NULL;
+	/* Concat `kernel_bin_file` to `absolute_kernel_binary_path` to get the correct path to the kernels binary file.
+	 * This program resides in `boot_protocol/config` whilst majority of binary files reside outside of the directory `boot_protocol`.
+	 */
+	strcat(kernel_bin_file, yod.kern_filename_bin_name);
+
+	/* Make sure that `50` is enough static memory for the path. */
+	config_assert(strlen(kernel_bin_file) <= 80, 
+		"File path is too large. Make sure the binary file for the kernel is not too long.\nPaths are allowed up to 50 characters.\n", false, NULL)
+
+	/* Open the kernel binary file, and make sure the file is valid. */
+	FILE *kernel_bin = open_and_assert(kernel_bin_file, "rb");
+
+	/* Make sure that `yod.kern_filename_bin_size` is the actual size. */
+	config_assert(get_file_size(kernel_bin, NULL) == yod.kern_filename_bin_size, 
+		"Size mismatch for kernel binary file located at %s.\n", false, NULL, kernel_bin_file_path)
+	disk_image_size += reallocate_disk_image_size(disk_image_size, get_file_size(kernel_bin, NULL));
+
+	// This will get opened later on
 	FILE *MBR_bin				= NULL;
 
 	/* Temporary FS binary file. 
@@ -103,7 +119,7 @@ int32 main(int args, char *argv[])
 
 		/* Get the partition header assigned. */
 		_PartitionHeader *part_header = calloc(1, sizeof(*part_header));
-		init_FS_type_and_part_type(part_header, true, &yod, NULL, NULL);
+		init_FS_type_and_part_type(part_header, true, &yod, NULL, NULL, get_file_size(kernel_bin, NULL));
 		set_start_and_end_LBA(part_header, (((sector - 1) * bytes_per_sector) + ssb_size + get_file_size(higher_half_kern_bin, NULL) + yod.kern_filename_bin_size) / 512, FS_size);
 
 		fwrite(part_header, sizeof(*part_header), 1, FS_bin);
@@ -121,31 +137,16 @@ int32 main(int args, char *argv[])
 		fclose(second_stage_bin);
 		fclose(mbr_part_table_bin);
 		fclose(higher_half_kern_bin);
+		fclose(kernel_bin);
 
 		if(args > 1 && strcmp(argv[1], "mbr") == 0) return 0;
 	}
 
 	everything_else:
 
+
 	/* Open up MBR binary, and perform according checks. */
 	MBR_bin = open_and_assert("../../bin/boot.bin", "rb");
-	
-	/* Make sure that `50` is enough static memory for the path. */
-	config_assert(strlen(kernel_bin_file) + 3 <= 80, 
-		"File path is too large. Make sure the binary file for the kernel is not too long.\nPaths are allowed up to 50 characters.\n", false, NULL)
-
-	/* If the above assertion passes, concat `kernel_bin_file` to `absolute_kernel_binary_path` to get the correct path to the kernels binary file.
-	 * This program resides in `boot_protocol/config` whilst majority of binary files reside outside of the directory `boot_protocol`.
-	 */
-	strcat(kernel_bin_file, yod.kern_filename_bin_name);
-
-	/* Open the kernel binary file, and make sure the file is valid. */
-	kernel_bin = open_and_assert(kernel_bin_file, "rb");
-
-	/* Make sure that `yod.kern_filename_bin_size` is the actual size. */
-	config_assert(get_file_size(kernel_bin, NULL) == yod.kern_filename_bin_size, 
-		"Size mismatch for kernel binary file located at %s.\n", false, NULL, kernel_bin_file_path)
-	disk_image_size += reallocate_disk_image_size(disk_image_size, get_file_size(kernel_bin, NULL));
 
 	/* See if the temporary disk image exists. */
 	if(access(temp_disk_image_path, F_OK) == 0)
@@ -165,7 +166,7 @@ int32 main(int args, char *argv[])
 		/* Lets begin checking! */
 		while(ind < sizeof(sizes)/sizeof(sizes[0]))
 		{
-			dicd[ind] = check_disk_chunk(disk_image, fs[ind], names[ind], sizes[ind], disk_image_size, ind == 2 || ind == 4 ? true : false);
+			dicd[ind] = check_disk_chunk(disk_image, fs[ind], names[ind], sizes[ind], disk_image_size, ind == 2 || ind == 4 ? true : false, ind == 2 || ind == 4 ? true : false);
 
 			/* Check memory stamp to the data occupied from the chunk of data.
 			 * Perform the check only when the index is 2 or 4(ind of 2 = second stage, ind of 4 = kernel)
@@ -203,10 +204,8 @@ int32 main(int args, char *argv[])
 	/* If the `if` statement above runs, the function `check_disk_chunk` closes all of the files after reading the files data.
 	 * The if statement, at the end, then jumps to `end`. We only want to close these files if the above `if` statement does not run.
 	 */
-	fclose(second_stage_bin);
 	fclose(mbr_part_table_bin);
 	fclose(higher_half_kern_bin);
-	fclose(kernel_bin);
 	fclose(MBR_bin);
 
 	end:
@@ -241,6 +240,18 @@ int32 main(int args, char *argv[])
 		sprintf(format2, format_, initiate_path(FAMP_disk_image_folder, initiate_path(yod.disk_name, ".fimg")));
 		write_file("scripts/FAMP_fdi", format2, strlen(format2));
 	}
+
+	/* Write second stage linker.
+	 * TODO: Do we need to write the kernels linker too so it knows where the second stage bootloader is located?
+	 */
+	{
+		format_ = read_format((const uint8 *)"formats/ss_linker_format", "rb");
+		sprintf(format2, format_, (0x7E00 + get_file_size(second_stage_bin, NULL)) - 512, (0xA000 + get_file_size(kernel_bin, NULL)) - 512, get_file_size(kernel_bin, NULL), 0xA000);
+		write_file("../linker/linker.ld", format2, strlen(format2));
+	}
+
+	fclose(second_stage_bin);
+	fclose(kernel_bin);
 
 	free((uint8 *)MBR_binary_file_path);
 	free((uint8 *)second_stage_binary_file_path);

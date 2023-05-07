@@ -12,6 +12,10 @@ usr_lib = '/usr/lib/FAMP_tools_bin/'
 usr_bin = '/usr/bin/'
 disk_image_path = '/usr/lib/FAMP_disk_images'
 
+# Remove `done`, if it exists, from `user_preferences`
+if os.path.isfile('config/user_preferences/done'):
+    subprocess.run('rm -rf config/user_preferences/done', shell=True, cwd=os.getcwd())
+
 # Function gets called if this script does not recieve `--purge` as an argument
 def delete_all_binaries():
     if os.path.exists(usr_lib):
