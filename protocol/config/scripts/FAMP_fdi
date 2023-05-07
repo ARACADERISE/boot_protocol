@@ -1,0 +1,29 @@
+LB='\033[1;36m'
+NC='\033[0m'
+
+# Print the help information right away
+if [ "$#" -ge 1 ];
+then
+    if [ $1 == "--h" ] || [ $1 == "--help" ];
+    then
+        echo -e "FAMP_fdi(FAMP Format Disk Image tool).\n\t- Run: $LB FAMP_fdi [type_of_filesystem] [part_type] [size_of_filesystem] [programs_to_store_on_fs] $NC\n\t- Example: FAMP_fdi FAMP_CFS 2G\n\t\twhere $LB\`FAMP_CFS\`$NC stands for FAMP Custom FileSystem and $LB\`2G\`$NC means 2GB disk image.\n"
+        echo -e "\t  * A disk image is referred to as a binary image that represents a filesystem for FAMP, as well as the entirety of the OS binary data. It also refers to a binary image of which the tool $LB\`FAMP_fdi\`$NC was used to format.\n"
+        echo -e "\t  -$LB \`type_of_filesystem\`$NC will be the type of file system the disk image represents. This too will have to be set in \`boot.yaml\` so FAMP knows what data to look for"
+        echo -e "\t    in the disk image partition header(the first 60 or so bytes of the disk image will be where the partition header dwells)."
+        echo -e "\t  -$LB \`part_type\`$NC will be the partition type. This can be \`UKA\`(User & Kernel Access), \`KOA\`(Kernel Only Access), \`CDKOA\`(Critical Data, Kernel Only Access), \`CDUKA\`(Critical Data, User & Kernel Access) or \`E\`(Extra)."
+        echo -e "\t  -$LB \`size_of_filesystem\`$NC will be the estimate size of the disk image. This is just a \"want\". The size is, and will most likely, be prone to change."
+        echo -e "\t    FAMP_fdi takes in the users requested size and will perform actions accordingly. FAMP can also expand the size, if needed, after the image has been read into memory"
+        echo -e "\t  -$LB \`programs_to_store_on_fs\`$NC is any sort of program you want the disk image to store when it gets read/loaded into memory by the protocol.\n"
+        exit 0
+    fi
+fi
+
+DIR=$PWD/
+DISK_IMAGE_PATH=/usr/lib/FAMP_disk_images/test_disk.fimg
+cd /usr/lib/FAMP_tools_bin
+./format_disk_image.o $DIR $DISK_IMAGE_PATH $*
+cd $DIR/boot_protocol/boot
+nasm boot.s -f bin -o ../../boot.bin
+cd ..
+cp -f /dev/null $DISK_IMAGE_PATH
+cp -f bin/temp_image.fimg $DISK_IMAGE_PATH

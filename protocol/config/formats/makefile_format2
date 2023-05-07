@@ -1,0 +1,19 @@
+.PHONY: run
+.PHONY: clean
+.PHONY: build
+.PHONY: bootloader
+
+FLAGS = -masm=intel -O1 -Wno-error -c -nostdinc -nostdlib -fno-builtin -fno-stack-protector -ffreestanding -m32
+run: build
+	@qemu-system-i386 -drive format=raw,file=bin/OS.image
+
+build:
+	@nasm protocol/protocol_util.s -f elf32 -o bin/protocol_util.o
+	@gcc ${FLAGS} -o %s %s
+	@ld -m elf_i386 -T../kernel.ld -nostdlib --nmagic -o bin/kernel.out %s bin/protocol_util.o
+	@objcopy -O binary bin/kernel.out bin/kernel.bin
+	@nasm boot/boot.s -f bin -o bin/bootloader.bin
+	@cat bin/bootloader.bin bin/kernel.bin > bin/OS.image
+
+clean:
+	@./config/clean

@@ -1,0 +1,65 @@
+/* Write linker scripts. */
+	FILE* ss_linker = fopen("../linker/linker.ld", "w");
+	format = read_format((const uint8 *)"formats/ss_linker_format", "rb");
+
+	config_assert(ss_linker, "Error opening `boot_protocol/linker/linker.ld`.\n")
+
+	/* Create static memory. Allow for additional 60 characters. */
+	uint8 ss_linker_format[strlen(format)+60];
+
+	/* Apply values and write. */
+	sprintf(ss_linker_format, format,
+		yod.ss_entry_point,
+		(0x7E00 + (((yod.ss_filename_bin_size / 512)) * 512))+1);
+	fwrite(ss_linker_format, sizeof(uint8), strlen(ss_linker_format), ss_linker);
+	fclose(ss_linker);
+
+	FILE* kern_linker = fopen("../linker/kernel.ld", "w");
+	format = read_format((const uint8 *)"formats/kern_linker_format", "rb");
+
+	config_assert(kern_linker, "Error opening `boot_protocol/linker/kernel.ld`.\n")
+
+	/* Create static memory. Allow for additional 60 characters. */
+	uint8 kern_linker_format[strlen(format)+60];
+
+	/* Apply values and write. */
+	sprintf(kern_linker_format, format, 
+		yod.kern_entry_point,
+		((yod.kern_addr*16) + (((yod.kern_filename_bin_size / 512)) * 512))+1);
+	fwrite(kern_linker_format, strlen(kern_linker_format), sizeof(*kern_linker_format), kern_linker);
+	
+	fclose(kern_linker);
+    /* Read in format(`protocol/gdt/gdt_ideals.s`) and write in the address. */
+	format = read_format((const uint8 *)"../protocol/gdt/gdt_ideals.s", "rb");
+
+	FILE* bit32_jump = fopen("../protocol/gdt/gdt_ideals.s", "wb");
+
+	config_assert(bit32_jump, "Error opening `../protocol/gdt/gdt_ideals.s`.\n")
+
+	format = realloc(format, (strlen(format) + 60) * sizeof(*format));
+	uint8 jump_format2[strlen(format)];
+	sprintf(jump_format2, format, yod.kern_addr*16);
+	fwrite(jump_format2, strlen(jump_format2), sizeof(uint8), bit32_jump);
+
+	fclose(bit32_jump);
+
+; Extended read wasn't working so.. I came up with my own little way :)
+Info:
+	; Sector information
+	.sector				db 0x02
+	; Second stage information
+	.second_stage_size	dw ((second_stageE - second_stage + 512) / 512)
+	.second_stage_addr	dw 0x07E0
+	.second_stage_loc	dw 0x7E00
+	; Kernel information
+	.kernel_size		dw ((kernelE - kernel) / 512)
+	.kernel_addr		dw 0x0%lx
+	.kernel_loc			dw 0x%lx
+
+		for(char i = 0; i < 5; i++)
+		{
+			printf("\n\n\tBytes Checked: %ld\n\tStatus: %s\n\tBad Bytes Found: %d\n\tBad Bytes Fixed: %d\n\t",
+				dicd[i].bytes_checked, 
+				(dicd[i].status[0] == good || dicd[i].status[1] == good) || (dicd[i].status[0] == fixed || dicd[i].status[1] == fixed) ? "good/fixed" : "bad :c",
+				dicd[i].bad_bytes, dicd[i].corrected_bytes);
+		}
