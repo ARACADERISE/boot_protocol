@@ -132,7 +132,7 @@ _yaml_os_data get_yaml_os_info()
 	os_data.disk_name = (uint8 *)yaml_file_data->val_data;
 	_next
 
-	os_data.auto_format = (uint8 *)yaml_file_data->val_data;
+	os_data.auto_format = strcmp((uint8 *)yaml_file_data->val_data, "yes") == 0 ? true : false;
 	_next
 
 	os_data.bin_folder = (uint8 *)yaml_file_data->val_data;

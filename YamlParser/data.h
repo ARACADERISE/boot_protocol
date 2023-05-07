@@ -28,7 +28,7 @@ typedef struct yaml_os_data
 	uint8			*disk_name;
 
 	/* Does the user want FAMP to auto format the disk image? By auto format, I am referring to FAMP formatting the disk image according to `FS_type`. */
-	uint8			*auto_format;
+	bool			auto_format;
 
 	/* Binary folder. */
 	uint8			*bin_folder;
